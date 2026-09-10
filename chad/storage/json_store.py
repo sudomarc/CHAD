@@ -35,7 +35,7 @@ class ConversationStore:
         except (OSError, json.JSONDecodeError) as exc:
             raise ValueError(f"unable to read conversation {conversation_id}") from exc
         if not isinstance(payload, dict):
-            raise ValueError("conversation file must contain an object")
+            raise TypeError("conversation file must contain an object")
         return Conversation.from_dict(payload)
 
     def list(self) -> list[Conversation]:

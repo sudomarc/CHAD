@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from chad.core.config import AppConfig
 from chad.core.conversation import ChatRequest, Conversation
-from chad.llm.client import LLMError, LapisClient
+from chad.llm.client import LapisClient, LLMError
 from chad.storage.json_store import ConversationStore
 
 
@@ -16,7 +16,7 @@ class ChadApp:
     conversation: Conversation
 
     @classmethod
-    def create(cls, config: AppConfig, client: LapisClient) -> "ChadApp":
+    def create(cls, config: AppConfig, client: LapisClient) -> ChadApp:
         store = ConversationStore(config.storage_dir)
         conversation = Conversation(system_prompt=config.system_prompt, model=client.current_model().id)
         return cls(config=config, client=client, store=store, conversation=conversation)

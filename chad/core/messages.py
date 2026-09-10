@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 
@@ -15,7 +15,7 @@ class MessageRole(StrEnum):
 class Message:
     role: MessageRole
     content: str
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def __post_init__(self) -> None:
         if not self.content.strip():
@@ -25,9 +25,9 @@ class Message:
         return {"role": self.role.value, "content": self.content, "created_at": self.created_at}
 
     @classmethod
-    def from_dict(cls, data: dict[str, str]) -> "Message":
+    def from_dict(cls, data: dict[str, str]) -> Message:
         return cls(
             role=MessageRole(data["role"]),
             content=data["content"],
-            created_at=data.get("created_at") or datetime.now(timezone.utc).isoformat(),
+            created_at=data.get("created_at") or datetime.now(UTC).isoformat(),
         )

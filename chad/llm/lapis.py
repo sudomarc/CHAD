@@ -66,8 +66,7 @@ class LocalLapisClient(LapisClient):
 
         # Current LapisRuntime returns the decoded prompt plus generated text.
         # Strip only the exact prompt when present; never mutate arbitrary output.
-        if result.startswith(prompt):
-            result = result[len(prompt):]
+        result = result.removeprefix(prompt)
         return result.strip()
 
     def current_model(self) -> ModelInfo:

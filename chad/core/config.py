@@ -29,6 +29,8 @@ class GenerationSettings:
 
 @dataclass(frozen=True, slots=True)
 class LapisSettings:
+    base_url: str = "http://127.0.0.1:8000"
+    model: str | None = None
     checkpoint: Path = Path("checkpoints/latest.pt")
     device: str = "auto"
 
@@ -43,6 +45,8 @@ class AppConfig:
 
     @classmethod
     def from_env(cls) -> AppConfig:
+        lapis_url = os.getenv("CHAD_LAPIS_URL", "http://127.0.0.1:8000").rstrip("/")
+        lapis_model = os.getenv("CHAD_LAPIS_MODEL") or None
         checkpoint = Path(os.getenv("CHAD_LAPIS_CHECKPOINT", "checkpoints/latest.pt"))
         device = os.getenv("CHAD_LAPIS_DEVICE", "auto")
         storage = Path(os.getenv("CHAD_STORAGE_DIR", str(Path.home() / ".chad" / "conversations")))
@@ -55,7 +59,12 @@ class AppConfig:
         )
         settings.validate()
         return cls(
-            lapis=LapisSettings(checkpoint=checkpoint, device=device),
+            lapis=LapisSettings(
+                base_url=lapis_url,
+                model=lapis_model,
+                checkpoint=checkpoint,
+                device=device,
+            ),
             generation=settings,
             storage_dir=storage,
             system_prompt=os.getenv("CHAD_SYSTEM_PROMPT") or None,

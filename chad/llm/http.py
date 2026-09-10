@@ -60,7 +60,7 @@ class HttpLapisClient(LapisClient):
             data = response.json()
             content = data["choices"][0]["message"]["content"]
             if not isinstance(content, str):
-                raise ValueError("Lapis API returned non-text content")
+                raise TypeError("Lapis API returned non-text content")
             return content.strip()
         except httpx.HTTPStatusError as exc:
             detail = exc.response.text.strip() or exc.response.reason_phrase

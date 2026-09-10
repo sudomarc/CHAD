@@ -46,10 +46,10 @@ class Conversation:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, object]) -> "Conversation":
+    def from_dict(cls, data: dict[str, object]) -> Conversation:
         raw_messages = data.get("messages", [])
         if not isinstance(raw_messages, list):
-            raise ValueError("conversation messages must be a list")
+            raise TypeError("conversation messages must be a list")
         return cls(
             id=str(data.get("id") or uuid4()),
             title=str(data.get("title") or "New conversation"),

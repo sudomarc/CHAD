@@ -5,7 +5,6 @@ from pathlib import Path
 from chad.core.conversation import ChatRequest
 from chad.llm.client import GenerationError, LapisClient, ModelInfo, ModelUnavailableError
 
-
 _ROLE_LABELS = {
     "system": "System",
     "user": "User",

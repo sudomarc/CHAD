@@ -11,6 +11,9 @@ dependencies = [
     "httpx>=0.28,<1.0",
 ]
 
+[project.scripts]
+chad = "chad.cli:app"
+
 [project.optional-dependencies]
 test = ["pytest>=8"]
 

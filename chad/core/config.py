@@ -42,7 +42,7 @@ class AppConfig:
     developer_mode: bool = False
 
     @classmethod
-    def from_env(cls) -> "AppConfig":
+    def from_env(cls) -> AppConfig:
         checkpoint = Path(os.getenv("CHAD_LAPIS_CHECKPOINT", "checkpoints/latest.pt"))
         device = os.getenv("CHAD_LAPIS_DEVICE", "auto")
         storage = Path(os.getenv("CHAD_STORAGE_DIR", str(Path.home() / ".chad" / "conversations")))

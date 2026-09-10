@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from urllib.parse import urljoin
-
 import httpx
 
 from chad.core.conversation import ChatRequest

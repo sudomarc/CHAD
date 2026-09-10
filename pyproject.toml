@@ -7,7 +7,9 @@ name = "chad-app"
 version = "0.1.0"
 description = "The official conversational application for LapisLLM"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "httpx>=0.28,<1.0",
+]
 
 [project.optional-dependencies]
 test = ["pytest>=8"]

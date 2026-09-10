@@ -1,3 +1,3 @@
-#!/bin/bash
-cd "$(dirname "$0")"
-python3 main.py
+#!/usr/bin/env bash
+set -euo pipefail
+python3 -m chad

@@ -59,11 +59,12 @@ class ChadApp:
         return request
 
     def send(self, text: str) -> str:
-        request = self.request(text)
         try:
+            request = self.request(text)
             response = self.client.generate(request)
         except (LLMError, ContextLimitError):
-            self.conversation.messages.pop()
+            if self.conversation.messages and self.conversation.messages[-1].role.value == "user":
+                self.conversation.messages.pop()
             raise
         self.conversation.add_assistant(response)
         self.store.save(self.conversation)

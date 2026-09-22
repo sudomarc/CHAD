@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import time
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-import time
 
 from chad.core.conversation import ChatRequest
 from chad.llm.client import (

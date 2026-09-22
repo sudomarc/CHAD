@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import time
+from pathlib import Path
 
 from chad.core.conversation import ChatRequest
 from chad.llm.client import LapisClient, ModelInfo

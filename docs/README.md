@@ -12,6 +12,7 @@ CHAD is the user-facing AI product built around LapisLLM.
 | [Model/provider contract](provider-contract.md) | Provider-neutral LLM interface and model routing contract |
 | [Evaluation](evaluation.md) | Quality, safety, reliability and regression evaluation system |
 | [Context](context.md) | Conversation context budgeting and truncation behavior |
+| [Compatibility](compatibility.md) | Current cross-repository capability matrix |
 
 ## Source-of-truth rules
 

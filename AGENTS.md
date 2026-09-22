@@ -6,6 +6,29 @@ CHAD is the official user-facing AI application for LapisLLM. It is the product 
 
 LapisLLM is a separate repository and owns model intelligence and runtime infrastructure. CHAD owns the end-user experience and application lifecycle.
 
+## Ecosystem role
+
+CHAD is the executable agent runtime and user-facing product in the three-repository ecosystem.
+
+~~~text
+Vibe Coding Instructions
+  -> governance / skills / role contracts
+  -> CHAD
+  -> orchestration / agents / tools / memory
+  -> LapisLLM
+  -> model / training / inference
+~~~
+
+CHAD should consume selected Vibe policies rather than creating a second generic coding-agent governance system.
+
+Cross-repository references:
+
+- docs/ecosystem.md
+- docs/agent-runtime.md
+- docs/compatibility.md
+- https://github.com/sudomarc/vibe-coding-instructions
+- https://github.com/sudomarc/LapisLLM
+
 ## Product direction
 
 CHAD is being developed as a general-purpose AI assistant that can evolve from conversational use into research, file analysis, tool use, bounded coding tasks, memory and multi-step agent workflows.

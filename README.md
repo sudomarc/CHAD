@@ -1,5 +1,11 @@
 # CHAD
 
+**CHAD is the agentic AI product and runtime for the LapisLLM ecosystem.**
+
+Vibe Coding Instructions provides reusable governance, skills and agent-role contracts. CHAD executes the agent runtime. LapisLLM provides model and inference capabilities.
+
+See docs/ecosystem.md, docs/agent-runtime.md and docs/roadmap.md.
+
 **CHAD is the user-facing AI product built around LapisLLM.**
 
 CHAD is intended to evolve from a small conversational application into a general-purpose, tool-using and agentic AI assistant.

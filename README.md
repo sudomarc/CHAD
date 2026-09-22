@@ -1,176 +1,139 @@
 # CHAD
 
-**CHAD is the official user-facing conversational application for LapisLLM.**
+**CHAD is the user-facing AI product built around LapisLLM.**
 
-CHAD owns the user experience: conversations, sessions, history, settings, application commands, and presentation. LapisLLM owns the model and inference runtime.
+CHAD is intended to evolve from a small conversational application into a general-purpose, tool-using and agentic AI assistant.
 
 ```text
-LapisLLM model/runtime
-        ↓ HTTP API
-      CHAD application
-        ↓
-      user
+                         CHAD
+                  user-facing AI product
+                           |
+                    orchestration
+                  /      |       \
+             memory     tools    model gateway
+                              /      |       \
+                         LapisLLM  providers  local models
 ```
+
+## Project boundary
+
+**CHAD owns**
+
+- conversations and sessions;
+- application state and history;
+- user-facing interfaces;
+- model/provider selection;
+- orchestration and agents;
+- files and retrieval workflows;
+- tool permissions and execution policy;
+- memory;
+- application-level security and observability.
+
+**LapisLLM owns**
+
+- Transformer/model architecture;
+- tokenization;
+- training data and training;
+- checkpoints;
+- native inference/runtime;
+- model evaluation;
+- model-serving primitives.
+
+Dependency direction:
+
+```text
+CHAD → LapisLLM
+```
+
+CHAD must not copy Lapis model or training internals, and Lapis must not acquire CHAD consumer-product responsibilities.
 
 ## Current foundation
 
-The repository has a layered application core:
+The repository currently contains a Python application core with:
 
-```text
-chad/
-├── core/
-│   ├── config.py          # typed application/generation configuration
-│   ├── conversation.py    # message ordering and model context
-│   └── messages.py        # explicit system/user/assistant messages
-├── llm/
-│   ├── client.py          # stable application-side LLM boundary
-│   ├── http.py            # LapisLLM HTTP API client
-│   └── lapis.py           # local developer adapter
-├── storage/
-│   └── json_store.py      # replaceable local conversation persistence
-├── interfaces/
-│   └── cli.py             # conversational CLI
-├── app.py                 # application orchestration
-└── commands.py            # secondary application controls
+- typed application configuration;
+- explicit conversation/message models;
+- model discovery;
+- an application-side LLM client boundary;
+- LapisLLM HTTP integration;
+- local JSON conversation persistence;
+- CLI interfaces and commands;
+- behavioral tests.
+
+The current Lapis integration is non-streaming. CHAD must not simulate streaming by splitting an already completed response.
+
+## Target product
+
+The roadmap turns CHAD into a full AI platform with staged capabilities:
+
+1. robust conversational core;
+2. web product;
+3. provider-neutral model gateway;
+4. web research;
+5. file analysis and retrieval;
+6. multimodal input;
+7. explicit tool platform;
+8. sandboxed coding;
+9. bounded agent orchestration;
+10. user/project memory;
+11. accounts, quotas and cost controls;
+12. observability and security hardening;
+13. continuous evaluation;
+14. deeper LapisLLM post-training and scale;
+15. connectors and controlled external actions;
+16. long-running autonomous workflows.
+
+The project will not claim parity with a named competitor without reproducible evaluation evidence.
+
+## Documentation
+
+- [Documentation index](docs/README.md)
+- [Product specification](docs/product-spec.md)
+- [Architecture](docs/architecture.md)
+- [Exhaustive roadmap](docs/roadmap.md)
+- [Model/provider contract](docs/provider-contract.md)
+- [Evaluation](docs/evaluation.md)
+- [ADR convention](docs/adr/README.md)
+- [Engineering contract](AGENTS.md)
+- [Security policy](SECURITY.md)
+
+## Running the current foundation
+
+Python 3.11+ is required.
+
+Install:
+
+```bash
+python -m pip install -e ".[test]"
 ```
 
-Natural-language input is model input. Only explicit slash-prefixed controls are commands.
+Run tests:
 
-Examples:
-
-```text
-hello
-Explain transformers
-What is Python?
-Tell me more
+```bash
+pytest
+ruff check .
 ```
 
-Application controls currently include:
-
-```text
-/help
-/new
-/clear
-/quit
-```
-
-## LapisLLM integration
-
-CHAD uses the **LapisLLM HTTP inference API** as its default user-facing backend. CHAD does not load the Transformer, tokenizer, or checkpoint directly in normal application mode.
-
-Start LapisLLM with one command:
+Start the Lapis backend:
 
 ```bash
 lapis api serve
 ```
 
-The API listens on `http://127.0.0.1:8000` by default and exposes:
-
-```text
-GET  /v1/models
-POST /v1/chat/completions
-```
-
-Then start CHAD:
+Start CHAD:
 
 ```bash
 python -m chad
 ```
 
-CHAD discovers the available Lapis model through `/v1/models` and sends conversation requests to `/v1/chat/completions`.
+The current application discovers the available Lapis model through `/v1/models` and sends chat requests to `/v1/chat/completions`.
 
-For developer-only local integration, `chad.llm.lapis.LocalLapisClient` remains available as a direct runtime adapter. It is not the default user-facing path.
+## Development rule
 
-The current Lapis API is non-streaming, so CHAD currently waits for the complete generated response instead of simulating token streaming.
+Roadmap items are plans until implementation and verification exist. Code, tests and runtime evidence are authoritative for implemented behavior.
 
-## Configuration
-
-The Lapis API endpoint and model can be overridden with:
-
-```text
-CHAD_LAPIS_URL
-CHAD_LAPIS_MODEL
-CHAD_STORAGE_DIR
-CHAD_SYSTEM_PROMPT
-CHAD_TEMPERATURE
-CHAD_TOP_K
-CHAD_TOP_P
-CHAD_MAX_NEW_TOKENS
-CHAD_DEVELOPER_MODE
-```
-
-The default API endpoint is:
-
-```text
-http://127.0.0.1:8000
-```
-
-Conversations are stored under `~/.chad/conversations` by default.
-
-## Google Colab
-
-With both repositories checked out in the same Colab runtime, the intended flow is:
-
-```bash
-cd /content/LapisLLM && pip install -e . && lapis api serve
-```
-
-Then, in another cell:
-
-```bash
-cd /content/CHAD && pip install -e . && python -m chad
-```
-
-For a background API server in one cell:
-
-```bash
-cd /content/LapisLLM && pip install -e . && (lapis api serve >/tmp/lapis-api.log 2>&1 &)
-```
-
-Then launch CHAD in another cell with:
-
-```bash
-cd /content/CHAD && pip install -e . && python -m chad
-```
-
-## Development
-
-Python 3.11+ is required.
-
-```bash
-python -m pip install -e ".[test]"
-pytest
-ruff check .
-```
-
-## Architecture rules
-
-CHAD must not contain model architecture, tokenizer internals, training loops, optimizer code, checkpoint-writing logic, or other LapisLLM engineering internals.
-
-The dependency direction is:
-
-```text
-CHAD → LapisLLM API
-```
-
-The interface hierarchy is:
-
-```text
-conversation engine
-        ↓
- application state
-        ↓
-      LLM client
-        ↓
-   LapisLLM HTTP API
-```
-
-This is deliberate so CLI, TUI, web, and desktop interfaces can evolve without moving model logic into presentation code.
-
-## Project status
-
-CHAD is in foundation migration. The official user path is now designed around the LapisLLM HTTP API. Future work will complete command migration, model discovery/switching, real streaming/cancellation when supported by Lapis, richer history UX, and additional interfaces.
+Before changing architecture, read the relevant documents under `docs/` and preserve the CHAD → LapisLLM boundary.
 
 ## License
 
-See `LICENSE`.
+See [LICENSE](LICENSE).

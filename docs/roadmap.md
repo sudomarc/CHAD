@@ -1,6 +1,23 @@
 # CHAD exhaustive roadmap
 
-## Status legend
+## Current execution queue
+
+The first executable queue is intentionally short:
+
+1. **#4 — Production conversational core** — harden the existing Python foundation.
+2. **#5 — Web product foundation** — introduce the browser product and application API.
+3. **#6 — Provider-neutral model gateway** — make model backends replaceable.
+4. **#7 — Research, files and multimodal inputs** — add evidence and user content.
+5. **#8 — Tools and sandboxed coding** — introduce controlled action.
+6. **#9 — Agent orchestration and memory** — introduce bounded autonomy and continuity.
+7. **#10 — Hosted product, economics, security and operations** — productionize the platform.
+8. **#11 — Continuous evaluation and Lapis evolution** — make capability progress evidence-driven.
+
+These epics are execution containers. Their detailed acceptance criteria remain in the roadmap and the linked documentation.
+
+---
+
+# Status legend
 
 - [x] Verified in the current repository.
 - [~] Partially present / foundation exists.

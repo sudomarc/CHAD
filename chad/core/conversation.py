@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+import math
 from uuid import uuid4
 
 from chad.core.messages import Message, MessageRole
@@ -103,7 +104,7 @@ class ChatRequest:
             raise ValueError("max_new_tokens must be at least 1")
         if self.top_k < 0:
             raise ValueError("top_k must be >= 0")
-        if self.temperature <= 0:
-            raise ValueError("temperature must be greater than 0")
-        if not 0 < self.top_p <= 1:
-            raise ValueError("top_p must be in the range (0, 1]")
+        if not math.isfinite(self.temperature) or self.temperature <= 0:
+            raise ValueError("temperature must be finite and greater than 0")
+        if not math.isfinite(self.top_p) or not 0 < self.top_p <= 1:
+            raise ValueError("top_p must be finite and in the range (0, 1]")

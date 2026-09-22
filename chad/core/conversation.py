@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from chad.core.messages import Message, MessageRole
@@ -13,19 +14,27 @@ class Conversation:
     system_prompt: str | None = None
     messages: list[Message] = field(default_factory=list)
     model: str | None = None
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+
+    def _touch(self) -> None:
+        self.updated_at = datetime.now(UTC).isoformat()
 
     def add_user(self, content: str) -> Message:
         message = Message(MessageRole.USER, content)
         self.messages.append(message)
+        self._touch()
         return message
 
     def add_assistant(self, content: str) -> Message:
         message = Message(MessageRole.ASSISTANT, content)
         self.messages.append(message)
+        self._touch()
         return message
 
     def clear(self) -> None:
         self.messages.clear()
+        self._touch()
 
     def context(self, max_messages: int | None = None) -> list[Message]:
         ordered: list[Message] = []
@@ -42,6 +51,8 @@ class Conversation:
             "title": self.title,
             "system_prompt": self.system_prompt,
             "model": self.model,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
             "messages": [message.to_dict() for message in self.messages],
         }
 
@@ -53,9 +64,17 @@ class Conversation:
         return cls(
             id=str(data.get("id") or uuid4()),
             title=str(data.get("title") or "New conversation"),
-            system_prompt=data.get("system_prompt") if isinstance(data.get("system_prompt"), str) else None,
+            system_prompt=data.get("system_prompt")
+            if isinstance(data.get("system_prompt"), str)
+            else None,
             model=data.get("model") if isinstance(data.get("model"), str) else None,
-            messages=[Message.from_dict(item) for item in raw_messages if isinstance(item, dict)],
+            created_at=str(data.get("created_at") or datetime.now(UTC).isoformat()),
+            updated_at=str(data.get("updated_at") or datetime.now(UTC).isoformat()),
+            messages=[
+                Message.from_dict(item)
+                for item in raw_messages
+                if isinstance(item, dict)
+            ],
         )
 
 

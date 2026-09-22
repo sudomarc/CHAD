@@ -13,6 +13,8 @@ class ModelInfo:
     display_name: str
     context_length: int | None = None
     backend: str = "lapis"
+    supports_streaming: bool = False
+    supports_cancellation: bool = False
 
 
 class LLMError(RuntimeError):

@@ -41,6 +41,8 @@ class Conversation:
         max_messages: int | None = None,
         max_input_tokens: int | None = None,
     ) -> list[Message]:
+        if max_messages is not None and max_messages < 1:
+            raise ValueError("max_messages must be at least 1")
         ordered: list[Message] = []
         if self.system_prompt and self.system_prompt.strip():
             ordered.append(Message(MessageRole.SYSTEM, self.system_prompt.strip()))
@@ -70,6 +72,8 @@ class Conversation:
         raw_messages = data.get("messages", [])
         if not isinstance(raw_messages, list):
             raise TypeError("conversation messages must be a list")
+        if any(not isinstance(item, dict) for item in raw_messages):
+            raise TypeError("conversation messages must contain objects")
         return cls(
             id=str(data.get("id") or uuid4()),
             title=str(data.get("title") or "New conversation"),
@@ -79,11 +83,7 @@ class Conversation:
             model=data.get("model") if isinstance(data.get("model"), str) else None,
             created_at=str(data.get("created_at") or datetime.now(UTC).isoformat()),
             updated_at=str(data.get("updated_at") or datetime.now(UTC).isoformat()),
-            messages=[
-                Message.from_dict(item)
-                for item in raw_messages
-                if isinstance(item, dict)
-            ],
+            messages=[Message.from_dict(item) for item in raw_messages],
         )
 
 

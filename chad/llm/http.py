@@ -32,7 +32,13 @@ class HttpLapisClient(LapisClient):
             return ModelInfo(
                 id=str(selected["id"]),
                 display_name=str(selected.get("id", "Lapis")),
-                context_length=selected.get("context_length"),
+                context_length=(
+                    int(selected["context_length"])
+                    if isinstance(selected.get("context_length"), int)
+                    else None
+                ),
+                supports_streaming=bool(selected.get("supports_streaming", False)),
+                supports_cancellation=bool(selected.get("supports_cancellation", False)),
             )
         except ModelUnavailableError:
             raise

@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 import time
-from typing import TYPE_CHECKING
 
 from chad.core.conversation import ChatRequest
 from chad.llm.client import (
@@ -12,9 +11,6 @@ from chad.llm.client import (
     ModelInfo,
     ModelUnavailableError,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 @dataclass(frozen=True, slots=True)

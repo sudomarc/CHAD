@@ -176,9 +176,11 @@ def test_http_client_error_normalization() -> None:
             client.generate_response(req)
 
     # Test Timeout
-    with patch("httpx.Client.post", side_effect=httpx.TimeoutException("Timed out")):
-        with pytest.raises(TimeoutError):
-            client.generate_response(req)
+    with (
+        patch("httpx.Client.post", side_effect=httpx.TimeoutException("Timed out")),
+        pytest.raises(TimeoutError),
+    ):
+        client.generate_response(req)
 
 
 def test_chad_app_with_gateway(tmp_path) -> None:

@@ -6,86 +6,80 @@ This document defines the internal boundary between CHAD and any model backend.
 
 The contract exists so CHAD can use LapisLLM, external APIs, and future local/open models without rewriting application logic.
 
+## Implementation: Model Gateway
+
+CHAD implements a provider-neutral `ModelGateway` (`chad.llm.gateway.ModelGateway`) that manages provider registration, capability discovery, request routing, normalized metadata responses, and fallback execution.
+
+```text
+ChadApp / Agents
+      ↓
+ModelGateway
+   ├── LapisClient (HTTP)
+   ├── LocalLapisClient
+   └── Future Provider Adapters
+```
+
 ## Capabilities
 
-A backend advertises capabilities rather than forcing the application to guess:
+A backend advertises capabilities via `ModelCapabilities`:
 
-- text generation;
-- streaming;
-- vision;
-- tool calling;
-- structured output;
-- embeddings;
-- long context;
-- cancellation;
-- usage accounting.
+- `text_generation` (bool)
+- `streaming` (bool)
+- `vision` (bool)
+- `tool_calling` (bool)
+- `structured_output` (bool)
+- `embeddings` (bool)
+- `context_length` (int | None)
 
 ## Model metadata
 
-Required fields:
+Model metadata is represented via `ModelInfo`:
 
-- stable model id;
-- provider/backend id;
-- human-readable display name;
-- context limit when known;
-- supported input modalities;
-- supported capabilities;
-- availability state.
-
-Optional fields:
-
-- pricing metadata;
-- quality tier;
-- latency tier;
-- region;
-- privacy mode.
+- `id`: stable model identifier;
+- `display_name`: human-readable name;
+- `context_length`: maximum token limit when known;
+- `backend`: provider identifier (e.g. `lapis`, `lapis_local`);
+- `supports_streaming`: boolean indicator;
+- `supports_cancellation`: boolean indicator;
+- `capabilities`: explicit `ModelCapabilities` instance.
 
 ## Request
 
-A normalized request should contain:
+Normalized requests use `ChatRequest` containing:
 
-- model;
-- messages;
-- generation parameters;
-- optional tools;
-- optional response format;
-- request metadata;
-- cancellation signal.
-
-The gateway, not the UI, validates provider-specific constraints.
+- `messages`: tuple of `Message` instances;
+- `model`: target model id;
+- `temperature`, `top_k`, `top_p`, `max_new_tokens`: generation parameters.
 
 ## Response
 
-A normalized response should preserve:
+Normalized generation responses return a `ModelResponse`:
 
-- text;
-- structured content where supported;
-- tool calls;
-- finish reason;
-- usage;
-- model id;
-- provider request id;
-- errors;
-- warnings.
-
-Provider-specific metadata may be attached without leaking provider-specific concepts into the application core.
+- `content`: generated output text;
+- `model_id`: model that produced the generation;
+- `provider`: provider identifier;
+- `request_id`: provider request identifier when supplied;
+- `finish_reason`: finish reason string (e.g., `stop`, `length`);
+- `usage`: `UsageInfo` (`prompt_tokens`, `completion_tokens`, `total_tokens`);
+- `latency_ms`: measured request latency in milliseconds;
+- `tool_calls`: tuple of structured tool calls;
+- `raw_response`: underlying raw payload.
 
 ## Error taxonomy
 
-At minimum:
+All model exceptions inherit from `LLMError`:
 
-- authentication failure;
-- model unavailable;
-- request invalid;
-- context limit exceeded;
-- rate limited;
-- provider timeout;
-- provider server failure;
-- malformed provider response;
-- cancellation;
-- policy denial.
-
-Errors should map to user-facing messages separately from diagnostic details.
+- `AuthenticationError`: HTTP 401/403 or invalid credentials;
+- `ModelUnavailableError`: model checkpoint or service is unavailable;
+- `InvalidRequestError`: HTTP 400/422 or malformed request parameters;
+- `ContextLimitExceededError`: request exceeds context budget;
+- `RateLimitError`: HTTP 429 or provider rate limit;
+- `TimeoutError`: network or execution timeout;
+- `ProviderServerError`: HTTP 500+ or provider internal error;
+- `MalformedResponseError`: provider response missing expected payload structure;
+- `CancellationError`: request cancelled by user/runtime;
+- `PolicyDenialError`: blocked by safety or permission policy;
+- `GenerationError`: general generation failure.
 
 ## Streaming
 
@@ -93,48 +87,14 @@ Streaming is valid only when the backend sends incremental generation events.
 
 CHAD must never manufacture fake streaming by splitting a completed response.
 
-The stream contract should support:
+## Routing policy and fallback
 
-- delta text;
-- tool-call deltas where supported;
-- completion;
-- error;
-- cancellation acknowledgement;
-- usage metadata where available.
-
-## Routing policy
-
-Routing may consider:
-
-- task type;
-- required capability;
-- context length;
-- latency target;
-- cost budget;
-- privacy requirement;
-- availability;
-- user preference.
-
-Routing decisions must be observable and reproducible from recorded request metadata.
+`ModelGateway.generate()` accepts `model_id` and optional `fallback_models`. If a primary provider encounters a recoverable error (such as `ModelUnavailableError`, `ProviderServerError`, or `TimeoutError`), the gateway automatically routes the request to configured fallback models in sequence.
 
 ## LapisLLM integration
 
-Current verified Lapis integration is HTTP-based.
+Current verified Lapis integration is HTTP-based (`HttpLapisClient`) and local checkpoint-based (`LocalLapisClient`).
 
-CHAD currently discovers models through `/v1/models` and sends chat requests through `/v1/chat/completions`.
+CHAD discovers models through `/v1/models` and sends chat requests through `/v1/chat/completions`.
 
 The Lapis README currently describes non-streaming API behavior. CHAD must not claim streaming over Lapis until Lapis exposes and CHAD verifies a real streaming path.
-
-## External providers
-
-Provider adapters are optional implementation modules.
-
-They must not be imported from:
-
-- conversation models;
-- storage;
-- UI components;
-- command parsing;
-- agent definitions.
-
-Only the model gateway should know provider SDK details.

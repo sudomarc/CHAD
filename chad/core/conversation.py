@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-import math
 from uuid import uuid4
 
 from chad.core.messages import Message, MessageRole

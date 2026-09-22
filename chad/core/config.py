@@ -53,6 +53,17 @@ class AppConfig:
         ):
             if value is not None and value < 1:
                 raise ValueError(f"{name} must be at least 1")
+    max_context_messages: int | None = None
+    max_context_tokens: int | None = None
+
+    def validate(self) -> None:
+        self.generation.validate()
+        for name, value in (
+            ("max_context_messages", self.max_context_messages),
+            ("max_context_tokens", self.max_context_tokens),
+        ):
+            if value is not None and value < 1:
+                raise ValueError(f"{name} must be at least 1")
 
     @classmethod
     def from_env(cls) -> AppConfig:
@@ -71,7 +82,7 @@ class AppConfig:
             max_new_tokens=int(os.getenv("CHAD_MAX_NEW_TOKENS", "128")),
         )
         settings.validate()
-        return cls(
+        result = cls(
             lapis=LapisSettings(
                 base_url=lapis_url,
                 model=lapis_model,

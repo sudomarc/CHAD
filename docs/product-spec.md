@@ -4,7 +4,7 @@
 
 **Product:** CHAD
 
-**Purpose:** a general-purpose AI assistant that can converse, reason, research, analyze files, use tools, and execute bounded multi-step tasks.
+**Purpose:** a general-purpose agentic AI system that can converse, reason, research, analyze files, use tools, delegate bounded work to specialist agents, and execute multi-step tasks under explicit policy and resource limits.
 
 **Engine relationship:** CHAD consumes LapisLLM through a stable application/runtime boundary and may also consume other model providers through a provider-neutral gateway.
 
@@ -51,7 +51,7 @@ CHAD may use high-quality external models while LapisLLM develops toward stronge
 
 ## 4. V1 user experience
 
-V1 is a browser-based conversational product backed by a provider-neutral AI gateway.
+V1 is an agent-runtime product with conversation as the primary interface and a provider-neutral AI gateway underneath.
 
 ### Core interactions
 
@@ -67,6 +67,12 @@ V1 is a browser-based conversational product backed by a provider-neutral AI gat
 - Upload supported files.
 - Inspect tool activity and cited sources.
 - Provide positive/negative feedback on a response.
+
+### V1 agent behavior
+
+The orchestrator is the default execution path for tasks that require more than a single model response. It decides whether a request is best handled directly or delegated to a specialist agent.
+
+Specialists operate under explicit role, tool, permission and budget contracts. The runtime records each step and distinguishes model output, tool results, retrieved evidence and external side effects.
 
 ### V1 task classes
 
@@ -100,7 +106,7 @@ V1 is a browser-based conversational product backed by a provider-neutral AI gat
 | Code analysis | Required | Sandboxed code agent |
 | Code execution | Bounded beta | Hardened multi-runtime execution |
 | Long-term memory | Controlled beta | Rich project/user memory |
-| Multi-agent workflows | Limited | Full orchestration |
+| Multi-agent workflows | Required for bounded specialist tasks | Durable collaboration |
 | Connectors | Minimal | GitHub, Notion, Drive, Slack, etc. |
 | Voice | No | Planned |
 | Image generation | No | Planned |

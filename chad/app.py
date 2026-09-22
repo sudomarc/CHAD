@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from chad.core.config import AppConfig
+from chad.core.context import ContextLimitError
 from chad.core.conversation import ChatRequest, Conversation
 from chad.llm.client import LapisClient, LLMError
 from chad.storage.json_store import ConversationStore
@@ -17,6 +18,7 @@ class ChadApp:
 
     @classmethod
     def create(cls, config: AppConfig, client: LapisClient) -> ChadApp:
+        config.validate()
         store = ConversationStore(config.storage_dir)
         conversation = Conversation(system_prompt=config.system_prompt, model=client.current_model().id)
         return cls(config=config, client=client, store=store, conversation=conversation)
@@ -30,8 +32,23 @@ class ChadApp:
 
     def request(self, text: str) -> ChatRequest:
         self.conversation.add_user(text)
+        max_input_tokens = self.config.max_context_tokens
+        if max_input_tokens is None:
+            context_length = self.client.current_model().context_length
+            if context_length is not None:
+                max_input_tokens = context_length - self.config.generation.max_new_tokens
+                if max_input_tokens < 1:
+                    raise ContextLimitError(
+                        "generation settings leave no room for conversation context"
+                    )
+
         request = ChatRequest(
-            messages=tuple(self.conversation.context()),
+            messages=tuple(
+                self.conversation.context(
+                    max_messages=self.config.max_context_messages,
+                    max_input_tokens=max_input_tokens,
+                )
+            ),
             model=self.conversation.model,
             temperature=self.config.generation.temperature,
             top_k=self.config.generation.top_k,
@@ -45,7 +62,7 @@ class ChadApp:
         request = self.request(text)
         try:
             response = self.client.generate(request)
-        except LLMError:
+        except (LLMError, ContextLimitError):
             self.conversation.messages.pop()
             raise
         self.conversation.add_assistant(response)

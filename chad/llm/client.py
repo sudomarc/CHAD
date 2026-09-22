@@ -3,8 +3,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from chad.core.conversation import ChatRequest
+
+if TYPE_CHECKING:
+    from chad.llm.gateway import ModelCapabilities, ModelResponse
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,6 +19,7 @@ class ModelInfo:
     backend: str = "lapis"
     supports_streaming: bool = False
     supports_cancellation: bool = False
+    capabilities: ModelCapabilities | None = None
 
 
 class LLMError(RuntimeError):
@@ -35,6 +40,17 @@ class LapisClient(ABC):
     @abstractmethod
     def generate(self, request: ChatRequest) -> str:
         raise NotImplementedError
+
+    def generate_response(self, request: ChatRequest) -> ModelResponse:
+        from chad.llm.gateway import ModelResponse
+
+        raw_text = self.generate(request)
+        model = self.current_model()
+        return ModelResponse(
+            content=raw_text,
+            model_id=model.id,
+            provider=model.backend,
+        )
 
     def stream_generate(self, request: ChatRequest) -> Iterator[str]:
         raise NotImplementedError("streaming is not supported by this backend")

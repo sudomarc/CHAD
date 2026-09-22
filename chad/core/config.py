@@ -53,17 +53,6 @@ class AppConfig:
         ):
             if value is not None and value < 1:
                 raise ValueError(f"{name} must be at least 1")
-    max_context_messages: int | None = None
-    max_context_tokens: int | None = None
-
-    def validate(self) -> None:
-        self.generation.validate()
-        for name, value in (
-            ("max_context_messages", self.max_context_messages),
-            ("max_context_tokens", self.max_context_tokens),
-        ):
-            if value is not None and value < 1:
-                raise ValueError(f"{name} must be at least 1")
 
     @classmethod
     def from_env(cls) -> AppConfig:
@@ -71,8 +60,15 @@ class AppConfig:
         lapis_model = os.getenv("CHAD_LAPIS_MODEL") or None
         checkpoint = Path(os.getenv("CHAD_LAPIS_CHECKPOINT", "checkpoints/latest.pt"))
         device = os.getenv("CHAD_LAPIS_DEVICE", "auto")
-        storage = Path(os.getenv("CHAD_STORAGE_DIR", str(Path.home() / ".chad" / "conversations")))
-        developer = os.getenv("CHAD_DEVELOPER_MODE", "0").lower() in {"1", "true", "yes", "on"}
+        storage = Path(
+            os.getenv("CHAD_STORAGE_DIR", str(Path.home() / ".chad" / "conversations"))
+        )
+        developer = os.getenv("CHAD_DEVELOPER_MODE", "0").lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
         max_context_messages_raw = os.getenv("CHAD_MAX_CONTEXT_MESSAGES")
         max_context_tokens_raw = os.getenv("CHAD_MAX_CONTEXT_TOKENS")
         settings = GenerationSettings(
@@ -81,7 +77,6 @@ class AppConfig:
             top_p=float(os.getenv("CHAD_TOP_P", "0.95")),
             max_new_tokens=int(os.getenv("CHAD_MAX_NEW_TOKENS", "128")),
         )
-        settings.validate()
         result = cls(
             lapis=LapisSettings(
                 base_url=lapis_url,
@@ -96,5 +91,9 @@ class AppConfig:
             max_context_messages=(
                 int(max_context_messages_raw) if max_context_messages_raw else None
             ),
-            max_context_tokens=int(max_context_tokens_raw) if max_context_tokens_raw else None,
+            max_context_tokens=(
+                int(max_context_tokens_raw) if max_context_tokens_raw else None
+            ),
         )
+        result.validate()
+        return result

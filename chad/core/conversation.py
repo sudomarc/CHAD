@@ -36,13 +36,22 @@ class Conversation:
         self.messages.clear()
         self._touch()
 
-    def context(self, max_messages: int | None = None) -> list[Message]:
+    def context(
+        self,
+        max_messages: int | None = None,
+        max_input_tokens: int | None = None,
+    ) -> list[Message]:
         ordered: list[Message] = []
         if self.system_prompt and self.system_prompt.strip():
             ordered.append(Message(MessageRole.SYSTEM, self.system_prompt.strip()))
 
         history = self.messages if max_messages is None else self.messages[-max_messages:]
         ordered.extend(history)
+
+        if max_input_tokens is not None:
+            from chad.core.context import ContextBudget
+
+            ordered = ContextBudget(max_input_tokens).trim(ordered)
         return ordered
 
     def to_dict(self) -> dict[str, object]:

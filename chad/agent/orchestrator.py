@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from chad.agent.registry import AgentRegistry
 from chad.agent.state import AgentRole, AgentRun, AgentState
@@ -87,7 +88,7 @@ class AgentOrchestrator:
         if executor_fn is not None:
             try:
                 step_result = executor_fn(action_payload or {})
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 run.budget.record_retry()
                 if run.budget.used_retries > run.budget.max_retries:
                     run.transition_to(
@@ -145,7 +146,7 @@ class AgentOrchestrator:
         if executor_fn is not None:
             try:
                 step_result = executor_fn(payload)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 run.transition_to(
                     AgentState.FAILED,
                     description=f"Approved action '{action_name}' failed execution: {exc}",

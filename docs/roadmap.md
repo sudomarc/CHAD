@@ -25,14 +25,13 @@ Phase 2 — Model Gateway
 - Streaming and cancellation.
 - Health, fallback, cost/latency/privacy-aware routing.
 
-Phase 3 — Agent runtime kernel
-- Agent registry.
-- Role contract loader.
-- Orchestrator state machine.
-- Step/token/time/retry budgets.
-- Approval checkpoints.
-- Loop detection.
-- Durable runs, handoffs, event log, resumption.
+Phase 3 — Agent runtime kernel (Completed)
+- Agent registry and role loader (`AgentRegistry`, `AgentRoleContract`).
+- Orchestrator state machine (`AgentOrchestrator`, `AgentState`).
+- Step, token, time, and retry budgets (`ExecutionBudget`).
+- Approval checkpoints (`WAITING_APPROVAL`, `approve_step`, `deny_step`).
+- Loop detection (`check_loop`).
+- Durable runs, handoffs, event log, resumption (`AgentRun`, `AgentEvent`, `AgentHandoff`).
 
 Phase 4 — Tool platform
 - Tool registry and schemas.

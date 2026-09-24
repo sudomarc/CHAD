@@ -167,7 +167,7 @@ audit_policy
 
 Tool execution must be centrally mediated.
 
-The model proposes a tool call. The application validates it. The tool runner enforces permissions. The result returns as untrusted tool data.
+The model proposes a tool call. The application validates it through `PermissionEngine`. `ToolExecutor` enforces permissions, time limits, and generates `ToolAuditEvent` entries. The result returns as structured, untrusted `ToolResult` data (`SUCCESS`, `ERROR`, `TIMEOUT`, `PERMISSION_DENIED`).
 
 ## 7. Memory architecture
 

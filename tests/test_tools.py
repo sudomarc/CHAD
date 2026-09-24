@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import time
+
 import pytest
+
 from chad.tools import (
     CALCULATOR_TOOL,
     FILE_READ_TOOL,

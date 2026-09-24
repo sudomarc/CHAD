@@ -25,11 +25,10 @@ class PermissionEngine:
         if (
             tool.permission_level == ToolPermissionLevel.USER_APPROVAL
             or tool.id in self.user_approval_tools
-        ):
-            if not has_user_approval:
-                return (
-                    False,
-                    f"Tool '{tool.id}' requires explicit user approval before execution.",
-                )
+        ) and not has_user_approval:
+            return (
+                False,
+                f"Tool '{tool.id}' requires explicit user approval before execution.",
+            )
 
         return True, "Execution permitted."

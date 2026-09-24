@@ -33,13 +33,13 @@ Phase 3 — Agent runtime kernel (Completed)
 - Loop detection (`check_loop`).
 - Durable runs, handoffs, event log, resumption (`AgentRun`, `AgentEvent`, `AgentHandoff`).
 
-Phase 4 — Tool platform
-- Tool registry and schemas.
-- Permission engine.
-- Time/resource limits.
-- Audit events.
-- Calculator, date/time, file, search, fetch.
-- Structured outputs and tool failure taxonomy.
+Phase 4 — Tool platform (Completed)
+- Tool registry and schemas (`ToolRegistry`, `ToolDefinition`).
+- Permission engine (`PermissionEngine`, `ToolPermissionLevel`).
+- Time/resource limits and execution engine (`ToolExecutor`).
+- Audit events (`ToolAuditEvent`).
+- Built-in tools: calculator, date/time, safe read file.
+- Structured outputs and tool failure taxonomy (`ToolStatus`).
 
 Phase 5 — Research agent
 - Search/fetch providers.

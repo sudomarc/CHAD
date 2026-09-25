@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from chad.agent.orchestrator import AgentOrchestrator
 from chad.agent.registry import AgentRegistry
 from chad.agent.research import (

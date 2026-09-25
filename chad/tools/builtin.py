@@ -4,8 +4,18 @@ import ast
 import operator
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
+from chad.agent.research import (
+    EvidenceItem,
+    MockFetchProvider,
+    MockSearchProvider,
+    sanitize_untrusted_content,
+)
 from chad.tools.schema import ToolDefinition, ToolPermissionLevel
+
+if TYPE_CHECKING:
+    from chad.tools.registry import ToolRegistry
 
 # Supported operators for safe calculator
 _SAFE_OPERATORS = {
@@ -110,3 +120,115 @@ FILE_READ_TOOL = ToolDefinition(
     timeout_seconds=10.0,
     side_effect_level="READ_ONLY",
 )
+
+
+def web_search(query: str, limit: int = 5) -> list[dict[str, Any]]:
+    """Searches web sources for information regarding a query."""
+    provider = MockSearchProvider()
+    results = provider.search(query, limit=limit)
+    return [
+        {
+            "title": r.title,
+            "url": r.url,
+            "snippet": r.snippet,
+            "score": r.score,
+        }
+        for r in results
+    ]
+
+
+WEB_SEARCH_TOOL = ToolDefinition(
+    id="web_search",
+    name="Web Search",
+    description="Searches web sources for information regarding a query.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "query": {"type": "string"},
+            "limit": {"type": "integer", "default": 5},
+        },
+        "required": ["query"],
+    },
+    output_schema={"type": "array"},
+    permission_level=ToolPermissionLevel.ALWAYS_ALLOW,
+    timeout_seconds=10.0,
+    side_effect_level="READ_ONLY",
+)
+
+
+def fetch_page(url: str) -> dict[str, Any]:
+    """Fetches text content from a specified URL and applies safety sanitization."""
+    provider = MockFetchProvider()
+    doc = provider.fetch(url)
+    return {
+        "url": doc.url,
+        "title": doc.title,
+        "content": doc.content,
+        "sanitized_content": sanitize_untrusted_content(doc.content),
+    }
+
+
+FETCH_PAGE_TOOL = ToolDefinition(
+    id="fetch_page",
+    name="Fetch Web Page",
+    description="Fetches text content from a specified URL and applies safety sanitization.",
+    input_schema={
+        "type": "object",
+        "properties": {"url": {"type": "string"}},
+        "required": ["url"],
+    },
+    output_schema={"type": "object"},
+    permission_level=ToolPermissionLevel.ALWAYS_ALLOW,
+    timeout_seconds=10.0,
+    side_effect_level="READ_ONLY",
+)
+
+
+def extract_evidence(text: str, source_url: str, title: str = "Extracted Source", score: float = 1.0) -> dict[str, Any]:
+    """Extracts structured evidence items with relevance scoring from text content."""
+    item = EvidenceItem(
+        id="EV-EXTRACTED",
+        source_url=source_url,
+        title=title,
+        text=text,
+        relevance_score=score,
+    )
+    return {
+        "id": item.id,
+        "source_url": item.source_url,
+        "title": item.title,
+        "text": item.text,
+        "relevance_score": item.relevance_score,
+        "sanitized_text": item.sanitized_text,
+    }
+
+
+EXTRACT_EVIDENCE_TOOL = ToolDefinition(
+    id="extract_evidence",
+    name="Extract Evidence",
+    description="Extracts structured evidence items with relevance scoring from text content.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "text": {"type": "string"},
+            "source_url": {"type": "string"},
+            "title": {"type": "string", "default": "Extracted Source"},
+            "score": {"type": "number", "default": 1.0},
+        },
+        "required": ["text", "source_url"],
+    },
+    output_schema={"type": "object"},
+    permission_level=ToolPermissionLevel.ALWAYS_ALLOW,
+    timeout_seconds=5.0,
+    side_effect_level="READ_ONLY",
+)
+
+
+def register_builtin_tools(registry: ToolRegistry) -> None:
+    """Registers all built-in tools into a ToolRegistry instance."""
+    registry.register(CALCULATOR_TOOL, safe_calculator)
+    registry.register(DATETIME_TOOL, datetime_now)
+    registry.register(FILE_READ_TOOL, safe_read_file)
+    registry.register(WEB_SEARCH_TOOL, web_search)
+    registry.register(FETCH_PAGE_TOOL, fetch_page)
+    registry.register(EXTRACT_EVIDENCE_TOOL, extract_evidence)

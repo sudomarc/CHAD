@@ -41,14 +41,15 @@ Phase 4 — Tool platform (Completed)
 - Built-in tools: calculator, date/time, safe read file.
 - Structured outputs and tool failure taxonomy (`ToolStatus`).
 
-Phase 5 — Research agent
-- Search/fetch providers.
-- Query decomposition.
-- Evidence store.
-- Ranking/deduplication.
-- Contradiction detection.
-- Citations.
-- Prompt-injection defenses.
+Phase 5 — Research agent (Completed)
+- Search/fetch providers (`SearchProvider`, `FetchProvider`, `MockSearchProvider`, `MockFetchProvider`).
+- Query decomposition (`QueryDecomposer`, `DecomposedQuery`).
+- Evidence store (`EvidenceStore`, `EvidenceItem`).
+- Ranking/deduplication (`get_ranked_evidence`, URL/hash deduplication).
+- Contradiction detection (`detect_contradictions`).
+- Citations and report synthesis (`ResearchReport`, `ResearchEngine`).
+- Prompt-injection defenses (`sanitize_untrusted_content`).
+- Research tools: `web_search`, `fetch_page`, `extract_evidence`.
 
 Phase 6 — Files, knowledge and RAG
 - Upload/storage/type validation.

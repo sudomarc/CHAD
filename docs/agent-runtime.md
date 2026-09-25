@@ -27,6 +27,18 @@ The Agent Runtime Kernel is implemented in `chad/agent/`:
   - Human-in-the-loop approval checkpoints (`WAITING_APPROVAL`, `approve_step`, `deny_step`).
   - Cross-role handoffs between Orchestrator, Researcher, Coder, and Analyst agents.
 
+- `research.py`: Implements Phase 5 Research Agent engine:
+  - `QueryDecomposer`: Deconstructs complex research topics into targeted sub-queries.
+  - `SearchProvider` & `FetchProvider`: Protocols and mock providers (`MockSearchProvider`, `MockFetchProvider`) for web search and page fetching.
+  - `EvidenceStore` & `EvidenceItem`: In-memory evidence repository with relevance ranking, source URL deduplication, and contradiction detection (`detect_contradictions`).
+  - `sanitize_untrusted_content`: Escapes external web content, closing tags, and system instruction hijacking attempts before exposing fetched content to model context.
+  - `ResearchEngine`: Coordinates query decomposition, search/fetch, evidence collection, contradiction analysis, and cited summary report generation (`ResearchReport`).
+
+## Specialist Tools (`chad.tools`)
+
+- Built-in tools: `calculator`, `datetime_now`, `read_file`.
+- Research tools: `web_search`, `fetch_page`, `extract_evidence`.
+
 ## Initial Specialist Roles
 
 - **Orchestrator**: Task decomposition, specialist selection, budgets, state, evidence, synthesis.

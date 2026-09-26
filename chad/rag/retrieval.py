@@ -3,7 +3,8 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter
-from typing import Protocol, Sequence
+from collections.abc import Sequence
+from typing import Protocol
 
 from chad.rag.chunker import DocumentChunk
 

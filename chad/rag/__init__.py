@@ -8,6 +8,8 @@ from chad.rag.tool import RAG_INDEX_TOOL, RAG_SEARCH_TOOL, register_rag_tools
 from chad.rag.vector_store import VectorStore
 
 __all__ = [
+    "RAG_INDEX_TOOL",
+    "RAG_SEARCH_TOOL",
     "DocumentChunk",
     "DocumentChunker",
     "DocumentParseError",
@@ -15,8 +17,6 @@ __all__ = [
     "FileDocument",
     "FileStore",
     "FileType",
-    "RAG_INDEX_TOOL",
-    "RAG_SEARCH_TOOL",
     "RAGEngine",
     "RAGQueryResponse",
     "RetrievalResult",

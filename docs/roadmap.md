@@ -51,13 +51,12 @@ Phase 5 — Research agent (Completed)
 - Prompt-injection defenses (`sanitize_untrusted_content`).
 - Research tools: `web_search`, `fetch_page`, `extract_evidence`.
 
-Phase 6 — Files, knowledge and RAG
-- Upload/storage/type validation.
-- PDF/TXT/Markdown/DOCX/CSV/JSON/code extraction.
-- Chunking.
-- Embeddings and vector/hybrid retrieval.
-- Source traceability.
-- Retrieval evaluation and parser isolation.
+Phase 6 — Files, knowledge and RAG (Completed)
+- Upload/storage/type validation (`FileDocument`, `DocumentValidator`).
+- PDF/TXT/Markdown/DOCX/CSV/JSON/code extraction (`DocumentExtractor`).
+- Chunking with character/line position tracking (`TextChunker`, `DocumentChunk`).
+- Embeddings, vector store, and hybrid retrieval (`VectorStore`, `MockEmbeddingProvider`, `HybridRetriever`).
+- Source traceability and prompt-injection defense (`ChunkLocation`, `RAGSearchResult`, `RAGPipeline`).
 
 Phase 7 — Multimodal runtime
 - Image message contract.

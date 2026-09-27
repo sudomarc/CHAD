@@ -37,7 +37,7 @@ class FileDocument:
     content_hash: str = field(init=False)
 
     def __post_init__(self) -> None:
-        raw_hash = hashlib.sha256(f"{self.filename}:{self.text_content}".encode("utf-8")).hexdigest()
+        raw_hash = hashlib.sha256(f"{self.filename}:{self.text_content}".encode()).hexdigest()
         object.__setattr__(self, "content_hash", raw_hash)
 
     def to_dict(self) -> dict[str, Any]:

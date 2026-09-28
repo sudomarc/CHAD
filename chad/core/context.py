@@ -4,7 +4,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from chad.core.messages import Message
+from chad.core.messages import ImageAttachment, ImageDetail, Message
 
 
 class ContextLimitError(ValueError):
@@ -14,11 +14,25 @@ class ContextLimitError(ValueError):
 def estimate_tokens(text: str, chars_per_token: int = 4) -> int:
     if chars_per_token < 1:
         raise ValueError("chars_per_token must be at least 1")
+    if not text:
+        return 0
     return max(1, math.ceil(len(text) / chars_per_token))
 
 
+def estimate_image_tokens(image: ImageAttachment) -> int:
+    if image.detail == ImageDetail.LOW:
+        return 85
+    if image.width and image.height:
+        tiles_w = math.ceil(image.width / 512)
+        tiles_h = math.ceil(image.height / 512)
+        return 85 + (170 * tiles_w * tiles_h)
+    return 765
+
+
 def estimate_message_tokens(message: Message, chars_per_token: int = 4) -> int:
-    return estimate_tokens(message.content, chars_per_token)
+    text_tokens = estimate_tokens(message.content, chars_per_token) if message.content else 0
+    image_tokens = sum(estimate_image_tokens(img) for img in message.images)
+    return max(1, text_tokens + image_tokens)
 
 
 @dataclass(frozen=True, slots=True)

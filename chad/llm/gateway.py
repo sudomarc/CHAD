@@ -146,6 +146,15 @@ class ModelGateway:
             return client, target_model
         raise ModelUnavailableError("No model provider is registered with Model Gateway.")
 
+    def _verify_multimodal_request(self, request: ChatRequest, model_id: str) -> None:
+        has_images = any(bool(getattr(msg, "images", None)) for msg in request.messages)
+        if has_images:
+            caps = self.capabilities(model_id)
+            if not caps.vision:
+                raise InvalidRequestError(
+                    f"Model '{model_id}' does not support vision capabilities required for multimodal requests with images."
+                )
+
     def generate(
         self,
         request: ChatRequest,
@@ -158,6 +167,7 @@ class ModelGateway:
         for candidate_model in target_models:
             try:
                 client, resolved_model = self._get_client_for_model(candidate_model)
+                self._verify_multimodal_request(request, resolved_model)
                 start_time = time.perf_counter()
 
                 if hasattr(client, "generate_response"):
@@ -191,5 +201,6 @@ class ModelGateway:
         raise ModelUnavailableError("No model available to service generation request.")
 
     def stream(self, request: ChatRequest, model_id: str | None = None) -> Iterator[str]:
-        client, _ = self._get_client_for_model(model_id or request.model)
+        client, resolved_model = self._get_client_for_model(model_id or request.model)
+        self._verify_multimodal_request(request, resolved_model)
         yield from client.stream_generate(request)

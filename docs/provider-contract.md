@@ -31,6 +31,14 @@ A backend advertises capabilities via `ModelCapabilities`:
 - `embeddings` (bool)
 - `context_length` (int | None)
 
+## Multimodal and Vision Contract
+
+When a request contains messages with `ImageAttachment` instances:
+
+1. `ModelGateway` verifies that the target model advertises `capabilities.vision == True`.
+2. If `vision == False`, `ModelGateway` raises `InvalidRequestError`.
+3. Vision adapters (`chad.llm.vision.VisionPayloadConverter`) transform multimodal messages into provider-standard image content payloads (e.g. data URLs with configurable detail level `low`, `high`, or `auto`).
+
 ## Model metadata
 
 Model metadata is represented via `ModelInfo`:
@@ -47,7 +55,7 @@ Model metadata is represented via `ModelInfo`:
 
 Normalized requests use `ChatRequest` containing:
 
-- `messages`: tuple of `Message` instances;
+- `messages`: tuple of `Message` instances (supporting text and optional `images: tuple[ImageAttachment, ...]`);
 - `model`: target model id;
 - `temperature`, `top_k`, `top_p`, `max_new_tokens`: generation parameters.
 
@@ -71,7 +79,7 @@ All model exceptions inherit from `LLMError`:
 
 - `AuthenticationError`: HTTP 401/403 or invalid credentials;
 - `ModelUnavailableError`: model checkpoint or service is unavailable;
-- `InvalidRequestError`: HTTP 400/422 or malformed request parameters;
+- `InvalidRequestError`: HTTP 400/422 or malformed request parameters (including attempting vision requests on non-vision models);
 - `ContextLimitExceededError`: request exceeds context budget;
 - `RateLimitError`: HTTP 429 or provider rate limit;
 - `TimeoutError`: network or execution timeout;

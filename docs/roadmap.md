@@ -58,12 +58,12 @@ Phase 6 — Files, knowledge and RAG (Completed)
 - Embeddings, vector store, and hybrid retrieval (`VectorStore`, `MockEmbeddingProvider`, `HybridRetriever`).
 - Source traceability and prompt-injection defense (`ChunkLocation`, `RAGSearchResult`, `RAGPipeline`).
 
-Phase 7 — Multimodal runtime
-- Image message contract.
-- Vision adapters.
-- Image validation/conversion.
-- Mixed text/image context.
-- Screenshot/diagram evaluation.
+Phase 7 — Multimodal runtime (Completed)
+- Image message contract (`ImageFormat`, `ImageDetail`, `ImageAttachment`).
+- Vision adapters and payload converters (`VisionAdapter`, `VisionPayloadConverter`).
+- Image validation and conversion (`ImageValidator`, `ImageConverter`).
+- Mixed text/image context token estimation (`estimate_image_tokens`, `estimate_message_tokens`, `ContextBudget`).
+- Screenshot and diagram evaluation (`ScreenshotDiagramEvaluator`, `ImageAnalysisResult`).
 
 Phase 8 — Coder agent
 - Repository workspace.

@@ -65,14 +65,14 @@ Phase 7 — Multimodal runtime (Completed)
 - Mixed text/image context token estimation (`estimate_image_tokens`, `estimate_message_tokens`, `ContextBudget`).
 - Screenshot and diagram evaluation (`ScreenshotDiagramEvaluator`, `ImageAnalysisResult`).
 
-Phase 8 — Coder agent
-- Repository workspace.
-- Safe file operations and diffs.
-- Test execution.
-- Sandboxed code runtime.
-- CPU/memory/time/network limits.
-- Secret scanning and command policy.
-- Vibe policy integration tests.
+Phase 8 — Coder agent (Completed)
+- Repository workspace (`RepositoryWorkspace`).
+- Path traversal prevention and safe file operations (`read_file`, `write_file`).
+- Git merge diff parsing and application (`apply_diff`).
+- Secret scanning and automatic redaction (`SecretScanner`, `redact_secrets`).
+- Command policy and sanitization (`CommandPolicy`).
+- Sandboxed code execution runtime (`SandboxedCodeRuntime`, `CodeExecutionResult`).
+- High-level Coder engine and test runner (`CoderEngine`, `run_tests`).
 
 Phase 9 — Analyst agent
 - Structured documents/data/images.

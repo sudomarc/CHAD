@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+from chad.agent.coder import (
+    CodeExecutionResult,
+    CoderEngine,
+    CoderResult,
+    CommandPolicy,
+    RepositoryWorkspace,
+    SandboxedCodeRuntime,
+    SecretScanner,
+)
 from chad.agent.orchestrator import AgentOrchestrator
 from chad.agent.registry import AgentRegistry, AgentRoleContract
 from chad.agent.state import (
@@ -20,5 +29,12 @@ __all__ = [
     "AgentRoleContract",
     "AgentRun",
     "AgentState",
+    "CodeExecutionResult",
+    "CoderEngine",
+    "CoderResult",
+    "CommandPolicy",
     "ExecutionBudget",
+    "RepositoryWorkspace",
+    "SandboxedCodeRuntime",
+    "SecretScanner",
 ]

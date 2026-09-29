@@ -256,6 +256,7 @@ class SandboxedCodeRuntime:
                 text=True,
                 timeout=effective_timeout,
                 env=exec_env,
+                check=False,
             )
             elapsed = time.time() - start_time
 
@@ -329,7 +330,7 @@ class CoderEngine:
     def read_file(self, relative_path: str) -> CoderResult:
         try:
             content = self.workspace.read_file(relative_path)
-            redacted_content, secrets_count = self.secret_scanner.redact_secrets(content)
+            redacted_content, _secrets_count = self.secret_scanner.redact_secrets(content)
             return CoderResult(
                 action="read_file",
                 success=True,

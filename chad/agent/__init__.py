@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+from chad.agent.analyst import (
+    AnalysisInput,
+    AnalysisReport,
+    AnalystEngine,
+    DatasetSummary,
+    EvidenceLink,
+    UncertaintyReport,
+)
 from chad.agent.coder import (
     CodeExecutionResult,
     CoderEngine,
@@ -29,12 +37,18 @@ __all__ = [
     "AgentRoleContract",
     "AgentRun",
     "AgentState",
+    "AnalysisInput",
+    "AnalysisReport",
+    "AnalystEngine",
     "CodeExecutionResult",
     "CoderEngine",
     "CoderResult",
     "CommandPolicy",
+    "DatasetSummary",
+    "EvidenceLink",
     "ExecutionBudget",
     "RepositoryWorkspace",
     "SandboxedCodeRuntime",
     "SecretScanner",
+    "UncertaintyReport",
 ]

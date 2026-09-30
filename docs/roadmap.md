@@ -74,11 +74,11 @@ Phase 8 — Coder agent (Completed)
 - Sandboxed code execution runtime (`SandboxedCodeRuntime`, `CodeExecutionResult`).
 - High-level Coder engine and test runner (`CoderEngine`, `run_tests`).
 
-Phase 9 — Analyst agent
-- Structured documents/data/images.
-- Evidence-linked reports.
-- Uncertainty reporting.
-- Large-document workflows.
+Phase 9 — Analyst agent (Completed)
+- Structured documents, datasets, and image interpretation (`AnalysisInput`, `DatasetSummary`).
+- Evidence-linked report synthesis (`AnalysisReport`, `EvidenceLink`).
+- Explicit uncertainty reporting and quality assessment (`UncertaintyReport`).
+- Large-document workflows with chunked hierarchical analysis (`AnalystEngine`).
 
 Phase 10 — Memory
 - Working memory.

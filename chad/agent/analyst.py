@@ -3,11 +3,10 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import statistics
 from dataclasses import dataclass, field
 from typing import Any
-
-import os
 
 from chad.core.messages import ImageAttachment, ImageFormat
 from chad.multimodal.evaluator import ScreenshotDiagramEvaluator
@@ -523,7 +522,7 @@ class AnalystEngine:
             return [], []
 
         # Try parsing JSON first
-        if cleaned.startswith("[") or cleaned.startswith("{"):
+        if cleaned.startswith(("[", "{")):
             try:
                 parsed = json.loads(cleaned)
                 if isinstance(parsed, list) and parsed and isinstance(parsed[0], dict):
@@ -540,5 +539,5 @@ class AnalystEngine:
             records = [dict(row) for row in reader]
             col_names = reader.fieldnames or []
             return records, list(col_names)
-        except Exception:
+        except (csv.Error, ValueError, KeyError):
             return [], []

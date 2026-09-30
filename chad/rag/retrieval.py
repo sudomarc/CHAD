@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import math
 import re
 from collections import Counter
@@ -30,8 +31,8 @@ class MockEmbeddingProvider:
                 continue
 
             for word in words:
-                hash_val = hash(word)
-                idx = abs(hash_val) % self.dim
+                hash_val = int(hashlib.md5(word.encode("utf-8")).hexdigest(), 16)
+                idx = hash_val % self.dim
                 vec[idx] += 1.0
 
             # L2 normalize

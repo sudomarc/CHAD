@@ -80,13 +80,13 @@ Phase 9 — Analyst agent (Completed)
 - Explicit uncertainty reporting and quality assessment (`UncertaintyReport`).
 - Large-document workflows with chunked hierarchical analysis (`AnalystEngine`).
 
-Phase 10 — Memory
-- Working memory.
-- Conversation summaries.
-- User/project/semantic memory.
-- Retrieval and conflict handling.
-- User inspection/edit/delete.
-- Retention/export/delete guarantees.
+Phase 10 — Memory (Completed)
+- Working memory (`add_working_memory`).
+- Conversation summaries (`record_conversation_summary`).
+- User/project/semantic memory (`MemoryItem`, `MemoryType`, `MemoryScope`, `MemoryStore`, `MemoryEngine`).
+- Retrieval and conflict handling (`search_memories`, `MemoryConflict`).
+- User inspection/edit/delete (`get`, `list`, `update`, `delete`, `clear_scope`).
+- Retention/export/delete guarantees (`export_json`, `import_json`).
 
 Phase 11 — Web product
 - Next.js/React/TypeScript client.

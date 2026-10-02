@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Iterator
+from typing import Self
 
 import httpx
 
 from chad.core.conversation import ChatRequest
-from chad.llm.client import GenerationError, LapisClient, ModelInfo, ModelUnavailableError
+from chad.llm.client import GenerationError, LapisClient, LLMError, ModelInfo
 from chad.llm.gateway import (
     AuthenticationError,
     InvalidRequestError,
@@ -248,7 +249,7 @@ class ExternalProviderClient(LapisClient):
     def close(self) -> None:
         self._client.close()
 
-    def __enter__(self) -> ExternalProviderClient:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args: object) -> None:

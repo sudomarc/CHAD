@@ -11,7 +11,6 @@ from chad.llm.gateway import (
     AuthenticationError,
     InvalidRequestError,
     MalformedResponseError,
-    ModelCapabilities,
     ModelGateway,
     ModelResponse,
     ProviderServerError,

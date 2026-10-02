@@ -16,7 +16,7 @@ ChadApp / Agents
 ModelGateway
    ├── LapisClient (HTTP)
    ├── LocalLapisClient
-   └── Future Provider Adapters
+   └── ExternalProviderClient (OpenAI-compatible)
 ```
 
 ## Capabilities
@@ -46,7 +46,7 @@ Model metadata is represented via `ModelInfo`:
 - `id`: stable model identifier;
 - `display_name`: human-readable name;
 - `context_length`: maximum token limit when known;
-- `backend`: provider identifier (e.g. `lapis`, `lapis_local`);
+- `backend`: provider identifier (e.g. `lapis`, `lapis_local`, `openai`, `groq`, `mistral`, `external`);
 - `supports_streaming`: boolean indicator;
 - `supports_cancellation`: boolean indicator;
 - `capabilities`: explicit `ModelCapabilities` instance.
@@ -106,3 +106,15 @@ Current verified Lapis integration is HTTP-based (`HttpLapisClient`) and local c
 CHAD discovers models through `/v1/models` and sends chat requests through `/v1/chat/completions`.
 
 The Lapis README currently describes non-streaming API behavior. CHAD must not claim streaming over Lapis until Lapis exposes and CHAD verifies a real streaming path.
+
+## External provider integration
+
+CHAD provides `ExternalProviderClient` (`chad.llm.external.ExternalProviderClient`) for external OpenAI-compatible inference APIs (e.g., OpenAI, Groq, Mistral, OpenRouter).
+
+Key capabilities:
+- Authentication via `api_key` or custom headers;
+- Configurable `base_url` and model target;
+- Automatic model discovery (`GET /models`);
+- Multimodal vision payload formatting (`VisionPayloadConverter`);
+- Incremental SSE streaming (`stream_generate`);
+- Error taxonomy mapping for 401/403, 429, 400/422, 5xx, timeouts, and malformed JSON payloads.

@@ -17,13 +17,13 @@ Phase 1 — Conversation kernel
 - Summaries, correlation IDs, idempotency.
 
 Phase 2 — Model Gateway
-- Normalized gateway.
-- Lapis adapter.
-- External provider adapter.
-- Model registry and capabilities.
-- Usage/errors normalization.
+- Normalized gateway (`ModelGateway`).
+- Lapis adapter (`HttpLapisClient`, `LocalLapisClient`).
+- External provider adapter (`ExternalProviderClient`).
+- Model registry and capabilities (`ModelInfo`, `ModelCapabilities`).
+- Usage/errors normalization (`UsageInfo`, `LLMError` hierarchy).
 - Streaming and cancellation.
-- Health, fallback, cost/latency/privacy-aware routing.
+- Fallback routing.
 
 Phase 3 — Agent runtime kernel (Completed)
 - Agent registry and role loader (`AgentRegistry`, `AgentRoleContract`).

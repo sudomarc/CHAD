@@ -5,7 +5,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from chad.core.conversation import Conversation
+from chad.core.conversation import Conversation, ConversationStatus
 
 
 class ConversationStore:
@@ -58,7 +58,12 @@ class ConversationStore:
             raise TypeError("conversation file must contain an object")
         return Conversation.from_dict(payload)
 
-    def list(self) -> list[Conversation]:
+    def list(
+        self,
+        status: ConversationStatus | None = ConversationStatus.ACTIVE,
+        include_archived: bool = False,
+        include_deleted: bool = False,
+    ) -> list[Conversation]:
         conversations: list[Conversation] = []
         for path in sorted(
             self.directory.glob("*.json"),
@@ -68,7 +73,26 @@ class ConversationStore:
             try:
                 payload = json.loads(path.read_text(encoding="utf-8"))
                 if isinstance(payload, dict):
-                    conversations.append(Conversation.from_dict(payload))
+                    conv = Conversation.from_dict(payload)
+                    if status is not None and conv.status != status:
+                        if conv.status == ConversationStatus.ARCHIVED and include_archived:
+                            pass
+                        elif conv.status == ConversationStatus.DELETED and include_deleted:
+                            pass
+                        else:
+                            continue
+                    conversations.append(conv)
             except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
                 continue
         return conversations
+
+    def delete(self, conversation_id: str, hard: bool = False) -> None:
+        if hard:
+            path = self._path(conversation_id)
+            if not path.exists():
+                raise KeyError(conversation_id)
+            path.unlink()
+        else:
+            conv = self.load(conversation_id)
+            conv.soft_delete()
+            self.save(conv)

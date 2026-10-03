@@ -75,9 +75,11 @@ class ConversationStore:
                 if isinstance(payload, dict):
                     conv = Conversation.from_dict(payload)
                     if status is not None and conv.status != status:
-                        if conv.status == ConversationStatus.ARCHIVED and include_archived:
-                            pass
-                        elif conv.status == ConversationStatus.DELETED and include_deleted:
+                        if (
+                            conv.status == ConversationStatus.ARCHIVED and include_archived
+                        ) or (
+                            conv.status == ConversationStatus.DELETED and include_deleted
+                        ):
                             pass
                         else:
                             continue

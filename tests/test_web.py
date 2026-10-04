@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import threading
-from typing import Any
 import urllib.request
+from typing import Any
 
 from chad.app import ChadApp
 from chad.core.config import AppConfig

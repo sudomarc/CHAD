@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import json
-import threading
-import urllib.request
-from typing import Any
 from pathlib import Path
+import threading
+from typing import Any
+import urllib.request
 
 from chad.app import ChadApp
 from chad.core.config import AppConfig
+from chad.core.conversation import ChatRequest
 from chad.interfaces.web import create_web_server
 from chad.llm.client import LapisClient, ModelInfo
-from chad.core.conversation import ChatRequest
 
 
 class MockLapisClient(LapisClient):

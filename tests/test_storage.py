@@ -28,3 +28,39 @@ def test_store_rejects_unsafe_conversation_ids(tmp_path) -> None:
             pass
         else:
             raise AssertionError(f"unsafe id accepted: {conversation_id!r}")
+
+
+def test_store_handles_status_filtering_and_deletion(tmp_path) -> None:
+    from chad.core.conversation import ConversationStatus
+
+    store = ConversationStore(tmp_path / "conversations")
+
+    c1 = Conversation(title="Active 1")
+    c1.add_user("Hi")
+
+    c2 = Conversation(title="Archived 1")
+    c2.archive()
+
+    c3 = Conversation(title="Deleted 1")
+    c3.soft_delete()
+
+    store.save(c1)
+    store.save(c2)
+    store.save(c3)
+
+    active_list = store.list(status=ConversationStatus.ACTIVE)
+    assert len(active_list) == 1
+    assert active_list[0].id == c1.id
+
+    archived_list = store.list(status=ConversationStatus.ARCHIVED)
+    assert len(archived_list) == 1
+    assert archived_list[0].id == c2.id
+
+    store.delete(c1.id, hard=False)
+    soft_deleted = store.load(c1.id)
+    assert soft_deleted.status == ConversationStatus.DELETED
+
+    store.delete(c2.id, hard=True)
+    import pytest
+    with pytest.raises(KeyError):
+        store.load(c2.id)

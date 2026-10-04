@@ -71,7 +71,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
             try:
                 conv = self.app.load_conversation(conv_id)
                 self._send_json({"conversation": conv.to_dict()})
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 self._send_json({"error": str(err)}, HTTPStatus.NOT_FOUND)
             return
 
@@ -106,7 +106,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
                         "conversation": self.app.conversation.to_dict(),
                     }
                 )
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 self._send_json({"error": str(err)}, HTTPStatus.BAD_REQUEST)
             return
 

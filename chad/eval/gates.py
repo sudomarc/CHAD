@@ -65,11 +65,13 @@ class ReleaseGateEvaluator:
                 )
 
         # 4. Latency p95 check
-        if thresh.max_p95_latency_ms is not None:
-            if report.latency_p95_ms > thresh.max_p95_latency_ms:
-                violations.append(
-                    f"Latency p95 {report.latency_p95_ms:.2f}ms exceeds maximum allowed threshold {thresh.max_p95_latency_ms:.2f}ms."
-                )
+        if (
+            thresh.max_p95_latency_ms is not None
+            and report.latency_p95_ms > thresh.max_p95_latency_ms
+        ):
+            violations.append(
+                f"Latency p95 {report.latency_p95_ms:.2f}ms exceeds maximum allowed threshold {thresh.max_p95_latency_ms:.2f}ms."
+            )
 
         passed = len(violations) == 0
         return passed, violations

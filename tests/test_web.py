@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import threading
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 from chad.app import ChadApp

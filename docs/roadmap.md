@@ -117,12 +117,11 @@ Phase 14 — Security
 - Sandbox escape tests.
 - Least privilege and abuse controls.
 
-Phase 15 — Evaluation
-- Versioned benchmark registry.
-- General QA, reasoning, coding, math, research, tools, files, vision.
-- French, English, multilingual, safety.
-- Agent completion/recovery.
-- Release gates and regression reports.
+Phase 15 — Evaluation (Completed)
+- Versioned benchmark registry (`BenchmarkRegistry`, `BenchmarkSuite`, `BenchmarkTestCase`).
+- Domain benchmarks: General QA, reasoning, coding, math, research, tools, files, vision, safety, French, English, multilingual.
+- Evaluation runner and metrics (`EvaluationRunner`, `EvaluationReport`, `TestCaseResult`).
+- Release gates and regression reports (`ReleaseGateEvaluator`, `QualityThreshold`, `RegressionReport`).
 
 Phase 16 — External connectors
 - GitHub, Notion, Drive, Slack, Calendar, Email.

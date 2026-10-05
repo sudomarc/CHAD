@@ -6,11 +6,16 @@ from chad.interfaces.cli import run_cli
 from chad.llm.http import HttpLapisClient
 
 
-def main() -> None:
+def main(mode: str = "cli") -> None:
     config = AppConfig.from_env()
     client = HttpLapisClient(config.lapis.base_url, config.lapis.model)
     try:
-        run_cli(ChadApp.create(config, client))
+        app_instance = ChadApp.create(config, client)
+        if mode == "web":
+            from chad.interfaces.web import run_web
+            run_web(app_instance)
+        else:
+            run_cli(app_instance)
     finally:
         client.close()
 

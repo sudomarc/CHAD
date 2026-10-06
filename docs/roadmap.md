@@ -100,13 +100,12 @@ Phase 12 — Multi-user platform
 - Rate/token/storage quotas.
 - Account deletion and audit boundaries.
 
-Phase 13 — Economics and observability
-- Usage metering.
-- Versioned provider pricing.
-- Cost calculation and budgets.
-- p50/p95 latency.
+Phase 13 — Economics and observability (Completed)
+- Usage metering (`UsageMeter`, `TokenUsageRecord`).
+- Versioned provider pricing (`ModelPricing`, `PricingRegistry`).
+- Cost calculation and budgets (`CostCalculator`, `UsageBudget`, `BudgetExceededError`).
+- p50/p95 latency and metrics (`MetricsTracker`, `LatencyMetrics`, `RequestMetric`).
 - Logs, tracing, metrics.
-- Cost per verified success.
 
 Phase 14 — Security
 - Threat model.

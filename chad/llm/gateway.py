@@ -200,7 +200,35 @@ class ModelGateway:
             raise last_error
         raise ModelUnavailableError("No model available to service generation request.")
 
-    def stream(self, request: ChatRequest, model_id: str | None = None) -> Iterator[str]:
-        client, resolved_model = self._get_client_for_model(model_id or request.model)
-        self._verify_multimodal_request(request, resolved_model)
-        yield from client.stream_generate(request)
+    def stream(
+        self,
+        request: ChatRequest,
+        model_id: str | None = None,
+        fallback_models: tuple[str, ...] = (),
+    ) -> Iterator[str]:
+        target_models = (model_id or request.model,) + fallback_models
+        last_error: Exception | None = None
+
+        for candidate_model in target_models:
+            try:
+                client, resolved_model = self._get_client_for_model(candidate_model)
+                self._verify_multimodal_request(request, resolved_model)
+                stream_iter = client.stream_generate(request)
+
+                try:
+                    first_chunk = next(stream_iter)
+                except StopIteration:
+                    return
+            except (ModelUnavailableError, ProviderServerError, TimeoutError) as exc:
+                last_error = exc
+                continue
+            except LLMError:
+                raise
+            else:
+                yield first_chunk
+                yield from stream_iter
+                return
+
+        if last_error is not None:
+            raise last_error
+        raise ModelUnavailableError("No model available to service streaming request.")

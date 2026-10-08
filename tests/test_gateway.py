@@ -54,6 +54,9 @@ class DummyClient(LapisClient):
             latency_ms=12.5,
         )
 
+    def stream_generate(self, request: ChatRequest):
+        yield f"Chunk: {request.messages[-1].content}"
+
 
 class FailingClient(LapisClient):
 
@@ -69,6 +72,10 @@ class FailingClient(LapisClient):
 
     def generate_response(self, request: ChatRequest) -> ModelResponse:
         raise self._exc
+
+    def stream_generate(self, request: ChatRequest):
+        raise self._exc
+        yield ""
 
 
 def test_gateway_registration_and_models() -> None:
@@ -121,6 +128,47 @@ def test_gateway_fallback_routing() -> None:
 
     assert res.content == "Response to: Test fallback"
     assert res.model_id == "backup-model"
+
+
+def test_gateway_stream_fallback_routing() -> None:
+    primary = FailingClient("primary-model", ProviderServerError("Server down"))
+    fallback = DummyClient("backup-model", "backup-provider")
+
+    gateway = ModelGateway()
+    gateway.register_provider("p1", primary, is_default=True)
+    gateway.register_provider("p2", fallback)
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Test stream fallback"),))
+    chunks = list(gateway.stream(req, model_id="primary-model", fallback_models=("backup-model",)))
+
+    assert len(chunks) == 1
+    assert chunks[0] == "Chunk: Test stream fallback"
+
+
+def test_gateway_stream_non_recoverable_error_no_fallback() -> None:
+    primary = FailingClient("primary-model", AuthenticationError("Invalid API key"))
+    fallback = DummyClient("backup-model", "backup-provider")
+
+    gateway = ModelGateway()
+    gateway.register_provider("p1", primary, is_default=True)
+    gateway.register_provider("p2", fallback)
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Test no fallback"),))
+    with pytest.raises(AuthenticationError, match="Invalid API key"):
+        list(gateway.stream(req, model_id="primary-model", fallback_models=("backup-model",)))
+
+
+def test_gateway_stream_all_fallbacks_fail() -> None:
+    primary = FailingClient("primary-model", ProviderServerError("Primary server down"))
+    fallback = FailingClient("backup-model", TimeoutError("Backup timed out"))
+
+    gateway = ModelGateway()
+    gateway.register_provider("p1", primary, is_default=True)
+    gateway.register_provider("p2", fallback)
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Test all fail"),))
+    with pytest.raises(TimeoutError, match="Backup timed out"):
+        list(gateway.stream(req, model_id="primary-model", fallback_models=("backup-model",)))
 
 
 def test_http_client_error_normalization() -> None:

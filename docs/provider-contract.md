@@ -97,7 +97,7 @@ CHAD must never manufacture fake streaming by splitting a completed response.
 
 ## Routing policy and fallback
 
-`ModelGateway.generate()` accepts `model_id` and optional `fallback_models`. If a primary provider encounters a recoverable error (such as `ModelUnavailableError`, `ProviderServerError`, or `TimeoutError`), the gateway automatically routes the request to configured fallback models in sequence.
+`ModelGateway.generate()` and `ModelGateway.stream()` accept `model_id` and optional `fallback_models`. If a primary provider encounters a recoverable error (such as `ModelUnavailableError`, `ProviderServerError`, or `TimeoutError`), the gateway automatically routes the generation or streaming request to configured fallback models in sequence.
 
 ## LapisLLM integration
 

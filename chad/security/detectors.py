@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 from urllib.parse import urlparse
 
 from chad.security.threat_model import (
@@ -14,7 +15,7 @@ from chad.security.threat_model import (
 class PromptInjectionDetector:
     """Detects direct and indirect prompt injection attacks, jailbreaks, and token manipulation."""
 
-    INJECTION_PATTERNS = [
+    INJECTION_PATTERNS: ClassVar[list[tuple[str, ThreatLevel, str]]] = [
         (r"(?i)ignore\s+(all\s+)?(previous|prior)\s+instructions?", ThreatLevel.HIGH, "Direct instruction override attempt."),
         (r"(?i)disregard\s+(all\s+)?(prior|previous)\s+(prompts?|instructions?)", ThreatLevel.HIGH, "Instruction override attempt."),
         (r"(?i)you\s+are\s+now\s+(in\s+)?(DAN|developer|jailbreak|unrestricted)\s+mode", ThreatLevel.CRITICAL, "Jailbreak mode attempt."),
@@ -60,7 +61,7 @@ class PromptInjectionDetector:
 class RetrievalPoisoningChecker:
     """Scans retrieved external documents/chunks for embedded injection attacks and hidden prompt poisoning."""
 
-    POISONING_PATTERNS = [
+    POISONING_PATTERNS: ClassVar[list[tuple[str, ThreatLevel, str]]] = [
         (r"(?i)note\s+to\s+(ai|assistant|model|llm)\s*:\s*", ThreatLevel.HIGH, "Indirect prompt injection via retrieved text."),
         (r"(?i)important\s*:\s*ignore\s+the\s+user'?s?\s+request", ThreatLevel.CRITICAL, "Retrieval poisoning targeting prompt flow."),
         (r"(?i)<!--\s*system\s*:\s*.*?-->", ThreatLevel.HIGH, "Hidden HTML comment injection in retrieved chunk."),
@@ -90,7 +91,7 @@ class RetrievalPoisoningChecker:
 class DataExfiltrationDetector:
     """Scans texts and outbound tool requests for secret leaks and suspicious exfiltration targets."""
 
-    SECRET_PATTERNS = [
+    SECRET_PATTERNS: ClassVar[list[tuple[str, ThreatLevel, str]]] = [
         (r"(?i)sk-[a-zA-Z0-9_-]{20,255}", ThreatLevel.CRITICAL, "OpenAI or API secret key detected."),
         (r"(?i)gh[pousr]_[a-zA-Z0-9_]{36,255}", ThreatLevel.CRITICAL, "GitHub Personal Access Token detected."),
         (r"(?i)xoxb-[0-9]{10,13}-[a-zA-Z0-9]{24}", ThreatLevel.CRITICAL, "Slack Bot token detected."),
@@ -98,7 +99,7 @@ class DataExfiltrationDetector:
         (r"-----BEGIN\s+(?:RSA\s+|EC\s+|OPENSSH\s+)?PRIVATE\s+KEY-----", ThreatLevel.CRITICAL, "PEM Private Key detected."),
     ]
 
-    EXFILTRATION_DOMAINS = [
+    EXFILTRATION_DOMAINS: ClassVar[list[str]] = [
         "webhook.site",
         "requestbin.net",
         "pipedream.net",
@@ -164,7 +165,7 @@ class DataExfiltrationDetector:
 class SandboxEscapeChecker:
     """Inspects code snippets and command lines for path traversal, host escape, and dangerous syscalls."""
 
-    ESCAPE_PATTERNS = [
+    ESCAPE_PATTERNS: ClassVar[list[tuple[str, ThreatLevel, str]]] = [
         (r"\.\./\.\./", ThreatLevel.HIGH, "Directory traversal attempt."),
         (r"/etc/passwd", ThreatLevel.CRITICAL, "Access to sensitive system path /etc/passwd."),
         (r"~/\.ssh", ThreatLevel.CRITICAL, "Access to sensitive user directory ~/.ssh."),

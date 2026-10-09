@@ -84,6 +84,8 @@ class Message:
     images: tuple[ImageAttachment, ...] = field(default_factory=tuple)
     parent_id: str | None = None
     edited_from_id: str | None = None
+    correlation_id: str | None = None
+    idempotency_key: str | None = None
 
     def __post_init__(self) -> None:
         if not self.content.strip() and not self.images:
@@ -100,6 +102,8 @@ class Message:
             "images": [img.to_dict() for img in self.images],
             "parent_id": self.parent_id,
             "edited_from_id": self.edited_from_id,
+            "correlation_id": self.correlation_id,
+            "idempotency_key": self.idempotency_key,
         }
 
     @classmethod
@@ -120,6 +124,8 @@ class Message:
 
         parent_id = data.get("parent_id")
         edited_from_id = data.get("edited_from_id")
+        correlation_id = data.get("correlation_id")
+        idempotency_key = data.get("idempotency_key")
 
         return cls(
             id=str(data.get("id") or uuid4()),
@@ -129,4 +135,6 @@ class Message:
             images=images,
             parent_id=str(parent_id) if isinstance(parent_id, str) else None,
             edited_from_id=str(edited_from_id) if isinstance(edited_from_id, str) else None,
+            correlation_id=str(correlation_id) if isinstance(correlation_id, str) else None,
+            idempotency_key=str(idempotency_key) if isinstance(idempotency_key, str) else None,
         )

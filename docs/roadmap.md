@@ -8,7 +8,7 @@ Phase 0 — Ecosystem foundation
 - Define shared contract-test fixtures.
 - Reference Vibe role contracts from runtime configuration.
 
-Phase 1 — Conversation kernel
+Phase 1 — Conversation kernel (Completed)
 - Stable message identity and timestamps.
 - Context budgeting and validation.
 - Message edits and branching.

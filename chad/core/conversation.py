@@ -20,6 +20,7 @@ class Conversation:
     id: str = field(default_factory=lambda: str(uuid4()))
     title: str = "New conversation"
     system_prompt: str | None = None
+    summary: str | None = None
     messages: list[Message] = field(default_factory=list)
     model: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
@@ -46,6 +47,10 @@ class Conversation:
         self.status = ConversationStatus.ACTIVE
         self._touch()
 
+    def record_summary(self, summary: str) -> None:
+        self.summary = summary
+        self._touch()
+
     def _get_default_parent_id(self) -> str | None:
         if self.active_branch_head_id is not None:
             return self.active_branch_head_id
@@ -53,17 +58,55 @@ class Conversation:
             return self.messages[-1].id
         return None
 
-    def add_user(self, content: str) -> Message:
+    def add_user(
+        self,
+        content: str,
+        correlation_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> Message:
+        if idempotency_key is not None:
+            existing = next(
+                (msg for msg in self.messages if msg.idempotency_key == idempotency_key),
+                None,
+            )
+            if existing is not None:
+                return existing
+
         parent_id = self._get_default_parent_id()
-        message = Message(role=MessageRole.USER, content=content, parent_id=parent_id)
+        message = Message(
+            role=MessageRole.USER,
+            content=content,
+            parent_id=parent_id,
+            correlation_id=correlation_id,
+            idempotency_key=idempotency_key,
+        )
         self.messages.append(message)
         self.active_branch_head_id = message.id
         self._touch()
         return message
 
-    def add_assistant(self, content: str) -> Message:
+    def add_assistant(
+        self,
+        content: str,
+        correlation_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> Message:
+        if idempotency_key is not None:
+            existing = next(
+                (msg for msg in self.messages if msg.idempotency_key == idempotency_key),
+                None,
+            )
+            if existing is not None:
+                return existing
+
         parent_id = self._get_default_parent_id()
-        message = Message(role=MessageRole.ASSISTANT, content=content, parent_id=parent_id)
+        message = Message(
+            role=MessageRole.ASSISTANT,
+            content=content,
+            parent_id=parent_id,
+            correlation_id=correlation_id,
+            idempotency_key=idempotency_key,
+        )
         self.messages.append(message)
         self.active_branch_head_id = message.id
         self._touch()
@@ -172,6 +215,7 @@ class Conversation:
             "id": self.id,
             "title": self.title,
             "system_prompt": self.system_prompt,
+            "summary": self.summary,
             "model": self.model,
             "status": self.status.value,
             "active_branch_head_id": self.active_branch_head_id,
@@ -196,6 +240,7 @@ class Conversation:
         )
 
         active_head = data.get("active_branch_head_id")
+        summary = data.get("summary")
 
         return cls(
             id=str(data.get("id") or uuid4()),
@@ -203,6 +248,7 @@ class Conversation:
             system_prompt=data.get("system_prompt")
             if isinstance(data.get("system_prompt"), str)
             else None,
+            summary=str(summary) if isinstance(summary, str) else None,
             model=data.get("model") if isinstance(data.get("model"), str) else None,
             status=status,
             active_branch_head_id=str(active_head) if isinstance(active_head, str) else None,
@@ -220,6 +266,8 @@ class ChatRequest:
     temperature: float = 0.8
     top_k: int = 40
     top_p: float = 0.95
+    correlation_id: str | None = None
+    idempotency_key: str | None = None
 
     def validate(self) -> None:
         if not self.messages:

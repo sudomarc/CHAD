@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import time
 from pathlib import Path
+from typing import ClassVar
 
 from chad.security.exfiltration import DataExfiltrationDetector, ExfiltrationChannel, SecretPolicy
 from chad.security.injection import InjectionDetectionResult, PromptInjectionDetector
@@ -13,7 +14,7 @@ from chad.tools.permissions import ToolPermissionLevel
 class SandboxEscapeChecker:
     """Inspects file paths and commands for sandbox escape or traversal vulnerabilities."""
 
-    FORBIDDEN_COMMAND_PATTERNS: list[re.Pattern[str]] = [
+    FORBIDDEN_COMMAND_PATTERNS: ClassVar[list[re.Pattern[str]]] = [
         re.compile(r"\brm\s+-rf\s+/", re.IGNORECASE),
         re.compile(r"\bsudo\b", re.IGNORECASE),
         re.compile(r"\|\s*(?:ba)?sh\b", re.IGNORECASE),

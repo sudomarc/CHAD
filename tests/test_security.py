@@ -202,7 +202,7 @@ def test_security_engine_unified_pipeline() -> None:
     assert not ret_res.is_detected
 
     # Outgoing payload inspection
-    approved, sanitized, _ = engine.inspect_outgoing_payload(
+    approved, _sanitized, _ = engine.inspect_outgoing_payload(
         "Response text without secrets", ExfiltrationChannel.SYSTEM_LOG
     )
     assert approved

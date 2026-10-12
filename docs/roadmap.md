@@ -107,14 +107,13 @@ Phase 13 — Economics and observability (Completed)
 - p50/p95 latency and metrics (`MetricsTracker`, `LatencyMetrics`, `RequestMetric`).
 - Logs, tracing, metrics.
 
-Phase 14 — Security
-- Threat model.
-- Prompt-injection and retrieval-poisoning tests.
-- Tool permissions.
-- Data exfiltration tests.
-- Secret handling.
-- Sandbox escape tests.
-- Least privilege and abuse controls.
+Phase 14 — Security (Completed)
+- Threat model (`ThreatModel`, `ThreatCategory`, `SecurityRiskLevel`, `ThreatAssessment`).
+- Direct prompt-injection and indirect retrieval-poisoning detection (`PromptInjectionDetector`, `InjectionCheckResult`).
+- Data exfiltration guard and out-of-band tracking URL / pixel detection (`DataExfiltrationGuard`, `ExfiltrationCheckResult`).
+- Secret scanning and automatic redaction validation (`SecretScanner`).
+- Sandbox escape and path traversal prevention (`SandboxEscapeGuard`, `SandboxCheckResult`).
+- Unified security engine and audit workflow (`SecurityEngine`, `SecurityAuditResult`).
 
 Phase 15 — Evaluation (Completed)
 - Versioned benchmark registry (`BenchmarkRegistry`, `BenchmarkSuite`, `BenchmarkTestCase`).

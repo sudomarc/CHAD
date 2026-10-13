@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from chad.security.threat_model import SecurityThreat, ThreatCategory, ThreatLevel
 
@@ -18,7 +18,7 @@ class InjectionScanResult:
 class PromptInjectionDetector:
     """Detects prompt injection attempts and retrieval poisoning in untrusted input/text."""
 
-    SUSPICIOUS_PATTERNS: list[tuple[re.Pattern[str], str, ThreatLevel]] = [
+    SUSPICIOUS_PATTERNS: ClassVar[list[tuple[re.Pattern[str], str, ThreatLevel]]] = [
         (
             re.compile(r"ignore\s+(previous|above|prior)\s+(instructions|directives|prompts)", re.IGNORECASE),
             "Ignore previous instructions attempt",

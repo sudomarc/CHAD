@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import ClassVar
 
 from chad.agent.coder import SecretScanner
 from chad.security.threat_model import SecurityThreat, ThreatCategory, ThreatLevel
@@ -19,7 +20,7 @@ class ExfiltrationScanResult:
 class ExfiltrationGuard:
     """Guards against data exfiltration, secret leakage, and unauthorized egress points."""
 
-    EGRESS_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    EGRESS_PATTERNS: ClassVar[list[tuple[re.Pattern[str], str]]] = [
         (
             re.compile(r"https?://[^\s<'\"]+", re.IGNORECASE),
             "URL detected in output",

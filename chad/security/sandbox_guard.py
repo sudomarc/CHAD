@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import ClassVar
 
 from chad.agent.coder import CommandPolicy
 from chad.security.threat_model import SecurityThreat, ThreatCategory, ThreatLevel
@@ -17,7 +18,7 @@ class EscapeScanResult:
 class SandboxEscapeGuard:
     """Detects and prevents sandbox escape attempts, unsafe host system interactions, and container breakout vectors."""
 
-    DANGEROUS_ESCAPE_PATTERNS: list[tuple[re.Pattern[str], str, ThreatLevel]] = [
+    DANGEROUS_ESCAPE_PATTERNS: ClassVar[list[tuple[re.Pattern[str], str, ThreatLevel]]] = [
         (
             re.compile(r"(/proc/|/sys/|/dev/mem|/dev/kmem)", re.IGNORECASE),
             "Host system pseudo-filesystem access attempt",

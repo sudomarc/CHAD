@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
-from chad.security.exfiltration import ExfiltrationGuard, ExfiltrationScanResult
-from chad.security.prompt_injection import InjectionScanResult, PromptInjectionDetector
-from chad.security.sandbox_guard import EscapeScanResult, SandboxEscapeGuard
-from chad.security.threat_model import SecurityThreat, ThreatCategory, ThreatLevel, ThreatModelEvaluator
+from chad.security.exfiltration import ExfiltrationGuard
+from chad.security.prompt_injection import PromptInjectionDetector
+from chad.security.sandbox_guard import SandboxEscapeGuard
+from chad.security.threat_model import SecurityThreat, ThreatLevel, ThreatModelEvaluator
 from chad.tools.permissions import PermissionEngine
-from chad.tools.schema import ToolDefinition, ToolPermissionLevel
+from chad.tools.schema import ToolDefinition
 
 
 @dataclass(frozen=True, slots=True)

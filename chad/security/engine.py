@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from chad.security.exfiltration import ExfiltrationGuard, ExfiltrationFinding
-from chad.security.prompt_injection import PromptInjectionDetector, InjectionAnalysis
+from chad.security.exfiltration import ExfiltrationFinding, ExfiltrationGuard
+from chad.security.prompt_injection import InjectionAnalysis, PromptInjectionDetector
 from chad.security.sandbox import SandboxGuard, SandboxViolation
-from chad.security.threat_model import ThreatModel, ThreatAssessment, RiskLevel
+from chad.security.threat_model import RiskLevel, ThreatAssessment, ThreatModel
 
 
 @dataclass(slots=True)

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-import re
 
 
 class RiskLevel(str, Enum):
@@ -90,11 +90,10 @@ class ThreatModel:
                 findings.append("High-risk command execution attempt")
                 mitigations.append("Block destructive network piping and root privilege escalation")
 
-        if "path" in args_str or "filepath" in args_str:
-            if re.search(r"(\.\./\.\.|/etc/|/var/run|/proc/)", args_str):
-                vectors.append(ThreatVector.SANDBOX_ESCAPE)
-                findings.append("Path traversal attempt in tool parameters")
-                mitigations.append("Restrict paths to workspace root sandbox")
+        if ("path" in args_str or "filepath" in args_str) and re.search(r"(\.\./\.\.|/etc/|/var/run|/proc/)", args_str):
+            vectors.append(ThreatVector.SANDBOX_ESCAPE)
+            findings.append("Path traversal attempt in tool parameters")
+            mitigations.append("Restrict paths to workspace root sandbox")
 
         risk = RiskLevel.CRITICAL if ThreatVector.SANDBOX_ESCAPE in vectors else (
             RiskLevel.HIGH if vectors else RiskLevel.LOW

@@ -94,7 +94,7 @@ class EvaluationRunner:
                 output, tokens_used = raw_res
             else:
                 output = raw_res
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error_msg = str(exc)
             output = ""
 

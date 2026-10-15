@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from chad.security import (
     ExfiltrationGuard,
     InjectionType,
@@ -8,8 +7,8 @@ from chad.security import (
     RiskLevel,
     SandboxEscapeType,
     SandboxGuard,
-    SecurityEngine,
     SecretType,
+    SecurityEngine,
     ThreatModel,
     ThreatVector,
 )

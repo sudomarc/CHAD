@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import html
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-import re
-import html
+from typing import ClassVar
 
 
 class InjectionType(str, Enum):
@@ -25,7 +26,7 @@ class InjectionAnalysis:
 class PromptInjectionDetector:
     """Detects direct/indirect prompt injection, jailbreaks, and system overrides."""
 
-    OVERRIDE_PATTERNS = [
+    OVERRIDE_PATTERNS: ClassVar[list[str]] = [
         r"(?i)\bignore\s+(all\s+|previous\s+|above\s+)*instructions\b",
         r"(?i)\bforget\s+(all\s+|previous\s+|your\s+)*instructions\b",
         r"(?i)\bdisregard\s+(all\s+|previous\s+|your\s+)*rules\b",
@@ -33,20 +34,20 @@ class PromptInjectionDetector:
         r"(?i)\bnew\s+system\s+prompt\b",
     ]
 
-    JAILBREAK_PATTERNS = [
+    JAILBREAK_PATTERNS: ClassVar[list[str]] = [
         r"(?i)\byou\s+are\s+now\s+(a|an|in)\s+DAN\b",
         r"(?i)\bdo\s+anything\s+now\b",
         r"(?i)\bjailbreak\b",
         r"(?i)\bdeveloper\s+mode\b",
     ]
 
-    LEAK_PATTERNS = [
+    LEAK_PATTERNS: ClassVar[list[str]] = [
         r"(?i)\brepeat\s+(your\s+|the\s+)*system\s+prompt\b",
         r"(?i)\bshow\s+(me\s+|your\s+)*initial\s+instructions\b",
         r"(?i)\bprint\s+everything\s+above\b",
     ]
 
-    CONTROL_TOKENS = [
+    CONTROL_TOKENS: ClassVar[list[str]] = [
         r"<\|im_start\|>",
         r"<\|im_end\|>",
         r"<\|endoftext\|>",

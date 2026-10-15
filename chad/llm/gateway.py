@@ -161,7 +161,7 @@ class ModelGateway:
         model_id: str | None = None,
         fallback_models: tuple[str, ...] = (),
     ) -> ModelResponse:
-        target_models = (model_id or request.model,) + fallback_models
+        target_models = (model_id or request.model, *fallback_models)
         last_error: Exception | None = None
 
         for candidate_model in target_models:
@@ -206,7 +206,7 @@ class ModelGateway:
         model_id: str | None = None,
         fallback_models: tuple[str, ...] = (),
     ) -> Iterator[str]:
-        target_models = (model_id or request.model,) + fallback_models
+        target_models = (model_id or request.model, *fallback_models)
         last_error: Exception | None = None
 
         for candidate_model in target_models:

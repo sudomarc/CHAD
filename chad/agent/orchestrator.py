@@ -88,7 +88,7 @@ class AgentOrchestrator:
         if executor_fn is not None:
             try:
                 step_result = executor_fn(action_payload or {})
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 run.budget.record_retry()
                 if run.budget.used_retries > run.budget.max_retries:
                     run.transition_to(
@@ -146,7 +146,7 @@ class AgentOrchestrator:
         if executor_fn is not None:
             try:
                 step_result = executor_fn(payload)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 run.transition_to(
                     AgentState.FAILED,
                     description=f"Approved action '{action_name}' failed execution: {exc}",

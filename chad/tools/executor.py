@@ -68,7 +68,7 @@ class ToolExecutor:
                 error=f"Tool execution timed out after {tool_def.timeout_seconds} seconds.",
                 execution_time_seconds=elapsed,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             elapsed = time.time() - start_time
             res = ToolResult(
                 tool_id=tool_id,

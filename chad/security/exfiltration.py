@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import math
 import re
+from dataclasses import dataclass
+from enum import Enum
+from typing import ClassVar
 
 
 class SecretType(str, Enum):
@@ -26,7 +27,7 @@ class ExfiltrationFinding:
 class ExfiltrationGuard:
     """Detects secrets, credentials, high-entropy tokens, and potential data exfiltration attempts."""
 
-    PATTERNS: list[tuple[SecretType, str]] = [
+    PATTERNS: ClassVar[list[tuple[SecretType, str]]] = [
         (SecretType.PRIVATE_KEY, r"-----BEGIN (RSA|OPENSSH|EC|PGP|PRIVATE) KEY-----"),
         (SecretType.API_KEY, r"\b(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}|xox[baprs]-[a-zA-Z0-9]{10,})\b"),
         (SecretType.AWS_KEY, r"\b(AKIA[0-9A-Z]{16})\b"),
@@ -63,16 +64,15 @@ class ExfiltrationGuard:
         # High entropy word scan for potential raw tokens
         words = re.findall(r"\b[A-Za-z0-9+/=_-]{24,}\b", text)
         for word in words:
-            if self._shannon_entropy(word) > 4.2:
-                if not any(f.snippet.startswith(word[:4]) for f in findings):
-                    findings.append(
-                        ExfiltrationFinding(
-                            secret_type=SecretType.GENERIC_SECRET,
-                            snippet=word[:4] + "..." + word[-2:],
-                            risk_level="medium",
-                            index=text.find(word),
-                        )
+            if self._shannon_entropy(word) > 4.2 and not any(f.snippet.startswith(word[:4]) for f in findings):
+                findings.append(
+                    ExfiltrationFinding(
+                        secret_type=SecretType.GENERIC_SECRET,
+                        snippet=word[:4] + "..." + word[-2:],
+                        risk_level="medium",
+                        index=text.find(word),
                     )
+                )
 
         return findings
 

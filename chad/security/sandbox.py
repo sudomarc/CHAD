@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import os
 import re
+from dataclasses import dataclass
+from enum import Enum
+from typing import ClassVar
 
 
 class SandboxEscapeType(str, Enum):
@@ -24,7 +25,7 @@ class SandboxViolation:
 class SandboxGuard:
     """Enforces file path boundaries, command execution policies, and sandbox isolation."""
 
-    FORBIDDEN_COMMANDS = [
+    FORBIDDEN_COMMANDS: ClassVar[list[tuple[str, str]]] = [
         (r"\bsudo\b", "Privilege escalation using sudo is strictly forbidden."),
         (r"\bsu\b", "Switching user account using su is forbidden."),
         (r"\bchmod\s+777\b", "Insecure permissions assignment chmod 777 is forbidden."),
@@ -35,7 +36,7 @@ class SandboxGuard:
         (r"\b(docker|kubectl|podman)\b", "Access to container runtime controls is restricted."),
     ]
 
-    RESTRICTED_PATHS = [
+    RESTRICTED_PATHS: ClassVar[list[str]] = [
         r"^/etc/",
         r"^/var/run",
         r"^/sys/",

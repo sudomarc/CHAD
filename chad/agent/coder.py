@@ -337,7 +337,7 @@ class CoderEngine:
                 details=redacted_content,
                 file_path=relative_path,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             return CoderResult(
                 action="read_file",
                 success=False,
@@ -363,7 +363,7 @@ class CoderEngine:
                 details=f"Successfully wrote content to '{relative_path}'.",
                 file_path=relative_path,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             return CoderResult(
                 action="write_file",
                 success=False,
@@ -388,7 +388,7 @@ class CoderEngine:
                 details=f"Successfully applied diff to '{relative_path}'.",
                 file_path=relative_path,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             return CoderResult(
                 action="apply_diff",
                 success=False,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, ClassVar
 
 from chad.security.threat_model import ThreatAssessment, ThreatCategory, ThreatModel
 
@@ -9,7 +9,7 @@ from chad.security.threat_model import ThreatAssessment, ThreatCategory, ThreatM
 class DataExfiltrationGuard:
     """Detects data exfiltration risks in tool calls, retrieved text, and output content."""
 
-    _SUSPICIOUS_DOMAINS: list[str] = [
+    _SUSPICIOUS_DOMAINS: ClassVar[list[str]] = [
         "webhook.site",
         "requestbin",
         "pipedream.net",
@@ -19,7 +19,7 @@ class DataExfiltrationGuard:
         "localtunnel.me",
     ]
 
-    _IMAGE_BEACON_KEYWORDS: list[str] = [
+    _IMAGE_BEACON_KEYWORDS: ClassVar[list[str]] = [
         "pixel",
         "beacon",
         "track",

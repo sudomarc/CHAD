@@ -6,7 +6,12 @@ from typing import Any
 from chad.security.detector import PromptInjectionDetector
 from chad.security.exfiltration import DataExfiltrationGuard
 from chad.security.sandbox_guard import SandboxEscapeGuard
-from chad.security.threat_model import ActionRecommendation, RiskLevel, ThreatAssessment, ThreatModel
+from chad.security.threat_model import (
+    ActionRecommendation,
+    RiskLevel,
+    ThreatAssessment,
+    ThreatModel,
+)
 
 
 @dataclass(frozen=True, slots=True)

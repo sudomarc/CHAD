@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, ClassVar
 
 from chad.security.threat_model import ThreatAssessment, ThreatCategory, ThreatModel
 
@@ -9,7 +9,7 @@ from chad.security.threat_model import ThreatAssessment, ThreatCategory, ThreatM
 class PromptInjectionDetector:
     """Detects direct and indirect prompt injection attempts in untrusted input."""
 
-    _PATTERNS: list[tuple[str, float, str]] = [
+    _PATTERNS: ClassVar[list[tuple[str, float, str]]] = [
         (r"(?i)ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|prompts|rules)", 0.95, "Instruction override attempt"),
         (r"(?i)disregard\s+(all\s+)?(previous|prior|above)\s+(instructions|prompts|rules)", 0.95, "Instruction override attempt"),
         (r"(?i)forget\s+(all\s+)?(previous|prior|above)\s+(instructions|prompts|rules)", 0.90, "Instruction override attempt"),
@@ -40,8 +40,7 @@ class PromptInjectionDetector:
         for pattern, score, reason in self._PATTERNS:
             if re.search(pattern, text):
                 matches.append(reason)
-                if score > max_score:
-                    max_score = score
+                max_score = max(max_score, score)
 
         if matches:
             description = f"Prompt injection detected: {', '.join(set(matches))}"

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, ClassVar
 
 from chad.security.threat_model import ThreatAssessment, ThreatCategory, ThreatModel
 
@@ -9,7 +9,7 @@ from chad.security.threat_model import ThreatAssessment, ThreatCategory, ThreatM
 class SandboxEscapeGuard:
     """Inspects commands, scripts, and code for sandbox escape and host escalation risks."""
 
-    _ESCAPE_PATTERNS: list[tuple[str, float, str]] = [
+    _ESCAPE_PATTERNS: ClassVar[list[tuple[str, float, str]]] = [
         (r"(?i)\b(sudo|su|doas|pkexec)\b", 0.95, "Privilege escalation binary invocation"),
         (r"(?i)\bchmod\s+([0-7]*777|a\+rwx)\b", 0.90, "Overly permissive file permissions modification"),
         (r"(?i)/etc/(passwd|shadow|sudoers)", 0.95, "Sensitive host file access"),

@@ -42,7 +42,9 @@ def run_cli(app: ChadApp) -> None:
         except Exception:
             if app.config.developer_mode:
                 raise
-            print("\nCHAD couldn't generate a response. Technical details are available in developer logs.\n")
+            print(
+                "\nCHAD couldn't generate a response. Technical details are available in developer logs.\n"
+            )
             continue
 
         print(f"\nCHAD: {response}\n")

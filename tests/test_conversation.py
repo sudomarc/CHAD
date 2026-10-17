@@ -21,7 +21,6 @@ def test_conversation_preserves_multi_turn_order() -> None:
     assert context[-1].content == "What is my name?"
 
 
-
 def test_context_rejects_non_positive_message_limit() -> None:
     conversation = Conversation()
     with pytest.raises(ValueError, match="max_messages"):

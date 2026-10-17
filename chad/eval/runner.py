@@ -195,8 +195,7 @@ class EvaluationRunner:
         pass_rate = (passed_cases / total_cases) if total_cases > 0 else 0.0
 
         domain_scores = {
-            dom: (domain_passes.get(dom, 0) / count)
-            for dom, count in domain_totals.items()
+            dom: (domain_passes.get(dom, 0) / count) for dom, count in domain_totals.items()
         }
 
         # Calculate latency percentiles

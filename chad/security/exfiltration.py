@@ -76,7 +76,9 @@ class ExfiltrationProtection:
             query_part = url.split("?", 1)[1]
             for pattern in SENSITIVE_KEY_PATTERNS:
                 if pattern.search(query_part):
-                    reasons.append("URL query parameter contains sensitive credential or key pattern.")
+                    reasons.append(
+                        "URL query parameter contains sensitive credential or key pattern."
+                    )
                     sanitized_url = url.split("?", 1)[0] + "?[REDACTED_QUERY_PARAMS]"
 
         is_risk = len(reasons) > 0

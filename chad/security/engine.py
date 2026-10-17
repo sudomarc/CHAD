@@ -99,9 +99,11 @@ class SecurityEngine:
         threat_level = inj_res.threat_level
 
         if inj_res.is_injection:
-            reasons.append(f"Prompt injection patterns detected: {', '.join(inj_res.matched_rules)}")
+            reasons.append(
+                f"Prompt injection patterns detected: {', '.join(inj_res.matched_rules)}"
+            )
             threat = SecurityThreat(
-                id=f"THR-{len(self.threat_model.get_threats())+1:04d}",
+                id=f"THR-{len(self.threat_model.get_threats()) + 1:04d}",
                 category=ThreatCategory.PROMPT_INJECTION,
                 level=inj_res.threat_level,
                 description=f"Prompt injection in input: {inj_res.matched_rules}",
@@ -125,7 +127,7 @@ class SecurityEngine:
 
         if poison_res.is_poisoned:
             threat = SecurityThreat(
-                id=f"THR-{len(self.threat_model.get_threats())+1:04d}",
+                id=f"THR-{len(self.threat_model.get_threats()) + 1:04d}",
                 category=ThreatCategory.RETRIEVAL_POISONING,
                 level=ThreatLevel.HIGH,
                 description=f"Retrieval poisoning: {', '.join(poison_res.reasons)}",
@@ -148,7 +150,7 @@ class SecurityEngine:
 
         if esc_res.is_escape_attempt:
             threat = SecurityThreat(
-                id=f"THR-{len(self.threat_model.get_threats())+1:04d}",
+                id=f"THR-{len(self.threat_model.get_threats()) + 1:04d}",
                 category=ThreatCategory.SANDBOX_ESCAPE,
                 level=ThreatLevel.CRITICAL,
                 description=f"Sandbox escape attempt in command: {esc_res.detected_techniques}",
@@ -170,7 +172,9 @@ class SecurityEngine:
             reasons=(),
         )
 
-    def inspect_exfiltration(self, url: str, payload: str | dict[str, Any] | None = None) -> SecurityCheckResult:
+    def inspect_exfiltration(
+        self, url: str, payload: str | dict[str, Any] | None = None
+    ) -> SecurityCheckResult:
         """Inspects outbound URLs and payloads for exfiltration risks."""
         url_res = self.exfiltration_protection.analyze_url(url)
         payload_res = self.exfiltration_protection.analyze_payload(payload) if payload else None
@@ -183,7 +187,7 @@ class SecurityEngine:
 
         if is_risk:
             threat = SecurityThreat(
-                id=f"THR-{len(self.threat_model.get_threats())+1:04d}",
+                id=f"THR-{len(self.threat_model.get_threats()) + 1:04d}",
                 category=ThreatCategory.DATA_EXFILTRATION,
                 level=ThreatLevel.HIGH,
                 description=f"Exfiltration risk blocked: {', '.join(reasons)}",

@@ -128,11 +128,13 @@ class AnalysisReport:
             lines.append("")
 
         if self.dataset_summary:
-            lines.extend([
-                "## Dataset Summary",
-                f"- **Rows:** {self.dataset_summary.row_count}",
-                f"- **Columns:** {self.dataset_summary.column_count} ({', '.join(self.dataset_summary.column_names)})",
-            ])
+            lines.extend(
+                [
+                    "## Dataset Summary",
+                    f"- **Rows:** {self.dataset_summary.row_count}",
+                    f"- **Columns:** {self.dataset_summary.column_count} ({', '.join(self.dataset_summary.column_names)})",
+                ]
+            )
             if self.dataset_summary.numeric_stats:
                 lines.append("- **Numeric Statistics:**")
                 for col, stats in self.dataset_summary.numeric_stats.items():
@@ -148,10 +150,12 @@ class AnalysisReport:
                 )
             lines.append("")
 
-        lines.extend([
-            "## Uncertainty Assessment",
-            f"- **Overall Uncertainty Score:** {self.uncertainty.overall_uncertainty:.2f}",
-        ])
+        lines.extend(
+            [
+                "## Uncertainty Assessment",
+                f"- **Overall Uncertainty Score:** {self.uncertainty.overall_uncertainty:.2f}",
+            ]
+        )
         if self.uncertainty.reasons:
             for reason in self.uncertainty.reasons:
                 lines.append(f"- *Note:* {reason}")
@@ -242,7 +246,9 @@ class AnalystEngine:
         reasons: list[str] = []
         sample_warning = row_count < 5
         if sample_warning:
-            reasons.append(f"Small sample size ({row_count} rows). Statistical conclusions may be unreliable.")
+            reasons.append(
+                f"Small sample size ({row_count} rows). Statistical conclusions may be unreliable."
+            )
 
         if total_nulls > 0:
             reasons.append(f"Found {total_nulls} missing/null values across columns.")
@@ -256,7 +262,9 @@ class AnalystEngine:
 
         uncertainty = UncertaintyReport(
             overall_uncertainty=min(1.0, uncertainty_score),
-            reasons=tuple(reasons) if reasons else ("Dataset quality appears high with no major anomalies.",),
+            reasons=tuple(reasons)
+            if reasons
+            else ("Dataset quality appears high with no major anomalies.",),
             missing_data_count=total_nulls,
             sample_size_warning=sample_warning,
         )
@@ -265,7 +273,9 @@ class AnalystEngine:
             f"Dataset contains {row_count} rows and {col_count} columns.",
         ]
         if numeric_stats:
-            num_cols_str = ", ".join(f"`{c}` (mean={s['mean']:.2f})" for c, s in numeric_stats.items())
+            num_cols_str = ", ".join(
+                f"`{c}` (mean={s['mean']:.2f})" for c, s in numeric_stats.items()
+            )
             key_findings.append(f"Numeric column summary: {num_cols_str}")
 
         evidence_links: list[EvidenceLink] = [
@@ -363,9 +373,13 @@ class AnalystEngine:
 
         uncertainty_score = 0.1 if not is_large_doc else 0.25
         if is_large_doc:
-            reasons.append("Large document required chunking; detailed review of tail chunks may be needed.")
+            reasons.append(
+                "Large document required chunking; detailed review of tail chunks may be needed."
+            )
 
-        summary = f"Analyzed document '{doc_name}' ({text_length} characters, {len(chunks)} chunks)."
+        summary = (
+            f"Analyzed document '{doc_name}' ({text_length} characters, {len(chunks)} chunks)."
+        )
         if query:
             summary += f" Query addressed: '{query}'."
 
@@ -377,7 +391,9 @@ class AnalystEngine:
             evidence_links=tuple(evidence_links),
             uncertainty=UncertaintyReport(
                 overall_uncertainty=uncertainty_score,
-                reasons=tuple(reasons) if reasons else ("Document structure and content were verified.",),
+                reasons=tuple(reasons)
+                if reasons
+                else ("Document structure and content were verified.",),
             ),
             structured_metrics={"char_count": text_length, "chunk_count": len(chunks)},
         )
@@ -487,9 +503,7 @@ class AnalystEngine:
             all_reasons.extend(rep.uncertainty.reasons)
             uncertainty_scores.append(rep.uncertainty.overall_uncertainty)
 
-        avg_uncertainty = (
-            statistics.mean(uncertainty_scores) if uncertainty_scores else 0.5
-        )
+        avg_uncertainty = statistics.mean(uncertainty_scores) if uncertainty_scores else 0.5
 
         summary = f"Synthesized analysis across {len(inputs)} multi-source inputs."
         if query:

@@ -10,7 +10,9 @@ def app() -> None:
         prog="chad",
         description="CHAD — the conversational application for LapisLLM.",
     )
-    parser.add_argument("command", nargs="?", choices=("start", "web"), help="start CHAD CLI or Web API server")
+    parser.add_argument(
+        "command", nargs="?", choices=("start", "web"), help="start CHAD CLI or Web API server"
+    )
     args = parser.parse_args()
     if args.command in (None, "start"):
         start("cli")

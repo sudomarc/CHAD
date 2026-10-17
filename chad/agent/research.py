@@ -73,13 +73,11 @@ class FetchedDocument:
 
 
 class SearchProvider(Protocol):
-    def search(self, query: str, limit: int = 5) -> list[SearchResult]:
-        ...
+    def search(self, query: str, limit: int = 5) -> list[SearchResult]: ...
 
 
 class FetchProvider(Protocol):
-    def fetch(self, url: str) -> FetchedDocument:
-        ...
+    def fetch(self, url: str) -> FetchedDocument: ...
 
 
 class MockSearchProvider:
@@ -161,19 +159,35 @@ class EvidenceStore:
             for j in range(i + 1, len(items)):
                 item_a, item_b = items[i], items[j]
                 text_a, text_b = item_a.text.lower(), item_b.text.lower()
-                if ("not " in text_a and "not " not in text_b) or ("not " in text_b and "not " not in text_a):
+                if ("not " in text_a and "not " not in text_b) or (
+                    "not " in text_b and "not " not in text_a
+                ):
                     words_a = set(re.findall(r"\w+", text_a))
                     words_b = set(re.findall(r"\w+", text_b))
                     shared = words_a.intersection(words_b) - {
-                        "not", "the", "a", "is", "are", "in", "of", "and", "or", "for", "to", "this", "that"
+                        "not",
+                        "the",
+                        "a",
+                        "is",
+                        "are",
+                        "in",
+                        "of",
+                        "and",
+                        "or",
+                        "for",
+                        "to",
+                        "this",
+                        "that",
                     }
                     if len(shared) >= 2:
-                        contradictions.append({
-                            "evidence_a": item_a.id,
-                            "evidence_b": item_b.id,
-                            "reason": f"Potential contradiction between evidence '{item_a.title}' and '{item_b.title}'.",
-                            "shared_keywords": sorted(shared),
-                        })
+                        contradictions.append(
+                            {
+                                "evidence_a": item_a.id,
+                                "evidence_b": item_b.id,
+                                "reason": f"Potential contradiction between evidence '{item_a.title}' and '{item_b.title}'.",
+                                "shared_keywords": sorted(shared),
+                            }
+                        )
         return contradictions
 
     def clear(self) -> None:
@@ -228,8 +242,7 @@ class ResearchEngine:
         contradictions = tuple(store.detect_contradictions())
 
         citations = tuple(
-            {"id": item.id, "title": item.title, "url": item.source_url}
-            for item in ranked_evidence
+            {"id": item.id, "title": item.title, "url": item.source_url} for item in ranked_evidence
         )
 
         summary_lines = [f"### Research Report: {topic}", ""]

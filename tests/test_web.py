@@ -28,7 +28,9 @@ def _make_app(tmp_path: Path) -> ChadApp:
     return ChadApp.create(config, client)
 
 
-def _http_request(url: str, method: str = "GET", data: dict[str, Any] | None = None) -> tuple[int, dict[str, Any]]:
+def _http_request(
+    url: str, method: str = "GET", data: dict[str, Any] | None = None
+) -> tuple[int, dict[str, Any]]:
     req = urllib.request.Request(url, method=method)
     if data is not None:
         payload = json.dumps(data).encode("utf-8")

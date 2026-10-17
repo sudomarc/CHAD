@@ -287,10 +287,14 @@ class AgentRun:
             goal=str(data["goal"]),
             current_role=AgentRole(data.get("current_role", AgentRole.ORCHESTRATOR.value)),
             current_state=AgentState(data.get("current_state", AgentState.RECEIVED.value)),
-            budget=ExecutionBudget.from_dict(dict(data["budget"])) if "budget" in data else ExecutionBudget(),  # type: ignore[arg-type]
+            budget=ExecutionBudget.from_dict(dict(data["budget"]))
+            if "budget" in data
+            else ExecutionBudget(),  # type: ignore[arg-type]
             events=[AgentEvent.from_dict(e) for e in data.get("events", [])],  # type: ignore[arg-type]
             handoffs=[AgentHandoff.from_dict(h) for h in data.get("handoffs", [])],  # type: ignore[arg-type]
-            pending_approval=dict(data["pending_approval"]) if data.get("pending_approval") else None,  # type: ignore[arg-type]
+            pending_approval=dict(data["pending_approval"])
+            if data.get("pending_approval")
+            else None,  # type: ignore[arg-type]
             result=str(data["result"]) if data.get("result") is not None else None,
             created_at=str(data.get("created_at") or datetime.now(UTC).isoformat()),
             updated_at=str(data.get("updated_at") or datetime.now(UTC).isoformat()),

@@ -74,32 +74,36 @@ class ScreenshotDiagramEvaluator:
 
         if resolved_type in (ImageType.SCREENSHOT, ImageType.UI_MOCKUP):
             summary = "Evaluated screenshot/UI mockup structure."
-            elements.extend([
-                VisualElement(
-                    element_type="header_bar",
-                    description="Navigation or header bar detected at top",
-                    bounds=(0, 0, attachment.width or 1920, 60),
-                ),
-                VisualElement(
-                    element_type="content_pane",
-                    description="Main application content viewport",
-                    bounds=(0, 60, attachment.width or 1920, attachment.height or 1020),
-                ),
-            ])
+            elements.extend(
+                [
+                    VisualElement(
+                        element_type="header_bar",
+                        description="Navigation or header bar detected at top",
+                        bounds=(0, 0, attachment.width or 1920, 60),
+                    ),
+                    VisualElement(
+                        element_type="content_pane",
+                        description="Main application content viewport",
+                        bounds=(0, 60, attachment.width or 1920, attachment.height or 1020),
+                    ),
+                ]
+            )
             detected_text.append("UI Viewport Content")
         elif resolved_type == ImageType.DIAGRAM:
             summary = "Evaluated diagram structure and component relationships."
-            elements.extend([
-                VisualElement(
-                    element_type="diagram_node",
-                    description="Diagram entity or system component",
-                    text_content="Component Node",
-                ),
-                VisualElement(
-                    element_type="connector",
-                    description="Relationship or flow arrow connecting nodes",
-                ),
-            ])
+            elements.extend(
+                [
+                    VisualElement(
+                        element_type="diagram_node",
+                        description="Diagram entity or system component",
+                        text_content="Component Node",
+                    ),
+                    VisualElement(
+                        element_type="connector",
+                        description="Relationship or flow arrow connecting nodes",
+                    ),
+                ]
+            )
             detected_text.append("System Component Flow")
         else:
             summary = "Evaluated general visual artifact."

@@ -89,9 +89,7 @@ class UsageMeter:
         return sum(r.total_tokens for r in self.get_records(conversation_id, user_id))
 
     def total_cost(self, conversation_id: str | None = None, user_id: str | None = None) -> float:
-        return round(
-            sum(r.estimated_cost for r in self.get_records(conversation_id, user_id)), 6
-        )
+        return round(sum(r.estimated_cost for r in self.get_records(conversation_id, user_id)), 6)
 
     def summary_by_model(self) -> dict[str, dict[str, float | int]]:
         summary: dict[str, dict[str, float | int]] = {}

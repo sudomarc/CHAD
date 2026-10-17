@@ -64,7 +64,12 @@ class ThreatModel:
     ) -> list[SecurityThreat]:
         results = self._threats
         if min_level:
-            level_order = [ThreatLevel.LOW, ThreatLevel.MEDIUM, ThreatLevel.HIGH, ThreatLevel.CRITICAL]
+            level_order = [
+                ThreatLevel.LOW,
+                ThreatLevel.MEDIUM,
+                ThreatLevel.HIGH,
+                ThreatLevel.CRITICAL,
+            ]
             min_idx = level_order.index(min_level)
             results = [t for t in results if level_order.index(t.level) >= min_idx]
         if category:

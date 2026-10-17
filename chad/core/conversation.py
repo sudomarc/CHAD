@@ -128,7 +128,9 @@ class Conversation:
             # Set head to parent user message to regenerate response
             if target.parent_id is not None:
                 self.switch_branch(target.parent_id)
-                parent_msg = next((msg for msg in self.messages if msg.id == target.parent_id), None)
+                parent_msg = next(
+                    (msg for msg in self.messages if msg.id == target.parent_id), None
+                )
                 return parent_msg
         else:
             self.switch_branch(target.id)

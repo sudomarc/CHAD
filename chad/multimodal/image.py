@@ -98,7 +98,9 @@ class ImageConverter:
             return f"data:{mime};base64,{b64_str}"
         if attachment.url:
             return attachment.url
-        raise ImageValidationError("Unable to convert image attachment to data URL: missing source data")
+        raise ImageValidationError(
+            "Unable to convert image attachment to data URL: missing source data"
+        )
 
     @staticmethod
     def from_bytes(

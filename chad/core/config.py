@@ -60,9 +60,7 @@ class AppConfig:
         lapis_model = os.getenv("CHAD_LAPIS_MODEL") or None
         checkpoint = Path(os.getenv("CHAD_LAPIS_CHECKPOINT", "checkpoints/latest.pt"))
         device = os.getenv("CHAD_LAPIS_DEVICE", "auto")
-        storage = Path(
-            os.getenv("CHAD_STORAGE_DIR", str(Path.home() / ".chad" / "conversations"))
-        )
+        storage = Path(os.getenv("CHAD_STORAGE_DIR", str(Path.home() / ".chad" / "conversations")))
         developer = os.getenv("CHAD_DEVELOPER_MODE", "0").lower() in {
             "1",
             "true",
@@ -91,9 +89,7 @@ class AppConfig:
             max_context_messages=(
                 int(max_context_messages_raw) if max_context_messages_raw else None
             ),
-            max_context_tokens=(
-                int(max_context_tokens_raw) if max_context_tokens_raw else None
-            ),
+            max_context_tokens=(int(max_context_tokens_raw) if max_context_tokens_raw else None),
         )
         result.validate()
         return result

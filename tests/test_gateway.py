@@ -24,7 +24,6 @@ from chad.llm.http import HttpLapisClient
 
 
 class DummyClient(LapisClient):
-
     def __init__(self, model_id: str = "dummy-1", backend: str = "dummy_backend") -> None:
         self._model = ModelInfo(
             id=model_id,
@@ -59,7 +58,6 @@ class DummyClient(LapisClient):
 
 
 class FailingClient(LapisClient):
-
     def __init__(self, model_id: str, exc_to_raise: Exception) -> None:
         self._model = ModelInfo(id=model_id, display_name=model_id, backend="failing")
         self._exc = exc_to_raise

@@ -76,7 +76,9 @@ class SandboxEscapeGuard:
         techniques: list[str] = []
         for pattern in SHELL_ESCAPE_PATTERNS:
             if pattern.search(command):
-                techniques.append(f"Dangerous command / subshell pattern matched: '{pattern.pattern}'")
+                techniques.append(
+                    f"Dangerous command / subshell pattern matched: '{pattern.pattern}'"
+                )
 
         is_escape = len(techniques) > 0
         return EscapeAnalysis(

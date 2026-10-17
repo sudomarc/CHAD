@@ -62,5 +62,6 @@ def test_store_handles_status_filtering_and_deletion(tmp_path) -> None:
 
     store.delete(c2.id, hard=True)
     import pytest
+
     with pytest.raises(KeyError):
         store.load(c2.id)

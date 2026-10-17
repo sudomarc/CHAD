@@ -21,7 +21,9 @@ def test_analyst_engine_dataset_csv_analysis() -> None:
 6,28,85.0,Engineering
 """
     engine = AnalystEngine()
-    report = engine.analyze_dataset(csv_data, filename="employees.csv", query="Analyze employee performance")
+    report = engine.analyze_dataset(
+        csv_data, filename="employees.csv", query="Analyze employee performance"
+    )
 
     assert isinstance(report, AnalysisReport)
     assert report.title == "Dataset Analysis: employees.csv"
@@ -48,7 +50,9 @@ def test_analyst_engine_dataset_dict_list_small_sample() -> None:
         {"product": "Widget B", "price": 25.0, "qty": 50},
     ]
     engine = AnalystEngine()
-    report = engine.analyze_dataset(records, filename="inventory.json", query="Check inventory levels")
+    report = engine.analyze_dataset(
+        records, filename="inventory.json", query="Check inventory levels"
+    )
 
     assert report.dataset_summary is not None
     assert report.dataset_summary.row_count == 2
@@ -67,7 +71,9 @@ def test_analyst_engine_empty_dataset() -> None:
 def test_analyst_engine_document_analysis_short() -> None:
     engine = AnalystEngine()
     doc_text = "The quarterly revenue grew by 15% year-over-year. Operating costs remained flat."
-    report = engine.analyze_document(doc_text, filename="q3_report.txt", query="What was the revenue growth?")
+    report = engine.analyze_document(
+        doc_text, filename="q3_report.txt", query="What was the revenue growth?"
+    )
 
     assert isinstance(report, AnalysisReport)
     assert report.title == "Document Analysis: q3_report.txt"
@@ -94,7 +100,9 @@ def test_analyst_engine_large_document_workflow() -> None:
 
 def test_analyst_engine_file_document_input() -> None:
     engine = AnalystEngine()
-    file_doc = FileDocument.create("sample.txt", b"Line 1: System overview.\nLine 2: System details.")
+    file_doc = FileDocument.create(
+        "sample.txt", b"Line 1: System overview.\nLine 2: System details."
+    )
     report = engine.analyze_document(file_doc, query="Extract overview")
 
     assert report.title == "Document Analysis: sample.txt"
@@ -104,7 +112,9 @@ def test_analyst_engine_file_document_input() -> None:
 def test_analyst_engine_image_analysis() -> None:
     engine = AnalystEngine()
     image_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\x00\x00\x00\x1f\xf3\xff"
-    report = engine.analyze_image(image_bytes, filename="arch_diagram.png", query="Analyze architecture diagram")
+    report = engine.analyze_image(
+        image_bytes, filename="arch_diagram.png", query="Analyze architecture diagram"
+    )
 
     assert isinstance(report, AnalysisReport)
     assert report.title == "Image Analysis: arch_diagram.png"

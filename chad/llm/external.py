@@ -106,9 +106,7 @@ class ExternalProviderClient(LapisClient):
         return [self._model]
 
     def _build_payload(self, request: ChatRequest, stream: bool = False) -> dict[str, object]:
-        messages_payload = [
-            self._vision_converter.format_message(msg) for msg in request.messages
-        ]
+        messages_payload = [self._vision_converter.format_message(msg) for msg in request.messages]
 
         payload: dict[str, object] = {
             "model": request.model or self._model_id,
@@ -139,9 +137,7 @@ class ExternalProviderClient(LapisClient):
             return ProviderServerError(
                 f"{self._provider_name.capitalize()} API server error ({status}): {detail}"
             )
-        return GenerationError(
-            f"{self._provider_name.capitalize()} API request failed: {detail}"
-        )
+        return GenerationError(f"{self._provider_name.capitalize()} API request failed: {detail}")
 
     def generate_response(self, request: ChatRequest) -> ModelResponse:
         request.validate()

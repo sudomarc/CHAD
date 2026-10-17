@@ -31,7 +31,11 @@ def test_memory_item_serialization():
 def test_memory_store_crud():
     store = MemoryStore()
     item1 = MemoryItem(
-        key="k1", content="c1", memory_type=MemoryType.WORKING, scope=MemoryScope.SESSION, session_id="s1"
+        key="k1",
+        content="c1",
+        memory_type=MemoryType.WORKING,
+        scope=MemoryScope.SESSION,
+        session_id="s1",
     )
     item2 = MemoryItem(
         key="k2", content="c2", memory_type=MemoryType.USER, scope=MemoryScope.USER, user_id="u1"
@@ -58,7 +62,11 @@ def test_memory_store_crud():
 def test_memory_store_clear_and_export():
     store = MemoryStore()
     item1 = MemoryItem(
-        key="k1", content="c1", memory_type=MemoryType.WORKING, scope=MemoryScope.SESSION, session_id="s1"
+        key="k1",
+        content="c1",
+        memory_type=MemoryType.WORKING,
+        scope=MemoryScope.SESSION,
+        session_id="s1",
     )
     item2 = MemoryItem(
         key="k2", content="c2", memory_type=MemoryType.USER, scope=MemoryScope.USER, user_id="u1"
@@ -122,7 +130,9 @@ def test_memory_engine_conversation_summary():
 
 def test_memory_engine_search():
     engine = MemoryEngine()
-    engine.add_working_memory("current_task", "Refactor the memory module in Python", session_id="s1")
+    engine.add_working_memory(
+        "current_task", "Refactor the memory module in Python", session_id="s1"
+    )
     engine.add_user_preference("framework", "Prefers Pytest over Unittest", user_id="u1")
     engine.add_project_memory("backend", "PostgreSQL vector store", project_id="p1")
 

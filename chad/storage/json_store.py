@@ -16,9 +16,8 @@ class ConversationStore:
         self.directory.mkdir(parents=True, exist_ok=True)
 
     def _path(self, conversation_id: str) -> Path:
-        if (
-            not conversation_id
-            or not all(char.isalnum() or char in "-_" for char in conversation_id)
+        if not conversation_id or not all(
+            char.isalnum() or char in "-_" for char in conversation_id
         ):
             raise ValueError("invalid conversation id")
         return self.directory / f"{conversation_id}.json"
@@ -75,9 +74,7 @@ class ConversationStore:
                 if isinstance(payload, dict):
                     conv = Conversation.from_dict(payload)
                     if status is not None and conv.status != status:
-                        if (
-                            conv.status == ConversationStatus.ARCHIVED and include_archived
-                        ) or (
+                        if (conv.status == ConversationStatus.ARCHIVED and include_archived) or (
                             conv.status == ConversationStatus.DELETED and include_deleted
                         ):
                             pass

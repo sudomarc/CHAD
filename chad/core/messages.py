@@ -65,9 +65,7 @@ class ImageAttachment:
             if isinstance(data.get("data_base64"), str)
             else None,
             url=str(data["url"]) if isinstance(data.get("url"), str) else None,
-            file_path=str(data["file_path"])
-            if isinstance(data.get("file_path"), str)
-            else None,
+            file_path=str(data["file_path"]) if isinstance(data.get("file_path"), str) else None,
             detail=ImageDetail(str(data.get("detail", "auto"))),
             width=int(data["width"]) if data.get("width") is not None else None,
             height=int(data["height"]) if data.get("height") is not None else None,
@@ -113,9 +111,7 @@ class Message:
         images: tuple[ImageAttachment, ...] = ()
         if isinstance(raw_images, (list, tuple)):
             images = tuple(
-                ImageAttachment.from_dict(img)
-                for img in raw_images
-                if isinstance(img, dict)
+                ImageAttachment.from_dict(img) for img in raw_images if isinstance(img, dict)
             )
 
         parent_id = data.get("parent_id")

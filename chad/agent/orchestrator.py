@@ -31,8 +31,12 @@ class AgentOrchestrator:
         run.budget.max_steps = effective_max_steps
 
         # Execute classification & planning phase transitions
-        run.transition_to(AgentState.CLASSIFIED, description=f"Goal classified for role {role.value}")
-        run.transition_to(AgentState.PLANNED, description=f"Execution plan initialized for role {role.value}")
+        run.transition_to(
+            AgentState.CLASSIFIED, description=f"Goal classified for role {role.value}"
+        )
+        run.transition_to(
+            AgentState.PLANNED, description=f"Execution plan initialized for role {role.value}"
+        )
         return run
 
     def execute_step(
@@ -53,7 +57,9 @@ class AgentOrchestrator:
             raise ValueError(f"Cannot execute step on terminal state {run.current_state}")
 
         if run.current_state == AgentState.WAITING_APPROVAL:
-            raise ValueError("Run is waiting for user approval. Call approve_step() or deny_step().")
+            raise ValueError(
+                "Run is waiting for user approval. Call approve_step() or deny_step()."
+            )
 
         # Budget check
         is_exceeded, reason = run.budget.is_exceeded()
@@ -79,7 +85,9 @@ class AgentOrchestrator:
 
         # Transition to EXECUTING state if needed
         if run.current_state != AgentState.EXECUTING:
-            run.transition_to(AgentState.EXECUTING, description=f"Executing step action: {action_name}")
+            run.transition_to(
+                AgentState.EXECUTING, description=f"Executing step action: {action_name}"
+            )
 
         run.budget.record_step(tokens_used=tokens_used)
 

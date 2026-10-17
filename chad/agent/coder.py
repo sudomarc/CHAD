@@ -241,7 +241,12 @@ class SandboxedCodeRuntime:
         effective_timeout = timeout or self.default_timeout
         exec_env = dict(os.environ)
         # Strip sensitive credentials from subprocess environment
-        for secret_var in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"):
+        for secret_var in (
+            "OPENAI_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "AWS_SECRET_ACCESS_KEY",
+            "GITHUB_TOKEN",
+        ):
             exec_env.pop(secret_var, None)
         if env:
             exec_env.update(env)
@@ -396,9 +401,7 @@ class CoderEngine:
                 file_path=relative_path,
             )
 
-    def run_tests(
-        self, test_path: str = "", timeout: float = 30.0
-    ) -> CoderResult:
+    def run_tests(self, test_path: str = "", timeout: float = 30.0) -> CoderResult:
         cmd = f"pytest {test_path}".strip()
         exec_res = self.runtime.run_command(cmd, timeout=timeout)
         success = exec_res.exit_code == 0

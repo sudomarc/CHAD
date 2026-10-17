@@ -184,7 +184,9 @@ FETCH_PAGE_TOOL = ToolDefinition(
 )
 
 
-def extract_evidence(text: str, source_url: str, title: str = "Extracted Source", score: float = 1.0) -> dict[str, Any]:
+def extract_evidence(
+    text: str, source_url: str, title: str = "Extracted Source", score: float = 1.0
+) -> dict[str, Any]:
     """Extracts structured evidence items with relevance scoring from text content."""
     item = EvidenceItem(
         id="EV-EXTRACTED",

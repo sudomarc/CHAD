@@ -13,6 +13,7 @@ def main(mode: str = "cli") -> None:
         app_instance = ChadApp.create(config, client)
         if mode == "web":
             from chad.interfaces.web import run_web
+
             run_web(app_instance)
         else:
             run_cli(app_instance)

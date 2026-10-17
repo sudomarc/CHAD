@@ -56,7 +56,11 @@ class ChadApp:
         return app_instance
 
     def new_conversation(self) -> Conversation:
-        model_id = self.gateway.list_models()[0].id if self.gateway.list_models() else self.client.current_model().id
+        model_id = (
+            self.gateway.list_models()[0].id
+            if self.gateway.list_models()
+            else self.client.current_model().id
+        )
         self.conversation = Conversation(
             system_prompt=self.config.system_prompt,
             model=model_id,

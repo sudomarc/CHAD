@@ -81,7 +81,9 @@ def test_image_converter() -> None:
 
 
 def test_multimodal_context_token_estimation() -> None:
-    low_img = ImageAttachment(format=ImageFormat.PNG, url="https://example.com/img.png", detail=ImageDetail.LOW)
+    low_img = ImageAttachment(
+        format=ImageFormat.PNG, url="https://example.com/img.png", detail=ImageDetail.LOW
+    )
     assert estimate_image_tokens(low_img) == 85
 
     high_img = ImageAttachment(

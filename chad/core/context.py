@@ -48,10 +48,7 @@ class ContextBudget:
 
     def estimate(self, messages: Sequence[Message]) -> int:
         self.validate()
-        return sum(
-            estimate_message_tokens(message, self.chars_per_token)
-            for message in messages
-        )
+        return sum(estimate_message_tokens(message, self.chars_per_token) for message in messages)
 
     def trim(self, messages: Sequence[Message]) -> list[Message]:
         self.validate()
@@ -59,11 +56,14 @@ class ContextBudget:
         system_messages = [message for message in selected if message.role.value == "system"]
         history = [message for message in selected if message.role.value != "system"]
 
-        while system_messages and self.estimate([*system_messages, *history]) > self.max_input_tokens:
-            if len(system_messages) + sum(
-                estimate_message_tokens(message, self.chars_per_token)
-                for message in history
-            ) <= self.max_input_tokens:
+        while (
+            system_messages and self.estimate([*system_messages, *history]) > self.max_input_tokens
+        ):
+            if (
+                len(system_messages)
+                + sum(estimate_message_tokens(message, self.chars_per_token) for message in history)
+                <= self.max_input_tokens
+            ):
                 break
             history.pop(0)
             if not history:

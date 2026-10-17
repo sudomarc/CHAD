@@ -79,10 +79,16 @@ class DocumentValidator:
     def validate(self, filename: str, content_bytes: bytes) -> tuple[bool, str]:
         ext = os.path.splitext(filename)[1].lower()
         if ext not in self.allowed_extensions:
-            return False, f"Unsupported file extension '{ext}'. Allowed extensions: {sorted(self.allowed_extensions)}"
+            return (
+                False,
+                f"Unsupported file extension '{ext}'. Allowed extensions: {sorted(self.allowed_extensions)}",
+            )
 
         if len(content_bytes) > self.max_file_size_bytes:
-            return False, f"File size {len(content_bytes)} bytes exceeds maximum allowed limit of {self.max_file_size_bytes} bytes."
+            return (
+                False,
+                f"File size {len(content_bytes)} bytes exceeds maximum allowed limit of {self.max_file_size_bytes} bytes.",
+            )
 
         if len(content_bytes) == 0:
             return False, "File content is empty."
@@ -96,7 +102,26 @@ class DocumentExtractor:
     def extract_text(self, doc: FileDocument) -> str:
         ext = f".{doc.file_type.lower()}"
 
-        if ext in {".txt", ".md", ".markdown", ".py", ".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".yaml", ".yml", ".c", ".cpp", ".rs", ".go", ".java", ".sh"}:
+        if ext in {
+            ".txt",
+            ".md",
+            ".markdown",
+            ".py",
+            ".js",
+            ".ts",
+            ".jsx",
+            ".tsx",
+            ".html",
+            ".css",
+            ".yaml",
+            ".yml",
+            ".c",
+            ".cpp",
+            ".rs",
+            ".go",
+            ".java",
+            ".sh",
+        }:
             return self._decode_text(doc.content_bytes)
 
         if ext == ".json":
@@ -144,7 +169,13 @@ class DocumentExtractor:
             elif "ET" in line:
                 in_text_block = False
             elif in_text_block or line.startswith("(") or "Tj" in line or "TJ" in line:
-                cleaned = line.replace("(", "").replace(")", "").replace("Tj", "").replace("TJ", "").strip()
+                cleaned = (
+                    line.replace("(", "")
+                    .replace(")", "")
+                    .replace("Tj", "")
+                    .replace("TJ", "")
+                    .strip()
+                )
                 if cleaned:
                     printable.append(cleaned)
 

@@ -43,7 +43,9 @@ class MemoryItem:
             "id": self.id,
             "key": self.key,
             "content": self.content,
-            "memory_type": self.memory_type.value if isinstance(self.memory_type, Enum) else self.memory_type,
+            "memory_type": self.memory_type.value
+            if isinstance(self.memory_type, Enum)
+            else self.memory_type,
             "scope": self.scope.value if isinstance(self.scope, Enum) else self.scope,
             "user_id": self.user_id,
             "project_id": self.project_id,

@@ -11,8 +11,7 @@ from chad.rag.chunker import DocumentChunk
 
 
 class EmbeddingProvider(Protocol):
-    def embed(self, texts: Sequence[str]) -> list[list[float]]:
-        ...
+    def embed(self, texts: Sequence[str]) -> list[list[float]]: ...
 
 
 class MockEmbeddingProvider:
@@ -140,8 +139,7 @@ class HybridRetriever:
 
             num_docs = len(all_chunks)
             idf = {
-                qw: math.log((num_docs + 1) / (count + 1)) + 1
-                for qw, count in doc_counts.items()
+                qw: math.log((num_docs + 1) / (count + 1)) + 1 for qw, count in doc_counts.items()
             }
 
             for chunk in all_chunks:
@@ -155,7 +153,11 @@ class HybridRetriever:
                 keyword_scores[chunk.chunk_id] = score
 
             # Normalize keyword scores
-            max_kw = max(keyword_scores.values()) if keyword_scores and max(keyword_scores.values()) > 0 else 1.0
+            max_kw = (
+                max(keyword_scores.values())
+                if keyword_scores and max(keyword_scores.values()) > 0
+                else 1.0
+            )
             for cid in keyword_scores:
                 keyword_scores[cid] /= max_kw
 

@@ -69,9 +69,7 @@ replacement
 def test_secret_scanner():
     scanner = SecretScanner()
 
-    sample_text = (
-        "AWS key is AKIA1234567890ABCDEF and GitHub token is ghp_1234567890abcdef1234567890abcdef1234."
-    )
+    sample_text = "AWS key is AKIA1234567890ABCDEF and GitHub token is ghp_1234567890abcdef1234567890abcdef1234."
     matches = scanner.scan(sample_text)
     assert len(matches) >= 2
 
@@ -137,9 +135,7 @@ def test_coder_engine_file_ops_and_secret_blocking(temp_workspace_dir):
     assert "def add(a, b):" in res_read.details
 
     # Writing secrets should be blocked
-    res_secret_write = engine.write_file(
-        "config.py", "AWS_KEY = 'AKIA1234567890ABCDEF'"
-    )
+    res_secret_write = engine.write_file("config.py", "AWS_KEY = 'AKIA1234567890ABCDEF'")
     assert not res_secret_write.success
     assert "Write blocked: content contains potential secrets" in res_secret_write.details
 

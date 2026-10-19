@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from chad.security.exfiltration import ExfiltrationGuard
 from chad.security.injection import PromptInjectionDetector
 from chad.security.models import (

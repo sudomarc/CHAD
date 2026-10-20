@@ -275,6 +275,11 @@ This ordering is conceptual, not permission to expose higher-trust data to lower
 
 Secrets must never enter model-visible context unless a deliberately designed integration requires it and the security model explicitly permits it.
 
+The `chad.security` module provides unified runtime threat defense via `SecurityEngine`:
+- `PromptInjectionDetector`: Evaluates user inputs and retrieved context for direct/indirect prompt injection and context poisoning.
+- `ExfiltrationGuard`: Scans outputs and payloads for credential/secret leakage and covert exfiltration URL channels.
+- `SandboxEscapeGuard`: Validates commands and file paths against filesystem containment boundaries and restricted syscalls.
+
 ## 13. Deployment evolution
 
 ### Stage A

@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from chad.core.config import AppConfig
 from chad.core.context import ContextLimitError
 from chad.core.conversation import ChatRequest, Conversation
+from chad.core.messages import MessageRole
 from chad.llm.client import LapisClient, LLMError
 from chad.llm.gateway import ModelGateway
 from chad.storage.json_store import ConversationStore
@@ -63,8 +64,15 @@ class ChadApp:
         )
         return self.conversation
 
-    def request(self, text: str) -> ChatRequest:
-        self.conversation.add_user(text)
+    def request(
+        self,
+        text: str,
+        correlation_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> ChatRequest:
+        self.conversation.add_user(
+            text, correlation_id=correlation_id, idempotency_key=idempotency_key
+        )
         max_input_tokens = self.config.max_context_tokens
         if max_input_tokens is None:
             model_id = self.conversation.model
@@ -89,20 +97,39 @@ class ChadApp:
             top_k=self.config.generation.top_k,
             top_p=self.config.generation.top_p,
             max_new_tokens=self.config.generation.max_new_tokens,
+            correlation_id=correlation_id,
+            idempotency_key=idempotency_key,
         )
         request.validate()
         return request
 
-    def send(self, text: str) -> str:
+    def send(
+        self,
+        text: str,
+        correlation_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> str:
+        if idempotency_key and idempotency_key in self.conversation.processed_idempotency_keys:
+            resp_idem_key = f"resp-{idempotency_key}"
+            for msg in self.conversation.get_active_messages():
+                if msg.role == MessageRole.ASSISTANT and msg.idempotency_key == resp_idem_key:
+                    return msg.content
+
         try:
-            request = self.request(text)
+            request = self.request(
+                text, correlation_id=correlation_id, idempotency_key=idempotency_key
+            )
             response = self.gateway.generate(request)
             content = response.content
         except (LLMError, ContextLimitError):
             if self.conversation.messages and self.conversation.messages[-1].role.value == "user":
                 self.conversation.messages.pop()
             raise
-        self.conversation.add_assistant(content)
+
+        resp_idem_key = f"resp-{idempotency_key}" if idempotency_key else None
+        self.conversation.add_assistant(
+            content, correlation_id=correlation_id, idempotency_key=resp_idem_key
+        )
         self.store.save(self.conversation)
         return content
 

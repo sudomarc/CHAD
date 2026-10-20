@@ -131,6 +131,7 @@ def test_conversation_correlation_and_idempotency() -> None:
 
 def test_chad_app_idempotency_and_correlation(tmp_path: pytest.TempPathFactory) -> None:
     from pathlib import Path
+
     from chad.app import ChadApp
     from chad.core.config import AppConfig
     from chad.core.conversation import ChatRequest

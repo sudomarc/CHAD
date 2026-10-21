@@ -15,6 +15,25 @@ def test_message_round_trip_preserves_identity_and_timestamp() -> None:
     assert restored.content == "hello"
 
 
+def test_message_correlation_and_idempotency_keys() -> None:
+    msg = Message(
+        MessageRole.USER,
+        "test payload",
+        correlation_id="corr-123",
+        idempotency_key="idem-456",
+    )
+    assert msg.correlation_id == "corr-123"
+    assert msg.idempotency_key == "idem-456"
+
+    d = msg.to_dict()
+    assert d["correlation_id"] == "corr-123"
+    assert d["idempotency_key"] == "idem-456"
+
+    restored = Message.from_dict(d)
+    assert restored.correlation_id == "corr-123"
+    assert restored.idempotency_key == "idem-456"
+
+
 def test_message_rejects_blank_content_and_id() -> None:
     try:
         Message(MessageRole.USER, "   ")

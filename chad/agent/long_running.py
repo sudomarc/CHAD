@@ -4,8 +4,9 @@ import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import IntEnum, StrEnum
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from uuid import uuid4
 
 from chad.agent.orchestrator import AgentOrchestrator
@@ -135,9 +136,8 @@ class DurableTaskQueue:
         for task in self._tasks.values():
             if task.status == TaskStatus.PENDING:
                 candidates.append(task)
-            elif task.status == TaskStatus.SCHEDULED:
-                if task.scheduled_at and task.scheduled_at <= now_iso:
-                    candidates.append(task)
+            elif task.status == TaskStatus.SCHEDULED and task.scheduled_at and task.scheduled_at <= now_iso:
+                candidates.append(task)
 
         if not candidates:
             return None
@@ -504,7 +504,12 @@ class MultiAgentDelegator:
         executor_map = executor_map or {}
 
         for node in subtask_nodes:
-            exec_fn = executor_map.get(node.role, lambda g: f"Executed subtask for role {node.role}: {g}")
+            role_val = node.role
+
+            def _default_exec(g: str, r: AgentRole = role_val) -> str:
+                return f"Executed subtask for role {r.value}: {g}"
+
+            exec_fn = executor_map.get(node.role, _default_exec)
             try:
                 subtask_output = exec_fn(node.goal)
                 node.result = subtask_output

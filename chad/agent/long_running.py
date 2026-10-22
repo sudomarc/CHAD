@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import IntEnum, StrEnum
-from collections.abc import Callable
+import json
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -134,9 +134,9 @@ class DurableTaskQueue:
         candidates: list[TaskItem] = []
 
         for task in self._tasks.values():
-            if task.status == TaskStatus.PENDING:
-                candidates.append(task)
-            elif task.status == TaskStatus.SCHEDULED and task.scheduled_at and task.scheduled_at <= now_iso:
+            if task.status == TaskStatus.PENDING or (
+                task.status == TaskStatus.SCHEDULED and task.scheduled_at and task.scheduled_at <= now_iso
+            ):
                 candidates.append(task)
 
         if not candidates:

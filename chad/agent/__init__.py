@@ -17,6 +17,18 @@ from chad.agent.coder import (
     SandboxedCodeRuntime,
     SecretScanner,
 )
+from chad.agent.long_running import (
+    AgentScheduler,
+    CostReliabilityPlanner,
+    DurableTaskQueue,
+    HumanCheckpoint,
+    HumanCheckpointEngine,
+    MultiAgentDelegator,
+    SubtaskNode,
+    TaskItem,
+    TaskPriority,
+    TaskStatus,
+)
 from chad.agent.orchestrator import AgentOrchestrator
 from chad.agent.registry import AgentRegistry, AgentRoleContract
 from chad.agent.state import (
@@ -36,6 +48,7 @@ __all__ = [
     "AgentRole",
     "AgentRoleContract",
     "AgentRun",
+    "AgentScheduler",
     "AgentState",
     "AnalysisInput",
     "AnalysisReport",
@@ -44,11 +57,20 @@ __all__ = [
     "CoderEngine",
     "CoderResult",
     "CommandPolicy",
+    "CostReliabilityPlanner",
     "DatasetSummary",
+    "DurableTaskQueue",
     "EvidenceLink",
     "ExecutionBudget",
+    "HumanCheckpoint",
+    "HumanCheckpointEngine",
+    "MultiAgentDelegator",
     "RepositoryWorkspace",
     "SandboxedCodeRuntime",
     "SecretScanner",
+    "SubtaskNode",
+    "TaskItem",
+    "TaskPriority",
+    "TaskStatus",
     "UncertaintyReport",
 ]

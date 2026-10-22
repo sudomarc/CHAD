@@ -127,13 +127,13 @@ Phase 16 — External connectors
 - Side-effect confirmation.
 - Revocation and health checks.
 
-Phase 17 — Long-running agents
-- Durable queues and background tasks.
-- Resume after interruption.
-- Scheduling.
-- Human checkpoints.
-- Multi-agent delegation.
-- Cost/reliability-aware planning.
+Phase 17 — Long-running agents (Completed)
+- Durable task queues and background execution (`DurableTaskQueue`, `TaskItem`, `TaskPriority`, `TaskStatus`).
+- Run state persistence and resumption after process interruption (`_save`, `_load`).
+- Delayed and recurring background task scheduling (`AgentScheduler`).
+- Human approval checkpoints and interactive resumption (`HumanCheckpointEngine`, `HumanCheckpoint`).
+- Hierarchical multi-agent delegation and subtask result aggregation (`MultiAgentDelegator`, `SubtaskNode`).
+- Cost and reliability aware execution planning and model fallback routing (`CostReliabilityPlanner`).
 
 Phase 18 — Product maturity
 - Projects/workspaces.

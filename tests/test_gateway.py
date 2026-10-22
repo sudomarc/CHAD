@@ -231,6 +231,30 @@ def test_http_client_error_normalization() -> None:
         client.generate_response(req)
 
 
+def test_gateway_generate_with_tools() -> None:
+    class ToolCapableClient(DummyClient):
+        def generate_response(self, request: ChatRequest, tools: list[dict] | tuple[dict, ...] | None = None) -> ModelResponse:
+            tool_calls: tuple[dict, ...] = ()
+            if tools:
+                tool_calls = ({"id": "call_abc", "function": {"name": tools[0]["function"]["name"]}},)
+            return ModelResponse(
+                content="",
+                model_id=self._model.id,
+                provider=self._model.backend,
+                tool_calls=tool_calls,
+            )
+
+    client = ToolCapableClient("tool-model")
+    gateway = ModelGateway(default_client=client)
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Run tool"),))
+    tools = [{"type": "function", "function": {"name": "test_tool"}}]
+
+    res = gateway.generate(req, tools=tools)
+    assert len(res.tool_calls) == 1
+    assert res.tool_calls[0]["function"]["name"] == "test_tool"
+
+
 def test_chad_app_with_gateway(tmp_path) -> None:
     config = AppConfig(storage_dir=tmp_path)
     client = DummyClient("test-model")

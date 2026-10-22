@@ -160,6 +160,7 @@ class ModelGateway:
         request: ChatRequest,
         model_id: str | None = None,
         fallback_models: tuple[str, ...] = (),
+        tools: list[dict] | tuple[dict, ...] | None = None,
     ) -> ModelResponse:
         target_models = (model_id or request.model,) + fallback_models
         last_error: Exception | None = None
@@ -171,7 +172,13 @@ class ModelGateway:
                 start_time = time.perf_counter()
 
                 if hasattr(client, "generate_response"):
-                    response = client.generate_response(request)
+                    import inspect
+                    sig = inspect.signature(client.generate_response)
+                    if "tools" in sig.parameters:
+                        response = client.generate_response(request, tools=tools)
+                    else:
+                        response = client.generate_response(request)
+
                     if not isinstance(response, ModelResponse):
                         latency_ms = (time.perf_counter() - start_time) * 1000
                         response = ModelResponse(

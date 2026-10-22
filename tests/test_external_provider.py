@@ -278,6 +278,67 @@ def test_external_provider_streaming() -> None:
     client.close()
 
 
+def test_external_provider_tool_calling() -> None:
+    client = ExternalProviderClient(
+        base_url="https://api.openai.com/v1",
+        api_key="test-key",
+        model="gpt-4o",
+        provider_name="openai",
+    )
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Calculate 2+2"),))
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "calculator",
+                "description": "Perform basic arithmetic operations",
+                "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}},
+            },
+        }
+    ]
+
+    mock_res = MagicMock()
+    mock_res.status_code = 200
+    mock_res.json.return_value = {
+        "id": "chatcmpl-tool-1",
+        "model": "gpt-4o",
+        "choices": [
+            {
+                "finish_reason": "tool_calls",
+                "message": {
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": "call_123",
+                            "type": "function",
+                            "function": {
+                                "name": "calculator",
+                                "arguments": '{"expression": "2+2"}',
+                            },
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    with patch.object(client._client, "post", return_value=mock_res) as mock_post:
+        res = client.generate_response(req, tools=tools)
+        assert res.content == ""
+        assert len(res.tool_calls) == 1
+        assert res.tool_calls[0]["id"] == "call_123"
+        assert res.tool_calls[0]["function"]["name"] == "calculator"
+
+        _, kwargs = mock_post.call_args
+        payload = kwargs["json"]
+        assert "tools" in payload
+        assert payload["tools"] == tools
+
+    client.close()
+
+
 def test_model_gateway_with_external_provider() -> None:
     ext_client = ExternalProviderClient(
         base_url="https://api.openai.com/v1",

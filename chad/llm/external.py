@@ -105,7 +105,12 @@ class ExternalProviderClient(LapisClient):
             pass
         return [self._model]
 
-    def _build_payload(self, request: ChatRequest, stream: bool = False) -> dict[str, object]:
+    def _build_payload(
+        self,
+        request: ChatRequest,
+        stream: bool = False,
+        tools: list[dict] | tuple[dict, ...] | None = None,
+    ) -> dict[str, object]:
         messages_payload = [
             self._vision_converter.format_message(msg) for msg in request.messages
         ]
@@ -118,6 +123,8 @@ class ExternalProviderClient(LapisClient):
             "max_tokens": request.max_new_tokens,
             "stream": stream,
         }
+        if tools:
+            payload["tools"] = list(tools)
         return payload
 
     def _map_http_error(self, exc: httpx.HTTPStatusError) -> LLMError:
@@ -143,9 +150,13 @@ class ExternalProviderClient(LapisClient):
             f"{self._provider_name.capitalize()} API request failed: {detail}"
         )
 
-    def generate_response(self, request: ChatRequest) -> ModelResponse:
+    def generate_response(
+        self,
+        request: ChatRequest,
+        tools: list[dict] | tuple[dict, ...] | None = None,
+    ) -> ModelResponse:
         request.validate()
-        payload = self._build_payload(request, stream=False)
+        payload = self._build_payload(request, stream=False, tools=tools)
 
         start_time = time.perf_counter()
         try:
@@ -167,7 +178,7 @@ class ExternalProviderClient(LapisClient):
 
             choice = choices[0]
             message = choice.get("message", {})
-            content = message.get("content", "")
+            content = message.get("content", "") or ""
             if not isinstance(content, str):
                 raise MalformedResponseError(
                     f"{self._provider_name.capitalize()} API returned non-text content."
@@ -175,6 +186,11 @@ class ExternalProviderClient(LapisClient):
 
             finish_reason = choice.get("finish_reason")
             request_id = data.get("id")
+
+            tool_calls_raw = message.get("tool_calls", [])
+            tool_calls: tuple[dict, ...] = ()
+            if isinstance(tool_calls_raw, list) and tool_calls_raw:
+                tool_calls = tuple(tc for tc in tool_calls_raw if isinstance(tc, dict))
 
             usage_data = data.get("usage")
             usage: UsageInfo | None = None
@@ -193,6 +209,7 @@ class ExternalProviderClient(LapisClient):
                 finish_reason=str(finish_reason) if finish_reason else None,
                 usage=usage,
                 latency_ms=latency_ms,
+                tool_calls=tool_calls,
                 raw_response=data,
             )
         except httpx.TimeoutException as exc:

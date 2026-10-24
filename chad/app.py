@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from chad.agent.long_running import HumanCheckpointEngine
 from chad.core.config import AppConfig
 from chad.core.context import ContextLimitError
 from chad.core.conversation import ChatRequest, Conversation
-from chad.agent.long_running import HumanCheckpointEngine
 from chad.core.messages import MessageRole
 from chad.llm.client import LapisClient, LLMError
 from chad.llm.gateway import ModelGateway

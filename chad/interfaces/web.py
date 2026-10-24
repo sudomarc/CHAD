@@ -110,6 +110,35 @@ class WebApiHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(err)}, HTTPStatus.BAD_REQUEST)
             return
 
+        if path in ("/api/agent/approve", "/api/agent/deny"):
+            checkpoint_id = body.get("checkpoint_id") or body.get("run_id")
+            reason = body.get("reason")
+            if not checkpoint_id:
+                self._send_json(
+                    {"error": "Missing 'checkpoint_id' or 'run_id' in request body"},
+                    HTTPStatus.BAD_REQUEST,
+                )
+                return
+
+            try:
+                if path.endswith("approve"):
+                    cp = self.app.checkpoint_engine.approve_checkpoint(
+                        checkpoint_id, reason=reason or "Approved via Web API"
+                    )
+                else:
+                    cp = self.app.checkpoint_engine.deny_checkpoint(
+                        checkpoint_id, reason=reason or "Denied via Web API"
+                    )
+                self._send_json(
+                    {
+                        "status": "success",
+                        "checkpoint": cp.to_dict(),
+                    }
+                )
+            except ValueError as err:
+                self._send_json({"error": str(err)}, HTTPStatus.NOT_FOUND)
+            return
+
         self._send_json({"error": "Not Found"}, HTTPStatus.NOT_FOUND)
 
 

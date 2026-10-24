@@ -65,6 +65,56 @@ def test_web_health(tmp_path: Path) -> None:
         server.server_close()
 
 
+def test_web_agent_approve_and_deny(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+    cp1 = app.checkpoint_engine.register_checkpoint("run-1", "deploy_prod")
+    cp2 = app.checkpoint_engine.register_checkpoint("run-2", "delete_db")
+
+    server = create_web_server(app, host="127.0.0.1", port=0)
+    host, port = server.server_address
+
+    thread = threading.Thread(target=server.serve_forever)
+    thread.daemon = True
+    thread.start()
+
+    try:
+        base_url = f"http://{host}:{port}"
+
+        # Missing checkpoint_id
+        status, body = _http_request(f"{base_url}/api/agent/approve", method="POST", data={})
+        assert status == 400
+        assert "error" in body
+
+        # Successful approve
+        status, body = _http_request(
+            f"{base_url}/api/agent/approve", method="POST", data={"checkpoint_id": cp1.checkpoint_id}
+        )
+        assert status == 200
+        assert body["status"] == "success"
+        assert body["checkpoint"]["status"] == "APPROVED"
+        assert body["checkpoint"]["checkpoint_id"] == cp1.checkpoint_id
+
+        # Successful deny
+        status, body = _http_request(
+            f"{base_url}/api/agent/deny", method="POST", data={"checkpoint_id": cp2.checkpoint_id, "reason": "Unsafe"}
+        )
+        assert status == 200
+        assert body["status"] == "success"
+        assert body["checkpoint"]["status"] == "DENIED"
+        assert body["checkpoint"]["reason"] == "Unsafe"
+
+        # Checkpoint not found
+        status, body = _http_request(
+            f"{base_url}/api/agent/approve", method="POST", data={"checkpoint_id": "nonexistent"}
+        )
+        assert status == 404
+        assert "error" in body
+
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
 def test_web_models_and_conversations(tmp_path: Path) -> None:
     app = _make_app(tmp_path)
     server = create_web_server(app, host="127.0.0.1", port=0)

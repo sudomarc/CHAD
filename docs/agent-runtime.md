@@ -34,6 +34,13 @@ The Agent Runtime Kernel is implemented in `chad/agent/`:
   - `sanitize_untrusted_content`: Escapes external web content, closing tags, and system instruction hijacking attempts before exposing fetched content to model context.
   - `ResearchEngine`: Coordinates query decomposition, search/fetch, evidence collection, contradiction analysis, and cited summary report generation (`ResearchReport`).
 
+- `long_running.py`: Implements Phase 17 Long-Running Agent capabilities:
+  - `DurableTaskQueue`: Priority task queueing (`TaskRecord`, `TaskStatus`), JSON state persistence, background task tracking, and run resumption after interruption (`resume_run`).
+  - `AgentScheduler`: Delayed timestamp or recurring interval scheduling (`ScheduledTask`), due task polling, and queue triggering.
+  - `HumanCheckpointEngine`: Interactive human approval checkpoint registration (`CheckpointRecord`, `CheckpointStatus`), approval/denial decision processing, and timeout evaluation.
+  - `MultiAgentDelegator`: Multi-agent delegation of sub-tasks across specialist agent roles (`ORCHESTRATOR`, `RESEARCHER`, `CODER`, `ANALYST`) with state tracking (`DelegatedTaskResult`).
+  - `CostReliabilityPlanner`: Trade-off planner (`ExecutionStrategy`) balancing cost limits and reliability scores to select optimal execution models and policies.
+
 ## Specialist Tools (`chad.tools`)
 
 - Built-in tools: `calculator`, `datetime_now`, `read_file`.

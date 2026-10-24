@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from chad.core.config import AppConfig
 from chad.core.context import ContextLimitError
 from chad.core.conversation import ChatRequest, Conversation
+from chad.agent.long_running import HumanCheckpointEngine
 from chad.core.messages import MessageRole
 from chad.llm.client import LapisClient, LLMError
 from chad.llm.gateway import ModelGateway
@@ -17,6 +18,7 @@ class ChadApp:
     client: LapisClient
     store: ConversationStore
     conversation: Conversation
+    checkpoint_engine: HumanCheckpointEngine = field(default_factory=HumanCheckpointEngine)
     gateway: ModelGateway = field(init=False)
 
     def __post_init__(self) -> None:

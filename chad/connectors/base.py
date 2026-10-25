@@ -43,13 +43,9 @@ class OAuthToken:
 class ConnectorError(Exception):
     """Base exception for external connectors."""
 
-    pass
-
 
 class OAuthScopeError(ConnectorError):
     """Raised when an operation requires scopes not present on the OAuth token."""
-
-    pass
 
 
 class SideEffectConfirmationRequiredError(ConnectorError):
@@ -114,12 +110,10 @@ class BaseConnector(ABC):
     @abstractmethod
     def health_check(self) -> bool:
         """Perform a health check to verify connectivity and token validity."""
-        pass
 
     @abstractmethod
     def get_operations(self) -> dict[str, OperationMetadata]:
         """Return a mapping of operation names to their metadata."""
-        pass
 
     def check_operation_permissions(
         self,
@@ -138,8 +132,8 @@ class BaseConnector(ABC):
 
         op_meta = operations[operation_name]
 
-        # Check scopes if token defines scopes
-        if self.token and self.token.scopes:
+        # Check scopes if token is present
+        if self.token is not None:
             missing = [s for s in op_meta.required_scopes if s not in self.token.scopes]
             if missing:
                 raise OAuthScopeError(
@@ -164,4 +158,3 @@ class BaseConnector(ABC):
         confirm_side_effects: bool = False,
     ) -> dict:
         """Execute a named operation on the external service."""
-        pass

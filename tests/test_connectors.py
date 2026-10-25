@@ -1,4 +1,5 @@
 import time
+
 import pytest
 
 from chad.connectors import (
@@ -39,6 +40,13 @@ def test_oauth_token_and_status() -> None:
 
 def test_scope_validation() -> None:
     gh = GitHubConnector()
+    token_empty = OAuthToken(access_token="tok_empty", scopes=())
+    gh.connect(token_empty)
+
+    with pytest.raises(OAuthScopeError) as exc_info_empty:
+        gh.execute_operation("read_repo", {"repo": "sudomarc/CHAD"})
+    assert "repo:read" in str(exc_info_empty.value)
+
     token_limited = OAuthToken(access_token="tok_read", scopes=("repo:read",))
     gh.connect(token_limited)
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
+
 from chad.connectors.base import (
     BaseConnector,
     ConnectorAccessLevel,
@@ -13,13 +14,13 @@ from chad.connectors.base import (
 class GitHubConnector(BaseConnector):
     """Connector for GitHub API integration."""
 
-    SCOPES = (
+    SCOPES: ClassVar[tuple[ConnectorScope, ...]] = (
         ConnectorScope("repo:read", "Read repository contents and metadata", ConnectorAccessLevel.READ),
         ConnectorScope("issues:write", "Create and modify issues", ConnectorAccessLevel.WRITE),
         ConnectorScope("pull_requests:write", "Create and modify pull requests", ConnectorAccessLevel.WRITE),
     )
 
-    OPERATIONS = {
+    OPERATIONS: ClassVar[dict[str, OperationMetadata]] = {
         "read_repo": OperationMetadata(
             name="read_repo",
             description="Read GitHub repository details and files",
@@ -50,9 +51,7 @@ class GitHubConnector(BaseConnector):
         return self.OPERATIONS
 
     def health_check(self) -> bool:
-        if self.status != ConnectorStatus.CONNECTED:
-            return False
-        return True
+        return self.status == ConnectorStatus.CONNECTED
 
     def execute_operation(
         self,
@@ -79,12 +78,12 @@ class GitHubConnector(BaseConnector):
 class NotionConnector(BaseConnector):
     """Connector for Notion workspace API integration."""
 
-    SCOPES = (
+    SCOPES: ClassVar[tuple[ConnectorScope, ...]] = (
         ConnectorScope("pages:read", "Read Notion pages and databases", ConnectorAccessLevel.READ),
         ConnectorScope("pages:write", "Create and update Notion pages", ConnectorAccessLevel.WRITE),
     )
 
-    OPERATIONS = {
+    OPERATIONS: ClassVar[dict[str, OperationMetadata]] = {
         "read_page": OperationMetadata(
             name="read_page",
             description="Read contents of a Notion page",
@@ -152,12 +151,12 @@ class NotionConnector(BaseConnector):
 class DriveConnector(BaseConnector):
     """Connector for Google Drive storage integration."""
 
-    SCOPES = (
+    SCOPES: ClassVar[tuple[ConnectorScope, ...]] = (
         ConnectorScope("drive.readonly", "Read files and metadata from Google Drive", ConnectorAccessLevel.READ),
         ConnectorScope("drive.file", "Create, update, and delete files in Google Drive", ConnectorAccessLevel.WRITE),
     )
 
-    OPERATIONS = {
+    OPERATIONS: ClassVar[dict[str, OperationMetadata]] = {
         "list_files": OperationMetadata(
             name="list_files",
             description="List files in Google Drive directory",
@@ -224,12 +223,12 @@ class DriveConnector(BaseConnector):
 class SlackConnector(BaseConnector):
     """Connector for Slack messaging integration."""
 
-    SCOPES = (
+    SCOPES: ClassVar[tuple[ConnectorScope, ...]] = (
         ConnectorScope("channels:read", "Read Slack channels and public message history", ConnectorAccessLevel.READ),
         ConnectorScope("chat:write", "Post messages to Slack channels", ConnectorAccessLevel.WRITE),
     )
 
-    OPERATIONS = {
+    OPERATIONS: ClassVar[dict[str, OperationMetadata]] = {
         "read_channel": OperationMetadata(
             name="read_channel",
             description="Read message history from a Slack channel",
@@ -278,12 +277,12 @@ class SlackConnector(BaseConnector):
 class CalendarConnector(BaseConnector):
     """Connector for Calendar event integration."""
 
-    SCOPES = (
+    SCOPES: ClassVar[tuple[ConnectorScope, ...]] = (
         ConnectorScope("calendar.readonly", "View calendar events and schedules", ConnectorAccessLevel.READ),
         ConnectorScope("calendar.events", "Create and cancel calendar events", ConnectorAccessLevel.WRITE),
     )
 
-    OPERATIONS = {
+    OPERATIONS: ClassVar[dict[str, OperationMetadata]] = {
         "list_events": OperationMetadata(
             name="list_events",
             description="List scheduled calendar events",
@@ -340,12 +339,12 @@ class CalendarConnector(BaseConnector):
 class EmailConnector(BaseConnector):
     """Connector for Email service integration (Gmail/SMTP/IMAP)."""
 
-    SCOPES = (
+    SCOPES: ClassVar[tuple[ConnectorScope, ...]] = (
         ConnectorScope("mail.read", "Read inbox emails and threads", ConnectorAccessLevel.READ),
         ConnectorScope("mail.send", "Send emails to external recipients", ConnectorAccessLevel.WRITE),
     )
 
-    OPERATIONS = {
+    OPERATIONS: ClassVar[dict[str, OperationMetadata]] = {
         "read_emails": OperationMetadata(
             name="read_emails",
             description="Read unread or queried emails",

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from chad.connectors.base import BaseConnector, ConnectorError
 from chad.connectors.models import ConnectorHealth, ConnectorType
 

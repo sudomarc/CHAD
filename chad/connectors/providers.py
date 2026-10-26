@@ -37,7 +37,7 @@ class GitHubConnector(BaseConnector):
         params: dict[str, Any] | None = None,
         side_effect_confirmed: bool = False,
     ) -> ConnectorResult:
-        action_info = self.validate_action(action_name, side_effect_confirmed=side_effect_confirmed)
+        self.validate_action(action_name, side_effect_confirmed=side_effect_confirmed)
         params = params or {}
 
         if action_name == "list_repos":

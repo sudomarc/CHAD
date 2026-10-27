@@ -107,6 +107,42 @@ def test_web_models_and_conversations(tmp_path: Path) -> None:
         assert status == 200
         assert body["conversation"]["id"] == conv_id
 
+        # DELETE /api/conversations/<id>
+        status, body = _http_request(f"{base_url}/api/conversations/{conv_id}", method="DELETE")
+        assert status == 200
+        assert body["status"] == "deleted"
+        assert body["id"] == conv_id
+
+        # GET /api/conversations/<id> after delete
+        status, body = _http_request(f"{base_url}/api/conversations/{conv_id}")
+        assert status == 404
+
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_web_tools(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+    server = create_web_server(app, host="127.0.0.1", port=0)
+    host, port = server.server_address
+
+    thread = threading.Thread(target=server.serve_forever)
+    thread.daemon = True
+    thread.start()
+
+    try:
+        base_url = f"http://{host}:{port}"
+
+        # GET /api/tools
+        status, body = _http_request(f"{base_url}/api/tools")
+        assert status == 200
+        assert "tools" in body
+        assert isinstance(body["tools"], list)
+        tool_ids = [t["id"] for t in body["tools"]]
+        assert "calculator" in tool_ids
+        assert "web_search" in tool_ids
+
     finally:
         server.shutdown()
         server.server_close()
@@ -126,6 +162,10 @@ def test_web_not_found_and_errors(tmp_path: Path) -> None:
 
         # GET invalid endpoint
         status, body = _http_request(f"{base_url}/api/invalid")
+        assert status == 404
+
+        # DELETE invalid endpoint
+        status, body = _http_request(f"{base_url}/api/conversations/non_existent_conv", method="DELETE")
         assert status == 404
 
         # POST /api/chat missing text

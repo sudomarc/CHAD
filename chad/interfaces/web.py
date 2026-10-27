@@ -7,6 +7,9 @@ from typing import Any
 from urllib.parse import urlparse
 
 from chad.app import ChadApp
+from chad.core.conversation import ConversationStatus
+from chad.tools.builtin import register_builtin_tools
+from chad.tools.registry import ToolRegistry
 
 
 class WebApiHandler(BaseHTTPRequestHandler):
@@ -18,7 +21,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
         self.wfile.write(payload)
@@ -33,7 +36,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self) -> None:
         self.send_response(HTTPStatus.NO_CONTENT)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
@@ -61,6 +64,13 @@ class WebApiHandler(BaseHTTPRequestHandler):
             self._send_json({"models": models})
             return
 
+        if path == "/api/tools":
+            registry = ToolRegistry()
+            register_builtin_tools(registry)
+            tools = [tool.to_dict() for tool in registry.list_tools()]
+            self._send_json({"tools": tools})
+            return
+
         if path == "/api/conversations":
             conversations = [conv.to_dict() for conv in self.app.history()]
             self._send_json({"conversations": conversations})
@@ -70,6 +80,8 @@ class WebApiHandler(BaseHTTPRequestHandler):
             conv_id = path.split("/")[-1]
             try:
                 conv = self.app.load_conversation(conv_id)
+                if conv.status == ConversationStatus.DELETED:
+                    raise KeyError(conv_id)
                 self._send_json({"conversation": conv.to_dict()})
             except Exception as err:  # noqa: BLE001
                 self._send_json({"error": str(err)}, HTTPStatus.NOT_FOUND)
@@ -108,6 +120,25 @@ class WebApiHandler(BaseHTTPRequestHandler):
                 )
             except Exception as err:  # noqa: BLE001
                 self._send_json({"error": str(err)}, HTTPStatus.BAD_REQUEST)
+            return
+
+        self._send_json({"error": "Not Found"}, HTTPStatus.NOT_FOUND)
+
+    def do_DELETE(self) -> None:
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
+
+        if self.app is None:
+            self._send_json({"error": "App instance not bound"}, HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+
+        if path.startswith("/api/conversations/"):
+            conv_id = path.split("/")[-1]
+            try:
+                self.app.store.delete(conv_id)
+                self._send_json({"status": "deleted", "id": conv_id})
+            except Exception as err:  # noqa: BLE001
+                self._send_json({"error": str(err)}, HTTPStatus.NOT_FOUND)
             return
 
         self._send_json({"error": "Not Found"}, HTTPStatus.NOT_FOUND)

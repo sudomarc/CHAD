@@ -33,6 +33,16 @@ Owns HTTP/UI/CLI transport and presentation only.
 
 It must not construct model prompts by hand or import model implementation internals.
 
+The HTTP Web API (`chad.interfaces.web`) exposes endpoints for web client interactions:
+- `GET /api/health`: Health status endpoint.
+- `GET /api/models`: Lists registered models and capabilities.
+- `GET /api/tools`: Lists available tools from the Tool Registry.
+- `GET /api/conversations`: Lists conversation history.
+- `POST /api/conversations`: Creates a new conversation.
+- `GET /api/conversations/{id}`: Loads details for a specific conversation.
+- `DELETE /api/conversations/{id}`: Deletes a specific conversation from storage.
+- `POST /api/chat`: Sends a user chat message.
+
 ### Application layer
 
 Owns request lifecycle, authorization, conversation state transitions, task lifecycle and user-facing errors.

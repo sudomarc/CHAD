@@ -4,7 +4,6 @@ import pytest
 from chad.connectors import (
     AuthenticationError,
     CalendarConnector,
-    ConnectorHealth,
     ConnectorOperation,
     ConnectorOperationType,
     ConnectorRegistry,

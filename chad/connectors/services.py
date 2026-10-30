@@ -20,22 +20,20 @@ class GitHubConnector(BaseConnector):
         self.validate_access(required_scope)
         self.enforce_side_effect_policy(operation, op_type, confirmed)
 
-        if op_type == OperationType.READ:
-            if operation in ("list_repos", "get_issue"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed read {operation} with params {params}"},
-                }
-        elif op_type == OperationType.WRITE:
-            if operation in ("create_issue", "merge_pr"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed write {operation} with params {params}"},
-                }
+        if op_type == OperationType.READ and operation in ("list_repos", "get_issue"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed read {operation} with params {params}"},
+            }
+        if op_type == OperationType.WRITE and operation in ("create_issue", "merge_pr"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed write {operation} with params {params}"},
+            }
         raise ConnectorError(f"Unsupported operation '{operation}' for service '{self.service_name}'.")
 
 
@@ -55,22 +53,20 @@ class NotionConnector(BaseConnector):
         self.validate_access(required_scope)
         self.enforce_side_effect_policy(operation, op_type, confirmed)
 
-        if op_type == OperationType.READ:
-            if operation in ("get_page", "search_pages"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed read {operation} with params {params}"},
-                }
-        elif op_type == OperationType.WRITE:
-            if operation in ("create_page", "update_page"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed write {operation} with params {params}"},
-                }
+        if op_type == OperationType.READ and operation in ("get_page", "search_pages"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed read {operation} with params {params}"},
+            }
+        if op_type == OperationType.WRITE and operation in ("create_page", "update_page"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed write {operation} with params {params}"},
+            }
         raise ConnectorError(f"Unsupported operation '{operation}' for service '{self.service_name}'.")
 
 
@@ -90,22 +86,20 @@ class DriveConnector(BaseConnector):
         self.validate_access(required_scope)
         self.enforce_side_effect_policy(operation, op_type, confirmed)
 
-        if op_type == OperationType.READ:
-            if operation in ("list_files", "get_file"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed read {operation} with params {params}"},
-                }
-        elif op_type == OperationType.WRITE:
-            if operation in ("upload_file", "delete_file"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed write {operation} with params {params}"},
-                }
+        if op_type == OperationType.READ and operation in ("list_files", "get_file"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed read {operation} with params {params}"},
+            }
+        if op_type == OperationType.WRITE and operation in ("upload_file", "delete_file"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed write {operation} with params {params}"},
+            }
         raise ConnectorError(f"Unsupported operation '{operation}' for service '{self.service_name}'.")
 
 
@@ -125,22 +119,20 @@ class SlackConnector(BaseConnector):
         self.validate_access(required_scope)
         self.enforce_side_effect_policy(operation, op_type, confirmed)
 
-        if op_type == OperationType.READ:
-            if operation in ("list_channels", "read_messages"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed read {operation} with params {params}"},
-                }
-        elif op_type == OperationType.WRITE:
-            if operation in ("post_message", "delete_message"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed write {operation} with params {params}"},
-                }
+        if op_type == OperationType.READ and operation in ("list_channels", "read_messages"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed read {operation} with params {params}"},
+            }
+        if op_type == OperationType.WRITE and operation in ("post_message", "delete_message"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed write {operation} with params {params}"},
+            }
         raise ConnectorError(f"Unsupported operation '{operation}' for service '{self.service_name}'.")
 
 
@@ -160,22 +152,20 @@ class CalendarConnector(BaseConnector):
         self.validate_access(required_scope)
         self.enforce_side_effect_policy(operation, op_type, confirmed)
 
-        if op_type == OperationType.READ:
-            if operation in ("list_events", "get_event"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed read {operation} with params {params}"},
-                }
-        elif op_type == OperationType.WRITE:
-            if operation in ("create_event", "delete_event"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed write {operation} with params {params}"},
-                }
+        if op_type == OperationType.READ and operation in ("list_events", "get_event"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed read {operation} with params {params}"},
+            }
+        if op_type == OperationType.WRITE and operation in ("create_event", "delete_event"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed write {operation} with params {params}"},
+            }
         raise ConnectorError(f"Unsupported operation '{operation}' for service '{self.service_name}'.")
 
 
@@ -195,20 +185,18 @@ class EmailConnector(BaseConnector):
         self.validate_access(required_scope)
         self.enforce_side_effect_policy(operation, op_type, confirmed)
 
-        if op_type == OperationType.READ:
-            if operation in ("list_emails", "get_email"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed read {operation} with params {params}"},
-                }
-        elif op_type == OperationType.WRITE:
-            if operation in ("send_email", "delete_email"):
-                return {
-                    "service": self.service_name,
-                    "operation": operation,
-                    "status": "success",
-                    "data": {"result": f"Executed write {operation} with params {params}"},
-                }
+        if op_type == OperationType.READ and operation in ("list_emails", "get_email"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed read {operation} with params {params}"},
+            }
+        if op_type == OperationType.WRITE and operation in ("send_email", "delete_email"):
+            return {
+                "service": self.service_name,
+                "operation": operation,
+                "status": "success",
+                "data": {"result": f"Executed write {operation} with params {params}"},
+            }
         raise ConnectorError(f"Unsupported operation '{operation}' for service '{self.service_name}'.")

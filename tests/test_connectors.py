@@ -9,7 +9,6 @@ from chad.connectors import (
     CalendarConnector,
     ConnectorError,
     ConnectorRegistry,
-    ConnectorRevokedError,
     DriveConnector,
     EmailConnector,
     GitHubConnector,

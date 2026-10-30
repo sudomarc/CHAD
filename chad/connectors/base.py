@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 
 from chad.connectors.models import (
     AuthError,
-    ConnectorError,
     ConnectorHealth,
     ConnectorRevokedError,
     OAuthToken,

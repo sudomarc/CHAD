@@ -16,7 +16,7 @@ Phase 1 — Conversation kernel (Completed)
 - Archive/delete lifecycle.
 - Summaries, correlation IDs, idempotency.
 
-Phase 2 — Model Gateway
+Phase 2 — Model Gateway (Completed)
 - Normalized gateway (`ModelGateway`).
 - Lapis adapter (`HttpLapisClient`, `LocalLapisClient`).
 - External provider adapter (`ExternalProviderClient`).
@@ -120,7 +120,7 @@ Phase 15 — Evaluation (Completed)
 - Evaluation runner and metrics (`EvaluationRunner`, `EvaluationReport`, `TestCaseResult`).
 - Release gates and regression reports (`ReleaseGateEvaluator`, `QualityThreshold`, `RegressionReport`).
 
-Phase 16 — External connectors
+Phase 16 — External connectors (Completed)
 - GitHub, Notion, Drive, Slack, Calendar, Email.
 - OAuth/scopes.
 - Read/write separation.

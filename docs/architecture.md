@@ -290,7 +290,16 @@ The `chad.security` module provides unified runtime threat defense via `Security
 - `ExfiltrationGuard`: Scans outputs and payloads for credential/secret leakage and covert exfiltration URL channels.
 - `SandboxEscapeGuard`: Validates commands and file paths against filesystem containment boundaries and restricted syscalls.
 
-## 13. Deployment evolution
+## 13. External connectors architecture
+
+The `chad.connectors` module provides standardized integration with external third-party services (GitHub, Notion, Drive, Slack, Calendar, Email):
+- `BaseConnector`: Abstract base class enforcing OAuth token lifecycle, scope validation, status tracking, and operation metadata.
+- Read/Write Separation: Operations are strictly categorized (`ConnectorActionType.READ` vs `ConnectorActionType.WRITE`).
+- Side-Effect Confirmation: Mutating/write operations enforce explicit side-effect confirmation (`SideEffectConfirmationRequiredError`).
+- Revocation & Health: Supports explicit credential revocation (`revoke_token`) and connectivity/health status reporting (`check_health`).
+- `ConnectorRegistry`: Centralized registry for managing connector instances, health checking, credential revocation, and lifecycle tracking.
+
+## 14. Deployment evolution
 
 ### Stage A
 

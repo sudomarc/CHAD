@@ -41,10 +41,14 @@ The Agent Runtime Kernel is implemented in `chad/agent/`:
   - `MultiAgentDelegator`: Multi-agent delegation of sub-tasks across specialist agent roles (`ORCHESTRATOR`, `RESEARCHER`, `CODER`, `ANALYST`) with state tracking (`DelegatedTaskResult`).
   - `CostReliabilityPlanner`: Trade-off planner (`ExecutionStrategy`) balancing cost limits and reliability scores to select optimal execution models and policies.
 
-## Specialist Tools (`chad.tools`)
+## Specialist Tools (`chad.tools` & `chad.connectors`)
 
 - Built-in tools: `calculator`, `datetime_now`, `read_file`.
 - Research tools: `web_search`, `fetch_page`, `extract_evidence`.
+- External connectors (`chad.connectors`):
+  - Integrations: GitHub, Notion, Google Drive, Slack, Google Calendar, Email.
+  - OAuth token management (`OAuthToken`), scope enforcement (`OAuthScopeError`), read/write separation, side-effect confirmation (`SideEffectConfirmationRequiredError`), token revocation, and health checks (`health_check`).
+  - Connector tool generation (`ConnectorRegistry.generate_tools`).
 
 ## Initial Specialist Roles
 

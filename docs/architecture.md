@@ -299,7 +299,16 @@ The `chad.connectors` module provides standardized integration with external thi
 - Revocation & Health: Supports explicit credential revocation (`revoke`) and connectivity/health status reporting (`health_check`).
 - `ConnectorRegistry`: Centralized registry for managing connector instances, health checking, credential revocation, and bridging connector operations into CHAD executable tools (`generate_tools`).
 
-## 14. Deployment evolution
+## 14. Multi-user platform architecture
+
+The `chad.auth` module provides enterprise-grade multi-user infrastructure, role-based access control, tenant isolation, quota management, and GDPR account lifecycle controls:
+- **Authentication & RBAC (`AuthEngine`)**: Secure PBKDF2-HMAC-SHA256 password hashing, API key issuance (`chad_live_...`), and role-based permissions (`UserRole.ADMIN`, `UserRole.MEMBER`, `UserRole.GUEST`).
+- **Session Lifecycle (`SessionManager`)**: Token hashing, activity tracking, session extension, and immediate revocation for single sessions or all user sessions.
+- **Tenant Isolation & Ownership (`DataOwnershipManager`)**: Enforces resource ownership boundaries on conversations, memories, documents, and agent tasks, denying cross-user access with `AccessDeniedError`.
+- **Tiered Quotas (`QuotaManager`)**: Implements tiered rate limiting (requests/minute), daily token consumption budgets, and storage capacity enforcement (`UserTier.FREE`, `UserTier.PRO`, `UserTier.ENTERPRISE`).
+- **GDPR Account Deletion & Audit Boundaries (`AccountLifecycleManager`)**: Supports cascade account deletion and irreversible cryptographic pseudonymization (`[ANONYMIZED_USER:<hash>]`) in audit logs to protect PII while maintaining verifiable audit records.
+
+## 15. Deployment evolution
 
 ### Stage A
 

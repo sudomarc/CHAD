@@ -26,6 +26,7 @@ class Conversation:
     created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     status: ConversationStatus = ConversationStatus.ACTIVE
+    owner_id: str | None = None
     active_branch_head_id: str | None = None
     processed_idempotency_keys: list[str] = field(default_factory=list)
 
@@ -223,6 +224,7 @@ class Conversation:
             "summary": self.summary,
             "model": self.model,
             "status": self.status.value,
+            "owner_id": self.owner_id,
             "active_branch_head_id": self.active_branch_head_id,
             "processed_idempotency_keys": list(self.processed_idempotency_keys),
             "created_at": self.created_at,
@@ -264,6 +266,7 @@ class Conversation:
             else None,
             model=data.get("model") if isinstance(data.get("model"), str) else None,
             status=status,
+            owner_id=data.get("owner_id") if isinstance(data.get("owner_id"), str) else None,
             active_branch_head_id=str(active_head) if isinstance(active_head, str) else None,
             processed_idempotency_keys=processed_idempotency_keys,
             created_at=str(data.get("created_at") or datetime.now(UTC).isoformat()),

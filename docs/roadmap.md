@@ -16,7 +16,7 @@ Phase 1 — Conversation kernel (Completed)
 - Archive/delete lifecycle.
 - Summaries, correlation IDs, idempotency.
 
-Phase 2 — Model Gateway
+Phase 2 — Model Gateway (Completed)
 - Normalized gateway (`ModelGateway`).
 - Lapis adapter (`HttpLapisClient`, `LocalLapisClient`).
 - External provider adapter (`ExternalProviderClient`).
@@ -93,12 +93,12 @@ Phase 11 — Web product
 - Chat/history/model/tool/source/file/agent-progress/approval UI.
 - Accessibility, responsiveness, browser verification.
 
-Phase 12 — Multi-user platform
-- Authentication/authorization.
-- Data ownership.
-- Sessions.
-- Rate/token/storage quotas.
-- Account deletion and audit boundaries.
+Phase 12 — Multi-user platform (Completed)
+- Authentication/authorization (`User`, `UserRole`, `Permission`, `AuthEngine`).
+- Data ownership (`DataOwnershipManager`, resource-level isolation).
+- Sessions (`SessionManager`, `SessionRecord`, lifecycle, revocation).
+- Rate/token/storage quotas (`QuotaManager`, `UserTier`, `QuotaLimits`, `RateLimitExceededError`).
+- Account deletion and audit boundaries (`AccountLifecycleManager`, cascade deletion, audit pseudonymization).
 
 Phase 13 — Economics and observability (Completed)
 - Usage metering (`UsageMeter`, `TokenUsageRecord`).

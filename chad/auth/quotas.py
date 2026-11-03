@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from chad.auth.models import (
+    TIER_LIMITS,
     QuotaLimits,
     QuotaUsage,
     RateLimitExceededError,
     StorageQuotaExceededError,
-    TIER_LIMITS,
     TokenQuotaExceededError,
     User,
     UserTier,

@@ -66,10 +66,7 @@ class DataOwnershipManager:
             return True
 
         # Admin override
-        if self.allow_admin_override and user.role == UserRole.ADMIN:
-            return True
-
-        return False
+        return bool(self.allow_admin_override and user.role == UserRole.ADMIN)
 
     def assert_access(
         self,

@@ -62,16 +62,20 @@ class WebApiHandler(BaseHTTPRequestHandler):
             try:
                 session = self.session_manager.authenticate_session(token)
                 return self.auth_engine.get_user(session.user_id)
-            except Exception:
-                pass
+            except (AuthError, KeyError, ValueError):
+                user_from_session = None
+            else:
+                return user_from_session
 
         # Try API key
         if self.auth_engine is not None:
             try:
                 user, _ = self.auth_engine.authenticate_api_key(token)
                 return user
-            except Exception:
-                pass
+            except (AuthError, KeyError, ValueError):
+                user_from_key = None
+            else:
+                return user_from_key
 
         return None
 
@@ -152,9 +156,13 @@ class WebApiHandler(BaseHTTPRequestHandler):
 
                 if current_user is not None and self.ownership_manager is not None:
                     self.ownership_manager.assert_access(current_user, conv.owner_id, action="read")
-                elif current_user is not None and conv.owner_id is not None:
-                    if conv.owner_id != current_user.id and current_user.role != UserRole.ADMIN:
-                        raise AccessDeniedError("Access to this conversation is denied")
+                elif (
+                    current_user is not None
+                    and conv.owner_id is not None
+                    and conv.owner_id != current_user.id
+                    and current_user.role != UserRole.ADMIN
+                ):
+                    raise AccessDeniedError("Access to this conversation is denied")
 
                 self._send_json({"conversation": conv.to_dict()})
             except AccessDeniedError as err:
@@ -293,9 +301,13 @@ class WebApiHandler(BaseHTTPRequestHandler):
                 conv = self.app.load_conversation(conv_id)
                 if current_user is not None and self.ownership_manager is not None:
                     self.ownership_manager.assert_access(current_user, conv.owner_id, action="delete")
-                elif current_user is not None and conv.owner_id is not None:
-                    if conv.owner_id != current_user.id and current_user.role != UserRole.ADMIN:
-                        raise AccessDeniedError("Access to delete this conversation is denied")
+                elif (
+                    current_user is not None
+                    and conv.owner_id is not None
+                    and conv.owner_id != current_user.id
+                    and current_user.role != UserRole.ADMIN
+                ):
+                    raise AccessDeniedError("Access to delete this conversation is denied")
 
                 self.app.store.delete(conv_id)
                 if self.ownership_manager is not None:

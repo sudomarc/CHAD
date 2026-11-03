@@ -10,10 +10,10 @@ from typing import Any
 from uuid import uuid4
 
 from chad.auth.models import (
+    ROLE_PERMISSIONS,
     AccessDeniedError,
     InvalidCredentialsError,
     Permission,
-    ROLE_PERMISSIONS,
     User,
     UserAlreadyExistsError,
     UserNotFoundError,
@@ -36,7 +36,7 @@ def verify_password(password: str, stored_hash: str) -> bool:
         expected = bytes.fromhex(key_hex)
         computed = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100_000)
         return hmac.compare_digest(expected, computed)
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 

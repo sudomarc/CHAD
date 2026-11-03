@@ -3,6 +3,7 @@ from __future__ import annotations
 from chad.auth.engine import ApiKeyRecord, AuthEngine, hash_password, verify_password
 from chad.auth.lifecycle import AccountLifecycleManager
 from chad.auth.models import (
+    TIER_LIMITS,
     AccessDeniedError,
     AuthContext,
     AuthError,
@@ -15,7 +16,6 @@ from chad.auth.models import (
     SessionExpiredError,
     SessionRecord,
     StorageQuotaExceededError,
-    TIER_LIMITS,
     TokenQuotaExceededError,
     User,
     UserAlreadyExistsError,
@@ -28,6 +28,7 @@ from chad.auth.quotas import QuotaManager
 from chad.auth.sessions import SessionManager
 
 __all__ = [
+    "TIER_LIMITS",
     "AccessDeniedError",
     "AccountLifecycleManager",
     "ApiKeyRecord",
@@ -47,7 +48,6 @@ __all__ = [
     "SessionManager",
     "SessionRecord",
     "StorageQuotaExceededError",
-    "TIER_LIMITS",
     "TokenQuotaExceededError",
     "User",
     "UserAlreadyExistsError",

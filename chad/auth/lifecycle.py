@@ -72,29 +72,28 @@ class AccountLifecycleManager:
 
         # 3. Cascade delete owned conversations
         if cascade and self.conversation_store is not None:
-            try:
-                user_convs = self.conversation_store.list(include_archived=True, include_deleted=True)
-                for conv in user_convs:
-                    if getattr(conv, "owner_id", None) == user_id:
+            user_convs = self.conversation_store.list(include_archived=True, include_deleted=True)
+            for conv in user_convs:
+                if getattr(conv, "owner_id", None) == user_id:
+                    try:
                         self.conversation_store.delete(conv.id, hard=True)
                         report["conversations_deleted"] += 1
-            except Exception:
-                pass
+                    except (KeyError, OSError):
+                        continue
 
         # 4. Cascade delete memory items
         if cascade and self.memory_store is not None:
-            try:
-                # Find all memory items matching user_id
-                all_memories = self.memory_store.list()
-                for mem in all_memories:
-                    if getattr(mem, "user_id", None) == user_id:
+            all_memories = self.memory_store.list()
+            for mem in all_memories:
+                if getattr(mem, "user_id", None) == user_id:
+                    try:
                         self.memory_store.delete(mem.id)
                         report["memories_deleted"] += 1
-            except Exception:
-                pass
+                    except (KeyError, OSError):
+                        continue
 
         # 5. Revoke any API keys
-        for key_id, record in list(self.auth_engine._api_keys.items()):
+        for _key_id, record in list(self.auth_engine._api_keys.items()):
             if record.user_id == user_id:
                 record.is_revoked = True
 

@@ -22,6 +22,7 @@ from chad.auth.models import (
     TokenQuotaExceededError,
     User,
     UserAlreadyExistsError,
+    UserNotFoundError,
     UserRole,
     UserTier,
 )
@@ -178,8 +179,8 @@ def test_session_manager_lifecycle() -> None:
 def test_session_manager_revoke_all_and_prune() -> None:
     sm = SessionManager(default_ttl_seconds=3600)
     user_id = "user-abc"
-    s1, t1 = sm.create_session(user_id)
-    s2, t2 = sm.create_session(user_id)
+    _s1, _t1 = sm.create_session(user_id)
+    _s2, _t2 = sm.create_session(user_id)
 
     assert len(sm.list_active_sessions(user_id)) == 2
 
@@ -270,8 +271,8 @@ def test_account_lifecycle_deletion_and_anonymization(tmp_path: Path) -> None:
     dom = DataOwnershipManager()
 
     user = auth_engine.register_user("charlie", "charlie@chad.ai", "charlie123")
-    sess, tok = session_manager.create_session(user.id)
-    key_rec, raw_key = auth_engine.create_api_key(user.id)
+    _sess, _tok = session_manager.create_session(user.id)
+    _key_rec, _raw_key = auth_engine.create_api_key(user.id)
 
     # Create owned conversation
     conv = Conversation(title="Charlie Conv", owner_id=user.id)
@@ -299,7 +300,7 @@ def test_account_lifecycle_deletion_and_anonymization(tmp_path: Path) -> None:
     assert report["conversations_deleted"] == 1
 
     # Verify user is gone from auth engine
-    with pytest.raises(Exception):
+    with pytest.raises(UserNotFoundError):
         auth_engine.get_user(user.id)
 
     # Verify conversation is gone from store

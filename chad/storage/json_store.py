@@ -63,6 +63,7 @@ class ConversationStore:
         status: ConversationStatus | None = ConversationStatus.ACTIVE,
         include_archived: bool = False,
         include_deleted: bool = False,
+        user_id: str | None = None,
     ) -> list[Conversation]:
         conversations: list[Conversation] = []
         for path in sorted(
@@ -74,6 +75,8 @@ class ConversationStore:
                 payload = json.loads(path.read_text(encoding="utf-8"))
                 if isinstance(payload, dict):
                     conv = Conversation.from_dict(payload)
+                    if user_id is not None and conv.owner_id != user_id:
+                        continue
                     if status is not None and conv.status != status:
                         if (
                             conv.status == ConversationStatus.ARCHIVED and include_archived

@@ -93,12 +93,13 @@ Phase 11 — Web product
 - Chat/history/model/tool/source/file/agent-progress/approval UI.
 - Accessibility, responsiveness, browser verification.
 
-Phase 12 — Multi-user platform
-- Authentication/authorization.
-- Data ownership.
-- Sessions.
-- Rate/token/storage quotas.
-- Account deletion and audit boundaries.
+Phase 12 — Multi-user platform (Completed)
+- Authentication/authorization (`UserRole`, `Permission`, `User`, `hash_password`, `verify_password`).
+- Data ownership (`DataOwnershipManager`, multi-tenant isolation, resource access controls).
+- Sessions (`SessionManager`, `Session`, token validation, revocation).
+- Rate/token/storage quotas (`QuotaManager`, `UserQuota`, `QuotaExceededError`).
+- Account deletion and audit boundaries (`AccountLifecycleManager`, GDPR anonymization).
+- Web auth endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/me`, `/api/auth/quota`, `/api/auth/account`).
 
 Phase 13 — Economics and observability (Completed)
 - Usage metering (`UsageMeter`, `TokenUsageRecord`).

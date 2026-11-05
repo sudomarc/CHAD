@@ -90,7 +90,7 @@ Phase 10 — Memory (Completed)
 
 Phase 11 — Web product
 - Next.js/React/TypeScript client.
-- Chat/history/model/tool/source/file/agent-progress/approval UI.
+- Chat/history/model/tool/source/file/agent-progress/approval endpoints (`/api/agent/approve`, `/api/agent/deny`).
 - Accessibility, responsiveness, browser verification.
 
 Phase 12 — Multi-user platform

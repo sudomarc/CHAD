@@ -37,11 +37,16 @@ The HTTP Web API (`chad.interfaces.web`) exposes endpoints for web client intera
 - `GET /api/health`: Health status endpoint.
 - `GET /api/models`: Lists registered models and capabilities.
 - `GET /api/tools`: Lists available tools from the Tool Registry.
-- `GET /api/conversations`: Lists conversation history.
+- `GET /api/conversations`: Lists conversation history (scoped by ownership).
 - `POST /api/conversations`: Creates a new conversation.
 - `GET /api/conversations/{id}`: Loads details for a specific conversation.
 - `DELETE /api/conversations/{id}`: Deletes a specific conversation from storage.
-- `POST /api/chat`: Sends a user chat message.
+- `POST /api/chat`: Sends a user chat message with rate and token quota enforcement.
+- `POST /api/auth/register`: Registers a new user.
+- `POST /api/auth/login`: Authenticates a user and issues a bearer token.
+- `GET /api/auth/me`: Returns profile for the currently authenticated user.
+- `GET /api/auth/quota`: Returns remaining quotas for the current user.
+- `DELETE /api/auth/account`: Executes GDPR account deletion and audit log anonymization.
 
 ### Application layer
 

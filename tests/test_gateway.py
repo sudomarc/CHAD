@@ -11,6 +11,8 @@ from chad.core.conversation import ChatRequest, Message, MessageRole
 from chad.llm.client import LapisClient, ModelInfo
 from chad.llm.gateway import (
     AuthenticationError,
+    CancellationError,
+    CancellationToken,
     InvalidRequestError,
     ModelCapabilities,
     ModelGateway,
@@ -263,3 +265,69 @@ def test_chad_app_with_gateway(tmp_path) -> None:
     reply = app.send("Hello world")
     assert reply == "Response to: Hello world"
     assert app.conversation.messages[-1].content == "Response to: Hello world"
+
+
+def test_cancellation_token_basics() -> None:
+    token = CancellationToken()
+    assert token.is_cancelled is False
+    assert token.reason is None
+    token.raise_if_cancelled()  # Should not raise
+
+    token.cancel("User cancelled generation")
+    assert token.is_cancelled is True
+    assert token.reason == "User cancelled generation"
+    with pytest.raises(CancellationError, match="User cancelled generation"):
+        token.raise_if_cancelled()
+
+
+def test_gateway_generate_cancelled_raises() -> None:
+    client = DummyClient("dummy-1")
+    gateway = ModelGateway(default_client=client)
+
+    token = CancellationToken()
+    token.cancel("Aborted before start")
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Hello"),))
+    with pytest.raises(CancellationError, match="Aborted before start"):
+        gateway.generate(req, cancellation_token=token)
+
+
+def test_gateway_stream_cancelled_before_start() -> None:
+    client = DummyClient("dummy-1")
+    gateway = ModelGateway(default_client=client)
+
+    token = CancellationToken()
+    token.cancel("Cancelled stream")
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Hello stream"),))
+    with pytest.raises(CancellationError, match="Cancelled stream"):
+        list(gateway.stream(req, cancellation_token=token))
+
+
+def test_gateway_stream_cancelled_mid_stream() -> None:
+    token = CancellationToken()
+
+    class MultiChunkClient(DummyClient):
+        def stream_generate(self, request: ChatRequest, cancellation_token: CancellationToken | None = None):
+            yield "Chunk 1"
+            # Cancel mid-stream after first chunk
+            token.cancel("Stop after chunk 1")
+            yield "Chunk 2"
+
+    client = MultiChunkClient("multi-stream")
+    gateway = ModelGateway(default_client=client)
+
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Hello"),))
+    stream_iter = gateway.stream(req, cancellation_token=token)
+
+    first = next(stream_iter)
+    assert first == "Chunk 1"
+    with pytest.raises(CancellationError, match="Stop after chunk 1"):
+        next(stream_iter)
+
+
+def test_gateway_capabilities_cancellation() -> None:
+    client = DummyClient("cancellation-model")
+    gateway = ModelGateway(default_client=client)
+    caps = gateway.capabilities("cancellation-model")
+    assert hasattr(caps, "cancellation")

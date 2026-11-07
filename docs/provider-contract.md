@@ -29,6 +29,7 @@ A backend advertises capabilities via `ModelCapabilities`:
 - `tool_calling` (bool)
 - `structured_output` (bool)
 - `embeddings` (bool)
+- `cancellation` (bool)
 - `context_length` (int | None)
 
 ## Multimodal and Vision Contract
@@ -89,11 +90,17 @@ All model exceptions inherit from `LLMError`:
 - `PolicyDenialError`: blocked by safety or permission policy;
 - `GenerationError`: general generation failure.
 
-## Streaming
+## Streaming and cancellation
 
 Streaming is valid only when the backend sends incremental generation events.
 
 CHAD must never manufacture fake streaming by splitting a completed response.
+
+Cancellation is mediated via `CancellationToken` (`chad.llm.gateway.CancellationToken`). Generation and streaming accept an optional `cancellation_token`. When cancelled:
+1. `cancellation_token.raise_if_cancelled()` raises `CancellationError`.
+2. `ModelGateway.generate()` and `ModelGateway.stream()` verify token status before invocation, between retry/fallback candidates, and on each incremental streaming chunk.
+3. Provider clients such as `ExternalProviderClient` check cancellation during request lifecycle and SSE chunk iteration, cleanly terminating connections upon cancellation.
+4. `ChadApp.stream()` and `ChadApp.send()` automatically roll back uncommitted user messages if generation is cancelled or fails, preserving conversation state consistency.
 
 ## Routing policy and fallback
 

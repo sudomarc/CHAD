@@ -9,6 +9,8 @@ from chad.core.conversation import ChatRequest, Message, MessageRole
 from chad.llm.external import ExternalProviderClient
 from chad.llm.gateway import (
     AuthenticationError,
+    CancellationError,
+    CancellationToken,
     InvalidRequestError,
     MalformedResponseError,
     ModelGateway,
@@ -31,8 +33,10 @@ def test_external_provider_initialization() -> None:
     assert model.id == "gpt-4o"
     assert model.backend == "openai"
     assert model.supports_streaming is True
+    assert model.supports_cancellation is True
     assert model.capabilities is not None
     assert model.capabilities.vision is True
+    assert model.capabilities.cancellation is True
     client.close()
 
 
@@ -373,3 +377,56 @@ def test_model_gateway_with_external_provider() -> None:
         assert res.provider == "openai"
 
     ext_client.close()
+
+
+def test_external_provider_stream_cancellation() -> None:
+    client = ExternalProviderClient(
+        base_url="https://api.openai.com/v1",
+        api_key="test-key",
+    )
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Stream test"),))
+    token = CancellationToken()
+
+    mock_lines = [
+        'data: {"choices": [{"delta": {"content": "First"}}]}',
+        'data: {"choices": [{"delta": {"content": "Second"}}]}',
+        "data: [DONE]",
+    ]
+
+    mock_stream_res = MagicMock()
+    mock_stream_res.status_code = 200
+
+    def iter_lines_with_cancellation():
+        for line in mock_lines:
+            yield line
+            # Cancel after yielding first line
+            token.cancel("User cancelled stream")
+
+    mock_stream_res.iter_lines.side_effect = iter_lines_with_cancellation
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_stream_res
+
+    with patch.object(client._client, "stream", return_value=mock_cm):
+        stream_iter = client.stream_generate(req, cancellation_token=token)
+        first_chunk = next(stream_iter)
+        assert first_chunk == "First"
+        with pytest.raises(CancellationError, match="User cancelled stream"):
+            next(stream_iter)
+
+    client.close()
+
+
+def test_external_provider_generate_cancellation() -> None:
+    client = ExternalProviderClient(
+        base_url="https://api.openai.com/v1",
+        api_key="test-key",
+    )
+    req = ChatRequest(messages=(Message(role=MessageRole.USER, content="Generate test"),))
+    token = CancellationToken()
+    token.cancel("Cancelled before request")
+
+    with pytest.raises(CancellationError, match="Cancelled before request"):
+        client.generate_response(req, cancellation_token=token)
+
+    client.close()

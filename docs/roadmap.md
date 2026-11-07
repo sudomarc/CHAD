@@ -16,13 +16,13 @@ Phase 1 — Conversation kernel (Completed)
 - Archive/delete lifecycle.
 - Summaries, correlation IDs, idempotency.
 
-Phase 2 — Model Gateway
+Phase 2 — Model Gateway (Completed)
 - Normalized gateway (`ModelGateway`).
 - Lapis adapter (`HttpLapisClient`, `LocalLapisClient`).
 - External provider adapter (`ExternalProviderClient`).
 - Model registry and capabilities (`ModelInfo`, `ModelCapabilities`).
 - Usage/errors normalization (`UsageInfo`, `LLMError` hierarchy).
-- Streaming and cancellation.
+- Streaming and cancellation (`CancellationToken`, `CancellationError`).
 - Fallback routing.
 
 Phase 3 — Agent runtime kernel (Completed)

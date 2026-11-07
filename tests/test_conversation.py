@@ -160,3 +160,76 @@ def test_chad_app_idempotency_and_correlation(tmp_path: pytest.TempPathFactory) 
     resp2 = app.send("Hello", correlation_id="corr-99", idempotency_key="req-99")
     assert resp2 == "Response #1 for Hello"
     assert client.calls == 1
+
+
+def test_chad_app_streaming_and_cancellation(tmp_path: pytest.TempPathFactory) -> None:
+    from pathlib import Path
+
+    from chad.app import ChadApp
+    from chad.core.config import AppConfig
+    from chad.core.conversation import ChatRequest
+    from chad.llm.client import LapisClient, ModelInfo
+    from chad.llm.gateway import CancellationError, CancellationToken, ModelCapabilities
+
+    class StreamableClient(LapisClient):
+        def __init__(self) -> None:
+            self._model = ModelInfo(
+                id="streaming-model",
+                display_name="Streaming Model",
+                supports_streaming=True,
+                supports_cancellation=True,
+                capabilities=ModelCapabilities(
+                    text_generation=True,
+                    streaming=True,
+                    cancellation=True,
+                ),
+            )
+
+        def current_model(self) -> ModelInfo:
+            return self._model
+
+        def generate(self, request: ChatRequest) -> str:
+            return "Complete: " + request.messages[-1].content
+
+        def stream_generate(self, request: ChatRequest, cancellation_token: CancellationToken | None = None):
+            yield "Hello "
+            if cancellation_token:
+                cancellation_token.raise_if_cancelled()
+            yield "streamed "
+            if cancellation_token:
+                cancellation_token.raise_if_cancelled()
+            yield "world!"
+
+    client = StreamableClient()
+    config = AppConfig(storage_dir=Path(tmp_path) / "storage")
+    app = ChadApp.create(config, client)
+
+    # 1. Successful stream
+    chunks = list(app.stream("Stream prompt"))
+    assert chunks == ["Hello ", "streamed ", "world!"]
+    assert app.conversation.messages[-1].role == MessageRole.ASSISTANT
+    assert app.conversation.messages[-1].content == "Hello streamed world!"
+
+    # 2. Cancelled stream
+    token = CancellationToken()
+
+    def stream_with_cancel():
+        stream_iter = app.stream("Another prompt", cancellation_token=token)
+        first = next(stream_iter)
+        assert first == "Hello "
+        token.cancel("User aborted stream")
+        next(stream_iter)
+
+    initial_msg_count = len(app.conversation.messages)
+    with pytest.raises(CancellationError, match="User aborted stream"):
+        stream_with_cancel()
+
+    # User message was rolled back from conversation
+    assert len(app.conversation.messages) == initial_msg_count
+
+    # 3. Cancelled send
+    token2 = CancellationToken()
+    token2.cancel("Cancel send")
+    with pytest.raises(CancellationError, match="Cancel send"):
+        app.send("Should fail immediately", cancellation_token=token2)
+    assert len(app.conversation.messages) == initial_msg_count

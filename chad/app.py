@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 
 from chad.core.config import AppConfig
 from chad.core.context import ContextLimitError
-from collections.abc import Iterator
-
 from chad.core.conversation import ChatRequest, Conversation
 from chad.core.messages import MessageRole
 from chad.llm.client import LapisClient, LLMError

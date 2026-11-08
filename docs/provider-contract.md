@@ -95,6 +95,14 @@ Streaming is valid only when the backend sends incremental generation events.
 
 CHAD must never manufacture fake streaming by splitting a completed response.
 
+## Cancellation
+
+CHAD implements cooperative cancellation through `CancellationToken` (`chad.llm.gateway.CancellationToken`).
+
+- Callers can cancel in-flight generation or streaming via `token.cancel(reason=...)`.
+- `ModelGateway`, `ExternalProviderClient`, and `ChadApp` check `cancellation_token.raise_if_cancelled()` before dispatching requests, between retries/fallbacks, and during streaming chunk iteration.
+- When cancelled, operations raise `CancellationError`, and active session/conversation state is cleanly preserved (e.g. unfulfilled user messages are cleanly removed without leaving incomplete state).
+
 ## Routing policy and fallback
 
 `ModelGateway.generate()` and `ModelGateway.stream()` accept `model_id` and optional `fallback_models`. If a primary provider encounters a recoverable error (such as `ModelUnavailableError`, `ProviderServerError`, or `TimeoutError`), the gateway automatically routes the generation or streaming request to configured fallback models in sequence.

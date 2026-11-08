@@ -5,6 +5,7 @@ from chad.llm.external import ExternalProviderClient
 from chad.llm.gateway import (
     AuthenticationError,
     CancellationError,
+    CancellationToken,
     ContextLimitExceededError,
     InvalidRequestError,
     MalformedResponseError,
@@ -21,6 +22,7 @@ from chad.llm.gateway import (
 __all__ = [
     "AuthenticationError",
     "CancellationError",
+    "CancellationToken",
     "ContextLimitExceededError",
     "ExternalProviderClient",
     "GenerationError",

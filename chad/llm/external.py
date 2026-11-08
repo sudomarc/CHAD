@@ -11,6 +11,8 @@ from chad.core.conversation import ChatRequest
 from chad.llm.client import GenerationError, LapisClient, LLMError, ModelInfo
 from chad.llm.gateway import (
     AuthenticationError,
+    CancellationError,
+    CancellationToken,
     InvalidRequestError,
     MalformedResponseError,
     ModelCapabilities,
@@ -72,6 +74,7 @@ class ExternalProviderClient(LapisClient):
             context_length=self._capabilities.context_length,
             backend=self._provider_name,
             supports_streaming=self._capabilities.streaming,
+            supports_cancellation=True,
             capabilities=self._capabilities,
         )
 
@@ -96,6 +99,7 @@ class ExternalProviderClient(LapisClient):
                                 context_length=self._capabilities.context_length,
                                 backend=self._provider_name,
                                 supports_streaming=self._capabilities.streaming,
+                                supports_cancellation=True,
                                 capabilities=self._capabilities,
                             )
                         )
@@ -154,13 +158,19 @@ class ExternalProviderClient(LapisClient):
         self,
         request: ChatRequest,
         tools: list[dict] | tuple[dict, ...] | None = None,
+        cancellation_token: CancellationToken | None = None,
     ) -> ModelResponse:
+        if cancellation_token is not None:
+            cancellation_token.raise_if_cancelled()
+
         request.validate()
         payload = self._build_payload(request, stream=False, tools=tools)
 
         start_time = time.perf_counter()
         try:
             response = self._client.post("chat/completions", json=payload)
+            if cancellation_token is not None:
+                cancellation_token.raise_if_cancelled()
             response.raise_for_status()
             latency_ms = (time.perf_counter() - start_time) * 1000
             data = response.json()
@@ -201,6 +211,9 @@ class ExternalProviderClient(LapisClient):
                     total_tokens=int(usage_data.get("total_tokens", 0)),
                 )
 
+            if cancellation_token is not None:
+                cancellation_token.raise_if_cancelled()
+
             return ModelResponse(
                 content=content.strip(),
                 model_id=str(data.get("model", request.model or self._model_id)),
@@ -219,23 +232,38 @@ class ExternalProviderClient(LapisClient):
         except httpx.HTTPStatusError as exc:
             raise self._map_http_error(exc) from exc
         except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as exc:
-            if isinstance(exc, (MalformedResponseError, AuthenticationError, RateLimitError)):
+            if isinstance(exc, (MalformedResponseError, AuthenticationError, RateLimitError, CancellationError)):
                 raise
             raise GenerationError(
                 f"{self._provider_name.capitalize()} API returned an invalid generation response."
             ) from exc
 
-    def generate(self, request: ChatRequest) -> str:
-        return self.generate_response(request).content
+    def generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> str:
+        return self.generate_response(request, cancellation_token=cancellation_token).content
 
-    def stream_generate(self, request: ChatRequest) -> Iterator[str]:
+    def stream_generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> Iterator[str]:
+        if cancellation_token is not None:
+            cancellation_token.raise_if_cancelled()
+
         request.validate()
         payload = self._build_payload(request, stream=True)
 
         try:
             with self._client.stream("POST", "chat/completions", json=payload) as response:
+                if cancellation_token is not None:
+                    cancellation_token.raise_if_cancelled()
                 response.raise_for_status()
                 for line in response.iter_lines():
+                    if cancellation_token is not None:
+                        cancellation_token.raise_if_cancelled()
                     line = line.strip()
                     if not line or not line.startswith("data: "):
                         continue
@@ -249,6 +277,8 @@ class ExternalProviderClient(LapisClient):
                             delta = choices[0].get("delta", {})
                             content = delta.get("content")
                             if content:
+                                if cancellation_token is not None:
+                                    cancellation_token.raise_if_cancelled()
                                 yield content
                     except json.JSONDecodeError:
                         continue

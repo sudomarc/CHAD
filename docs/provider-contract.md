@@ -89,11 +89,18 @@ All model exceptions inherit from `LLMError`:
 - `PolicyDenialError`: blocked by safety or permission policy;
 - `GenerationError`: general generation failure.
 
-## Streaming
+## Streaming and Cancellation
 
 Streaming is valid only when the backend sends incremental generation events.
 
 CHAD must never manufacture fake streaming by splitting a completed response.
+
+CHAD provides thread-safe cooperative request cancellation via `CancellationToken` (`chad.llm.cancellation.CancellationToken`).
+- `cancel(reason: str)`: Signals cancellation and executes registered callbacks.
+- `throw_if_cancelled()`: Raises `CancellationError` if cancelled.
+- `ModelGateway.generate()` and `ModelGateway.stream()` propagate `cancellation_token` to providers and verify cancellation pre-run and at each streamed chunk.
+- Adapters such as `ExternalProviderClient` abort network processing and raise `CancellationError` on cancellation.
+- `ChadApp.send()` supports passing `cancellation_token` directly to generation.
 
 ## Routing policy and fallback
 

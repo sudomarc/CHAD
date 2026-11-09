@@ -8,6 +8,7 @@ from typing import Self
 import httpx
 
 from chad.core.conversation import ChatRequest
+from chad.llm.cancellation import CancellationToken
 from chad.llm.client import GenerationError, LapisClient, LLMError, ModelInfo
 from chad.llm.gateway import (
     AuthenticationError,
@@ -154,13 +155,18 @@ class ExternalProviderClient(LapisClient):
         self,
         request: ChatRequest,
         tools: list[dict] | tuple[dict, ...] | None = None,
+        cancellation_token: CancellationToken | None = None,
     ) -> ModelResponse:
+        if cancellation_token is not None:
+            cancellation_token.throw_if_cancelled()
         request.validate()
         payload = self._build_payload(request, stream=False, tools=tools)
 
         start_time = time.perf_counter()
         try:
             response = self._client.post("chat/completions", json=payload)
+            if cancellation_token is not None:
+                cancellation_token.throw_if_cancelled()
             response.raise_for_status()
             latency_ms = (time.perf_counter() - start_time) * 1000
             data = response.json()
@@ -225,17 +231,31 @@ class ExternalProviderClient(LapisClient):
                 f"{self._provider_name.capitalize()} API returned an invalid generation response."
             ) from exc
 
-    def generate(self, request: ChatRequest) -> str:
-        return self.generate_response(request).content
+    def generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> str:
+        return self.generate_response(request, cancellation_token=cancellation_token).content
 
-    def stream_generate(self, request: ChatRequest) -> Iterator[str]:
+    def stream_generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> Iterator[str]:
+        if cancellation_token is not None:
+            cancellation_token.throw_if_cancelled()
         request.validate()
         payload = self._build_payload(request, stream=True)
 
         try:
             with self._client.stream("POST", "chat/completions", json=payload) as response:
+                if cancellation_token is not None:
+                    cancellation_token.throw_if_cancelled()
                 response.raise_for_status()
                 for line in response.iter_lines():
+                    if cancellation_token is not None:
+                        cancellation_token.throw_if_cancelled()
                     line = line.strip()
                     if not line or not line.startswith("data: "):
                         continue

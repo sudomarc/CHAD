@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from chad.core.conversation import ChatRequest
 
 if TYPE_CHECKING:
+    from chad.llm.cancellation import CancellationToken
     from chad.llm.gateway import ModelCapabilities, ModelResponse
 
 
@@ -38,13 +39,28 @@ class LapisClient(ABC):
     """Small application boundary around Lapis inference capabilities."""
 
     @abstractmethod
-    def generate(self, request: ChatRequest) -> str:
+    def generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> str:
         raise NotImplementedError
 
-    def generate_response(self, request: ChatRequest) -> ModelResponse:
+    def generate_response(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> ModelResponse:
+        import inspect
         from chad.llm.gateway import ModelResponse
 
-        raw_text = self.generate(request)
+        if cancellation_token is not None:
+            cancellation_token.throw_if_cancelled()
+        sig = inspect.signature(self.generate)
+        if "cancellation_token" in sig.parameters:
+            raw_text = self.generate(request, cancellation_token=cancellation_token)
+        else:
+            raw_text = self.generate(request)
         model = self.current_model()
         return ModelResponse(
             content=raw_text,
@@ -52,10 +68,18 @@ class LapisClient(ABC):
             provider=model.backend,
         )
 
-    def stream_generate(self, request: ChatRequest) -> Iterator[str]:
+    def stream_generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> Iterator[str]:
         raise NotImplementedError("streaming is not supported by this backend")
 
-    async def astream_generate(self, request: ChatRequest) -> AsyncIterator[str]:
+    async def astream_generate(
+        self,
+        request: ChatRequest,
+        cancellation_token: CancellationToken | None = None,
+    ) -> AsyncIterator[str]:
         raise NotImplementedError("streaming is not supported by this backend")
         yield ""
 

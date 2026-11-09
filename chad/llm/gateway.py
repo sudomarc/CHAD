@@ -5,6 +5,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 
 from chad.core.conversation import ChatRequest
+from chad.llm.cancellation import CancellationError, CancellationToken
 from chad.llm.client import (
     LapisClient,
     LLMError,
@@ -73,8 +74,8 @@ class MalformedResponseError(LLMError):
     pass
 
 
-class CancellationError(LLMError):
-    pass
+# Re-export CancellationError from cancellation module for backwards compatibility
+CancellationError = CancellationError
 
 
 class PolicyDenialError(LLMError):
@@ -161,12 +162,18 @@ class ModelGateway:
         model_id: str | None = None,
         fallback_models: tuple[str, ...] = (),
         tools: list[dict] | tuple[dict, ...] | None = None,
+        cancellation_token: CancellationToken | None = None,
     ) -> ModelResponse:
+        if cancellation_token is not None:
+            cancellation_token.throw_if_cancelled()
+
         target_models = (model_id or request.model,) + fallback_models
         last_error: Exception | None = None
 
         for candidate_model in target_models:
             try:
+                if cancellation_token is not None:
+                    cancellation_token.throw_if_cancelled()
                 client, resolved_model = self._get_client_for_model(candidate_model)
                 self._verify_multimodal_request(request, resolved_model)
                 start_time = time.perf_counter()
@@ -174,10 +181,12 @@ class ModelGateway:
                 if hasattr(client, "generate_response"):
                     import inspect
                     sig = inspect.signature(client.generate_response)
+                    kwargs: dict[str, object] = {}
                     if "tools" in sig.parameters:
-                        response = client.generate_response(request, tools=tools)
-                    else:
-                        response = client.generate_response(request)
+                        kwargs["tools"] = tools
+                    if "cancellation_token" in sig.parameters:
+                        kwargs["cancellation_token"] = cancellation_token
+                    response = client.generate_response(request, **kwargs)
 
                     if not isinstance(response, ModelResponse):
                         latency_ms = (time.perf_counter() - start_time) * 1000
@@ -187,10 +196,19 @@ class ModelGateway:
                             provider=client.current_model().backend,
                             latency_ms=latency_ms,
                         )
+                    if cancellation_token is not None:
+                        cancellation_token.throw_if_cancelled()
                     return response
 
-                raw_text = client.generate(request)
+                import inspect
+                sig = inspect.signature(client.generate)
+                if "cancellation_token" in sig.parameters:
+                    raw_text = client.generate(request, cancellation_token=cancellation_token)
+                else:
+                    raw_text = client.generate(request)
                 latency_ms = (time.perf_counter() - start_time) * 1000
+                if cancellation_token is not None:
+                    cancellation_token.throw_if_cancelled()
                 return ModelResponse(
                     content=raw_text,
                     model_id=resolved_model,
@@ -212,18 +230,31 @@ class ModelGateway:
         request: ChatRequest,
         model_id: str | None = None,
         fallback_models: tuple[str, ...] = (),
+        cancellation_token: CancellationToken | None = None,
     ) -> Iterator[str]:
+        if cancellation_token is not None:
+            cancellation_token.throw_if_cancelled()
+
         target_models = (model_id or request.model,) + fallback_models
         last_error: Exception | None = None
 
         for candidate_model in target_models:
             try:
+                if cancellation_token is not None:
+                    cancellation_token.throw_if_cancelled()
                 client, resolved_model = self._get_client_for_model(candidate_model)
                 self._verify_multimodal_request(request, resolved_model)
-                stream_iter = client.stream_generate(request)
+                import inspect
+                sig = inspect.signature(client.stream_generate)
+                if "cancellation_token" in sig.parameters:
+                    stream_iter = client.stream_generate(request, cancellation_token=cancellation_token)
+                else:
+                    stream_iter = client.stream_generate(request)
 
                 try:
                     first_chunk = next(stream_iter)
+                    if cancellation_token is not None:
+                        cancellation_token.throw_if_cancelled()
                 except StopIteration:
                     return
             except (ModelUnavailableError, ProviderServerError, TimeoutError) as exc:
@@ -233,7 +264,10 @@ class ModelGateway:
                 raise
             else:
                 yield first_chunk
-                yield from stream_iter
+                for chunk in stream_iter:
+                    if cancellation_token is not None:
+                        cancellation_token.throw_if_cancelled()
+                    yield chunk
                 return
 
         if last_error is not None:

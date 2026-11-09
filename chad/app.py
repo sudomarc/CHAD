@@ -6,6 +6,7 @@ from chad.core.config import AppConfig
 from chad.core.context import ContextLimitError
 from chad.core.conversation import ChatRequest, Conversation
 from chad.core.messages import MessageRole
+from chad.llm.cancellation import CancellationToken
 from chad.llm.client import LapisClient, LLMError
 from chad.llm.gateway import ModelGateway
 from chad.storage.json_store import ConversationStore
@@ -108,7 +109,11 @@ class ChadApp:
         text: str,
         correlation_id: str | None = None,
         idempotency_key: str | None = None,
+        cancellation_token: CancellationToken | None = None,
     ) -> str:
+        if cancellation_token is not None:
+            cancellation_token.throw_if_cancelled()
+
         if idempotency_key and idempotency_key in self.conversation.processed_idempotency_keys:
             resp_idem_key = f"resp-{idempotency_key}"
             for msg in self.conversation.get_active_messages():
@@ -119,7 +124,7 @@ class ChadApp:
             request = self.request(
                 text, correlation_id=correlation_id, idempotency_key=idempotency_key
             )
-            response = self.gateway.generate(request)
+            response = self.gateway.generate(request, cancellation_token=cancellation_token)
             content = response.content
         except (LLMError, ContextLimitError):
             if self.conversation.messages and self.conversation.messages[-1].role.value == "user":

@@ -1,5 +1,6 @@
 """LLM client boundaries, model gateway, and Lapis adapters."""
 
+from chad.llm.cancellation import CancellationToken
 from chad.llm.client import GenerationError, LapisClient, LLMError, ModelInfo, ModelUnavailableError
 from chad.llm.external import ExternalProviderClient
 from chad.llm.gateway import (
@@ -21,6 +22,7 @@ from chad.llm.gateway import (
 __all__ = [
     "AuthenticationError",
     "CancellationError",
+    "CancellationToken",
     "ContextLimitExceededError",
     "ExternalProviderClient",
     "GenerationError",

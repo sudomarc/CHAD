@@ -41,7 +41,7 @@ class CancellationToken:
         for callback in callbacks_to_run:
             try:
                 callback(reason)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
 
     def register_callback(self, callback: Callable[[str], None]) -> None:
@@ -57,7 +57,7 @@ class CancellationToken:
         if run_immediately and reason is not None:
             try:
                 callback(reason)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
 
     def throw_if_cancelled(self) -> None:

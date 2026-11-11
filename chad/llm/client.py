@@ -52,6 +52,7 @@ class LapisClient(ABC):
         cancellation_token: CancellationToken | None = None,
     ) -> ModelResponse:
         import inspect
+
         from chad.llm.gateway import ModelResponse
 
         if cancellation_token is not None:

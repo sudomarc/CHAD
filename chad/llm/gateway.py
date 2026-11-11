@@ -75,7 +75,7 @@ class MalformedResponseError(LLMError):
 
 
 # Re-export CancellationError from cancellation module for backwards compatibility
-CancellationError = CancellationError
+__all__ = ["CancellationError"]
 
 
 class PolicyDenialError(LLMError):

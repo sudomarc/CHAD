@@ -28,8 +28,16 @@ def _make_app(tmp_path: Path) -> ChadApp:
     return ChadApp.create(config, client)
 
 
-def _http_request(url: str, method: str = "GET", data: dict[str, Any] | None = None) -> tuple[int, dict[str, Any]]:
+def _http_request(
+    url: str,
+    method: str = "GET",
+    data: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> tuple[int, dict[str, Any]]:
     req = urllib.request.Request(url, method=method)
+    if headers:
+        for k, v in headers.items():
+            req.add_header(k, v)
     if data is not None:
         payload = json.dumps(data).encode("utf-8")
         req.add_header("Content-Type", "application/json")
@@ -60,6 +68,79 @@ def test_web_health(tmp_path: Path) -> None:
         assert status == 200
         assert body["status"] == "ok"
         assert body["app"] == "CHAD"
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_web_projects_endpoints(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+    server = create_web_server(app, host="127.0.0.1", port=0)
+    host, port = server.server_address
+
+    thread = threading.Thread(target=server.serve_forever)
+    thread.daemon = True
+    thread.start()
+
+    try:
+        base_url = f"http://{host}:{port}"
+
+        # Register user
+        status, user_body = _http_request(
+            f"{base_url}/api/auth/register",
+            method="POST",
+            data={"username": "alice", "password": "securepassword123"},
+        )
+        assert status == 201
+        token = user_body["token"]
+        auth_headers = {"Authorization": f"Bearer {token}"}
+
+        # Create project
+        status, proj_body = _http_request(
+            f"{base_url}/api/projects",
+            method="POST",
+            data={"name": "Web AI Project", "description": "Testing web endpoints"},
+            headers=auth_headers,
+        )
+        assert status == 201
+        assert "project" in proj_body
+        project_id = proj_body["project"]["project_id"]
+        assert proj_body["project"]["name"] == "Web AI Project"
+
+        # List projects
+        status, list_body = _http_request(f"{base_url}/api/projects", headers=auth_headers)
+        assert status == 200
+        assert len(list_body["projects"]) >= 1
+
+        # Get project
+        status, get_body = _http_request(
+            f"{base_url}/api/projects/{project_id}", headers=auth_headers
+        )
+        assert status == 200
+        assert get_body["project"]["project_id"] == project_id
+
+        # Add member to project
+        status, mem_body = _http_request(
+            f"{base_url}/api/projects/{project_id}/members",
+            method="POST",
+            data={"user_id": "bob_user", "role": "editor"},
+            headers=auth_headers,
+        )
+        assert status == 201
+        assert mem_body["member"]["user_id"] == "bob_user"
+        assert mem_body["member"]["role"] == "editor"
+
+        # Delete project
+        status, del_body = _http_request(
+            f"{base_url}/api/projects/{project_id}", method="DELETE", headers=auth_headers
+        )
+        assert status == 200
+        assert del_body["status"] == "deleted"
+
+        # Verify not found after deletion
+        status, _ = _http_request(f"{base_url}/api/projects/{project_id}", headers=auth_headers)
+        assert status == 404
+
     finally:
         server.shutdown()
         server.server_close()

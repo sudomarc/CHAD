@@ -14,6 +14,8 @@ from chad.auth.quotas import QuotaExceededError, QuotaManager
 from chad.auth.security import generate_salt, generate_user_id, hash_password, verify_password
 from chad.auth.session import SessionManager
 from chad.core.conversation import ConversationStatus
+from chad.projects.manager import ProjectAccessError, ProjectManager, ProjectNotFoundError
+from chad.projects.models import ProjectRole
 from chad.tools.builtin import register_builtin_tools
 from chad.tools.registry import ToolRegistry
 
@@ -23,6 +25,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
     session_manager: SessionManager = SessionManager()
     ownership_manager: DataOwnershipManager = DataOwnershipManager()
     quota_manager: QuotaManager = QuotaManager()
+    project_manager: ClassVar[ProjectManager] = ProjectManager()
     users: ClassVar[dict[str, User]] = {}  # user_id -> User
     users_by_username: ClassVar[dict[str, User]] = {}  # username -> User
     lifecycle_manager: AccountLifecycleManager = AccountLifecycleManager(
@@ -119,6 +122,36 @@ class WebApiHandler(BaseHTTPRequestHandler):
             register_builtin_tools(registry)
             tools = [tool.to_dict() for tool in registry.list_tools()]
             self._send_json({"tools": tools})
+            return
+
+        if path == "/api/projects":
+            user = self._get_current_user()
+            if self.users and not user:
+                self._send_json({"error": "Unauthorized"}, HTTPStatus.UNAUTHORIZED)
+                return
+            user_id = user.id if user else None
+            if user and user.role == UserRole.ADMIN:
+                projects = self.project_manager.list_projects()
+            else:
+                projects = self.project_manager.list_projects(user_id=user_id)
+            self._send_json({"projects": [p.to_dict() for p in projects]})
+            return
+
+        if path.startswith("/api/projects/"):
+            project_id = path.split("/")[-1]
+            user = self._get_current_user()
+            if self.users and not user:
+                self._send_json({"error": "Unauthorized"}, HTTPStatus.UNAUTHORIZED)
+                return
+            try:
+                project = self.project_manager.get_project(project_id)
+                if user and user.role != UserRole.ADMIN:
+                    self.project_manager.require_access(user.id, project_id, "read")
+                self._send_json({"project": project.to_dict()})
+            except ProjectNotFoundError as e:
+                self._send_json({"error": str(e)}, HTTPStatus.NOT_FOUND)
+            except ProjectAccessError as e:
+                self._send_json({"error": str(e)}, HTTPStatus.FORBIDDEN)
             return
 
         if path == "/api/conversations":
@@ -249,6 +282,55 @@ class WebApiHandler(BaseHTTPRequestHandler):
 
         user = self._get_current_user()
 
+        if path == "/api/projects":
+            if not user:
+                self._send_json({"error": "Unauthorized"}, HTTPStatus.UNAUTHORIZED)
+                return
+            name = body.get("name")
+            if not name:
+                self._send_json({"error": "Missing 'name' in request body"}, HTTPStatus.BAD_REQUEST)
+                return
+            description = body.get("description", "")
+            metadata = body.get("metadata", {})
+            try:
+                project = self.project_manager.create_project(
+                    name=name,
+                    owner_id=user.id,
+                    description=description,
+                    metadata=metadata,
+                )
+                self._send_json({"project": project.to_dict()}, HTTPStatus.CREATED)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, HTTPStatus.BAD_REQUEST)
+            return
+
+        if path.startswith("/api/projects/") and path.endswith("/members"):
+            # POST /api/projects/{id}/members
+            parts = path.strip("/").split("/")
+            if len(parts) == 4 and parts[1] == "projects" and parts[3] == "members":
+                project_id = parts[2]
+                if not user:
+                    self._send_json({"error": "Unauthorized"}, HTTPStatus.UNAUTHORIZED)
+                    return
+                member_user_id = body.get("user_id")
+                role_val = body.get("role", "viewer")
+                if not member_user_id:
+                    self._send_json({"error": "Missing 'user_id' in request body"}, HTTPStatus.BAD_REQUEST)
+                    return
+                try:
+                    if user.role != UserRole.ADMIN:
+                        self.project_manager.require_access(user.id, project_id, "write")
+                    role = ProjectRole(role_val)
+                    member = self.project_manager.add_member(project_id, member_user_id, role)
+                    self._send_json({"member": member.to_dict()}, HTTPStatus.CREATED)
+                except ProjectNotFoundError as e:
+                    self._send_json({"error": str(e)}, HTTPStatus.NOT_FOUND)
+                except ProjectAccessError as e:
+                    self._send_json({"error": str(e)}, HTTPStatus.FORBIDDEN)
+                except Exception as e:  # noqa: BLE001
+                    self._send_json({"error": str(e)}, HTTPStatus.BAD_REQUEST)
+                return
+
         if path == "/api/conversations":
             if user and not user.has_permission(Permission.CONVERSATION_CREATE):
                 self._send_json({"error": "Permission denied"}, HTTPStatus.FORBIDDEN)
@@ -306,6 +388,23 @@ class WebApiHandler(BaseHTTPRequestHandler):
             self.users_by_username.pop(user.username, None)
             result = self.lifecycle_manager.delete_account(user.id)
             self._send_json({"status": "deleted", "result": result})
+            return
+
+        if path.startswith("/api/projects/"):
+            project_id = path.split("/")[-1]
+            user = self._get_current_user()
+            if not user:
+                self._send_json({"error": "Unauthorized"}, HTTPStatus.UNAUTHORIZED)
+                return
+            try:
+                project = self.project_manager.get_project(project_id)
+                if user.role != UserRole.ADMIN and project.owner_id != user.id:
+                    self._send_json({"error": "Forbidden: Only owner or admin can delete project"}, HTTPStatus.FORBIDDEN)
+                    return
+                self.project_manager.delete_project(project_id)
+                self._send_json({"status": "deleted", "project_id": project_id})
+            except ProjectNotFoundError as e:
+                self._send_json({"error": str(e)}, HTTPStatus.NOT_FOUND)
             return
 
         if self.app is None:

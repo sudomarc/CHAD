@@ -42,6 +42,11 @@ The HTTP Web API (`chad.interfaces.web`) exposes endpoints for web client intera
 - `GET /api/conversations/{id}`: Loads details for a specific conversation.
 - `DELETE /api/conversations/{id}`: Deletes a specific conversation from storage.
 - `POST /api/chat`: Sends a user chat message with rate and token quota enforcement.
+- `GET /api/projects`: Lists projects accessible to the current user.
+- `POST /api/projects`: Creates a new project workspace.
+- `GET /api/projects/{id}`: Loads details for a specific project.
+- `DELETE /api/projects/{id}`: Deletes a project (owner or admin only).
+- `POST /api/projects/{id}/members`: Adds a member with role (owner, editor, viewer).
 - `POST /api/auth/register`: Registers a new user.
 - `POST /api/auth/login`: Authenticates a user and issues a bearer token.
 - `GET /api/auth/me`: Returns profile for the currently authenticated user.
@@ -304,7 +309,14 @@ The `chad.connectors` module provides standardized integration with external thi
 - Revocation & Health: Supports explicit credential revocation (`revoke`) and connectivity/health status reporting (`health_check`).
 - `ConnectorRegistry`: Centralized registry for managing connector instances, health checking, credential revocation, and bridging connector operations into CHAD executable tools (`generate_tools`).
 
-## 14. Deployment evolution
+## 14. Projects and workspaces architecture
+
+The `chad.projects` module provides shared project workspaces:
+- `Project`: Core model representing an isolated workspace, holding metadata, member roles (`OWNER`, `EDITOR`, `VIEWER`), associated conversation IDs, and file IDs.
+- `ProjectManager`: Coordinates project lifecycle (CRUD), membership access control (`can_access`, `require_access`), resource associations (`link_conversation`, `link_file`), and workspace file isolation.
+- Filesystem containment: Each project maintains an isolated filesystem workspace folder (`resolve_workspace_path`, `write_workspace_file`, `read_workspace_file`, `list_workspace_files`), rejecting directory traversal attempts (`..`).
+
+## 15. Deployment evolution
 
 ### Stage A
 

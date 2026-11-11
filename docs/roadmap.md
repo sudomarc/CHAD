@@ -137,7 +137,7 @@ Phase 17 — Long-running agents (Completed)
 - Cost/reliability-aware planning (`CostReliabilityPlanner`, `ExecutionStrategy`).
 
 Phase 18 — Product maturity
-- Projects/workspaces.
+- Projects/workspaces (`Project`, `ProjectMember`, `ProjectRole`, `ProjectManager`, isolated workspace directories, Web API).
 - Artifacts.
 - Collaboration/sharing.
 - Voice.

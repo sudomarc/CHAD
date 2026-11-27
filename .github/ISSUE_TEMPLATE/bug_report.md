@@ -2,7 +2,6 @@
 name: Bug report
 about: Report a reproducible defect in CHAD
 title: "[Bug] "
-labels: ["bug"]
 assignees: []
 ---
 

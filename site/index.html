@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>CHAD — Local-first Coding Agent</title>
+  <meta name="description" content="CHAD — Local-first general-purpose coding agent">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --bg-subtle: #1a1a1a;
+      --fg: #e0e0e0;
+      --muted: #6b6b6b;
+      --accent: #c5f015;
+      --card: #121212;
+      --border: #2a2a2a;
+    }
+    [data-theme="light"] {
+      --bg: #f5f5f5;
+      --bg-subtle: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2e7d32;
+      --card: #ffffff;
+      --border: #e0e0e0;
+    }
+    body {
+      margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: var(--fg);
+      font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+    }
+    .gutter { padding: 0 16px; max-width: 860px; margin: 0 auto; }
+    header { padding: 48px 0 24px; text-align: center; border-bottom: 1px solid var(--border); }
+    h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+    .tagline { color: var(--muted); margin: 8px 0 24px; font-size: 1.1rem; }
+    .version { color: var(--accent); font-family: monospace; font-size: 1.2rem; margin: 24px 0; display: inline-block; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; }
+    .install { margin: 32px 0; text-align: center; }
+    .install-btn { display: inline-block; padding: 12px 24px; background: var(--accent); color: #000; font-weight: 600; text-decoration: none; border-radius: 4px; font-size: 1rem; margin-top: 8px; }
+    .features { margin: 48px 0; }
+    .feature { margin: 16px 0; display: flex; align-items: center; gap: 8px; }
+    .feature svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7; }
+    .footer { padding: 32px 0; text-align: center; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
+    @media (max-width: 600px) { h1 { font-size: 2rem; } .gutter { padding: 0 12px; } }
+  </style>
+  <script>
+    // Theme toggle
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    });
+  </script>
+</head>
+<body>
+  <div class="gutter">
+    <header>
+      <h1>CHAD</h1>
+      <p class="tagline">Local-first general-purpose coding agent</p>
+      <div class="version">v0.1.0</div>
+      <div class="install">
+        <a href="https://github.com/sudomarc/CHAD" target="_blank" rel="noopener" class="install-btn">Installer CHAD</a>
+        <span style="margin-left: 16px; color: var(--muted);">via APT</span>
+      </div>
+    </header>
+
+    <section class="features">
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M12 7c1.934 0 3.5 1.566 3.5 3.5S13.934 14 12 14 8.5 12.566 8.5 10 10 6.434 12 7ZM12 4c-1.103 0-2 .897-2 2v3h3l2 3h5l2-3h3v-3c0-1.103-.897-2-2-2Z"/></svg>
+        <span>Python-first orchestration</span>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M12 17c-1.657 0-3.032.895-3.359 2.121l.596 1.505c.038.157.072.325.072.512 0 .217-.035.444-.072.682l-.595 1.506C8.967 21.105 8 21.323 8 23c0 1.103.897 2 2 2h8c.707 0 1.293-.165 1.707-.395l.596-1.506c.038-.157.072-.324.072-.512 0-.217.035-.444.072-.683l.596-1.505C15.032 17.895 13.657 17 12 17ZM12 7a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
+        <span>Provider-neutral gateway</span>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M2 4h5v19H2V4zm4 6h11v7H6V10zm4 4h.02c.552-.77 1.268-1.532 2.273-2.013 1.018-.53 2.011-1.144 2.842-1.834 1.02-.843 1.997-1.794 2.898-2.933.377-.5 1.024-.808 1.595-.658.572.15 1.253.238 1.853.238.664 0 1.321-.096 1.867-.288.546-.192.924-.356 1.177-.466.253-.11.435-.17.588-.133.153.037.288.037.442 0l2-3c.186-.506.33-.708.33-1.0l0-6h-4v2h2c.553 0 1 .425 1 1v1c0 .528-.22 1.017-.637 1.394l-.768 2.135-.768-2.135c-.41-.377-.86-.57-1.342-.57-1.055 0-2.093.383-3.006 1.126l-.246.675-.805-.515c-.777-.495-1.557-.962-2.245-1.371-.2-.097-.384-.12-.577-.087-.194.035-.339.055-.466.055-.128 0-.258 0-.382 0l-2 3c-.186.506-.33.708-.33 1.0l0 6h4v-2H6c-.553 0-1-.425-1-1v-1c0-.528.22-1.017.637-1.394l.768-2.135.768 2.135c.41.377.86.57 1.342.57 1.055 0 2.093-.383 3.006-1.126l.246-.675.805.515c.777.495 1.557.962 2.245 1.371.2.097.384.12.577.087.194-.035.339-.055.466-.055.128 0 .258 0 .382 0l2-3c.186-.506.33-.708.33-1.0l0-6h-4v2H6z"/></svg>
+        <span>Interface TUI terminal</span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Projet open source — Voir le code sur <a href="https://github.com/sudomarc/CHAD" target="_blank" rel="noopener">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>

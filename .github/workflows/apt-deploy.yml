@@ -9,6 +9,7 @@ on:
         description: 'Version de CHAD à déployer (ex: 0.1.0, 0.1.1)'
         required: false
         default: ''
+        pattern: '^(0|[1-9]\\d{0,3})\\.(0|[1-9]\\d{0,4})\\.(0|[1-9]\\d{0,5})$'
 
 permissions:
   contents: read
@@ -16,14 +17,22 @@ permissions:
   id-token: write
 
 jobs:
-  build-apt-repo:
+  build-deb:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Validate version
+        run: |
+          VERSION="${{ github.event.inputs.version || '0.1.0' }}"
+          if ! echo "$VERSION" | grep -qP '^(0|[1-9]\d{0,3})\.(0|[1-9]\d{0,4})\.(0|[1-9]\d{0,5})$'; then
+            echo "::error ::Version invalide : $VERSION. Format attendu : MAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          echo "Version validée : $VERSION"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,50 +44,116 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[dev]
 
-      - name: Set deployed version
+      - name: Create deployment venv
+        run: |
+          python3 -m venv /opt/chad-venv
+          /opt/chad-venv/bin/pip install --quiet -e .
+
+      - name: Build .deb package
         run: |
           VERSION="${{ github.event.inputs.version || '0.1.0' }}"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Build CHAD .deb package (with specified version)
-        run: |
-          VERSION="${{ env.VERSION }}"
-          echo "Construction de CHAD version $VERSION"
-          # Mise à jour de la version dans le paquet
-          sed -i "s/Version: ${CHAD_VERSION}/Version: ${VERSION}/" /opt/chad-apt/DEBIAN/control 2>/dev/null || true
+          echo "Construction du paquet chad version $VERSION"
+          # Installer les outils de packaging
           apt-get update -qq && apt-get install -y -qq dpkg-dev gnupg
-          python3 -m venv /tmp/chad-venv
-          /tmp/chad-venv/bin/pip install --quiet -e .
-          which chad || echo "chad not in PATH"
+          # Créer la structure de fichiers du .deb
+          mkdir -p /tmp/chad-deb/DEBIAN /tmp/chad-deb/usr/bin
+          # Créer les scripts de contrôle
+          cat > /tmp/chad-deb/DEBIAN/control <<EOF
+Package: chad
+Version: ${VERSION}
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: CHAD maintainers <chad@localhost>
+Description: Local-first general-purpose coding agent.
+ CHAD is a local-first, general-purpose software engineering agent with a
+ Python orchestration layer, a terminal UI, and a provider-neutral model
+ gateway.
+Depends: python3 (>= 3.11)
+EOF
+          # Créer le wrapper chad dans usr/bin
+          cat > /tmp/chad-deb/usr/bin/chad << 'INTERNAL_CHAD_SCRIPT'
+#!/usr/bin/env bash
+export PATH="/opt/chad-venv/bin:$PATH"
+exec "${CHAD_VENV}/bin/chad" "$@"
+INTERNAL_CHAD_SCRIPT
+          chmod +x /tmp/chad-deb/usr/bin/chad
+          # Construire le .deb
+          cd /tmp && dpkg-deb --build chad-deb
+          mkdir -p /opt/chad-apt/pool/main/c/chad
+          cp /tmp/chad-deb_${VERSION}_amd64.deb /opt/chad-apt/pool/main/c/chad/chad_${VERSION}_amd64.deb
+          echo "Paquet .deb créé : chad_${VERSION}_amd64.deb"
 
-      - name: Update APT repository metadata
+      - name: Generate APT metadata
         run: |
-          VERSION="${{ env.VERSION }}"
-          echo "Mise à jour du dépôt APT pour la version $VERSION"
+          VERSION="${{ github.event.inputs.version || '0.1.0' }}"
+          echo "Génération des métadonnées APT pour la version $VERSION"
+          # S'assurer que le répertoire de dépôt existe
+          mkdir -p /opt/chad-apt/dists/stable/main/binary-amd64
+          mkdir -p /opt/chad-apt/pool/main/c/chad
+          # Copier le .deb dans pool
+          cp /tmp/chad-deb_${VERSION}_amd64.deb /opt/chad-apt/pool/main/c/chad/
+          # Générer Packages depuis pool (chemins relatifs racine du repo)
           (cd /opt/chad-apt && dpkg-scanpackages -a amd64 "pool/main/c/chad" > "dists/stable/main/binary-amd64/Packages" 2>/dev/null || true)
           gzip -9c "/opt/chad-apt/dists/stable/main/binary-amd64/Packages" > "/opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz"
-          gpg --batch --homedir /tmp/chad-gnupg --default-key "$(gpg --batch --homedir /tmp/chad-gnupg --with-colons --list-keys CHAD APT Archive 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')" --detach-sign --armor --output "dists/stable/Release.gpg" "dists/stable/Release" 2>/dev/null || true
-          gpg --batch --homedir /tmp/chad-gnupg --default-key "$(gpg --batch --homedir /tmp/chad-gnupg --with-colons --list-keys CHAD APT Archive 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')" --clearsign --output "dists/stable/InRelease" "dists/stable/Release" 2>/dev/null || true
+          # Générer Release file
+          cat > /opt/chad-apt/dists/stable/Release <<RELEASEEOF
+Origin: CHAD Local
+Label: CHAD
+Suite: stable
+Version: ${VERSION}
+Codename: stable
+Architectures: amd64
+Components: main
+Description: Local APT repository for CHAD packages.
+Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+Acquire-By-Hash: no
+RELEASEEOF
+          # Ajouter les sections de hachage (MD5, SHA1, SHA256)
+          . /home/runner/work/CHAD/CHAD/add-apt-repo-hash.sh /opt/chad-apt/dists/stable/main/binary-amd64/Packages /opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz
+          # Générer InRelease (Release signé)
+          gpg --batch --homedir /tmp/chad-gnupg --default-key "$(gpg --batch --homedir /tmp/chad-gnupg --list-keys CHAD 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')" --detach-sign --armor --output /opt/chad-apt/dists/stable/Release.gpg /opt/chad-apt/dists/stable/Release 2>/dev/null || true
+          gpg --batch --homedir /tmp/chad-gnupg --default-key "$(gpg --batch --homedir /tmp/chad-gnupg --list-keys CHAD 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')" --clearsign --output /opt/chad-apt/dists/stable/InRelease /opt/chad-apt/dists/stable/Release 2>/dev/null || true
+          # Vérifier
+          echo "=== Vérification APT ==="
+          apt-cache policy chad
+
+  publish-apt-repo:
+    needs: build-deb
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (with gh-pages branch)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Git for Pages deployment
+        run: |
+          git config user.name "sudomarc"
+          git config user.email "sudomarc@users.noreply.github.com"
+
+      - name: Deploy APT repository to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /opt/chad-apt
+          target_branch: gh-pages
+          keep_files: .
+          user_name: "sudomarc"
+          user_email: "sudomarc@users.noreply.github.com"
+
+      - name: Deploy site to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          target_branch: gh-pages
+          keep_files: .
+          user_name: "sudomarc"
+          user_email: "sudomarc@users.noreply.github.com"
 
       - name: Display CHAD info
         run: |
           echo "CHAD version: $(chad --version)"
           echo "Installed at: $(which chad)"
-          echo "Deployed version from workflow: $VERSION"
-
-  build-site:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          keep_files: .
-          user_name: "sudomarc"
-          user_email: "sudomarc@users.noreply.github.com"

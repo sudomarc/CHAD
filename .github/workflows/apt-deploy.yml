@@ -11,6 +11,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,12 +52,7 @@ jobs:
           echo "Utiliser dpkg-scanpackages, gzip, et les fichiers Release/InRelease"
           echo "Placer le dépôt sur la branche gh-pages de GitHub Pages"
 
-      - name: Configure git for Pages deployment
-        run: |
-          git config user.name "sudomarc"
-          git config user.email "sudomarc@users.noreply.github.com"
-
-      - name: Deploy to GitHub Pages (site + repo APT)
+      - name: Deploy site to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

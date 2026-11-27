@@ -133,7 +133,7 @@ class OutputLimitTests(unittest.TestCase):
                 def __init__(self) -> None:
                     self.calls = 0
 
-                def request(self, messages, tool_schemas):
+                def request(self, model: str, messages, tool_schemas):
                     self.calls += 1
                     if self.calls == 1:
                         return ModelResponse(

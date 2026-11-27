@@ -85,6 +85,7 @@ class AgentLoop:
         task: Task,
         provider: Provider,
         registry: ToolRegistry,
+        model: str | None = None,
         policy: Policy | None = None,
         on_event: Callable[[Event], None] | None = None,
         limits: LoopLimits | None = None,
@@ -92,6 +93,7 @@ class AgentLoop:
         self.task = task
         self.provider = provider
         self.registry = registry
+        self.model = model
         self.policy = policy or DefaultDenyPolicy()
         self._on_event = on_event
         self.limits = limits or LoopLimits()
@@ -202,7 +204,9 @@ class AgentLoop:
                 )
             self._emit(EventType.MODEL_REQUEST_STARTED, {"request": self.requests})
             try:
-                response = self.provider.request(messages, self.registry.schemas())
+                response = self.provider.request(
+                    self.model or "unknown", messages, self.registry.schemas()
+                )
             except Exception as exc:  # noqa: BLE001 - surface provider failure
                 self._emit(EventType.MODEL_RESPONSE_RECEIVED, {"error": str(exc)})
                 try:

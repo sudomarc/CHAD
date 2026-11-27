@@ -39,11 +39,12 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("run", out)
 
-    def test_run_not_implemented(self):
-        code, out, err = self.run_main(["run", "inspect the repository"])
-        self.assertNotEqual(code, 0)
-        self.assertEqual(out, "")
-        self.assertIn("not yet implemented", err)
+    def test_run_executes_task_with_fake_provider(self):
+        code, out, _err = self.run_main(["run", "list the workspace files"])
+        self.assertEqual(code, 0)
+        self.assertIn("CHAD task", out)
+        self.assertIn("outcome:", out)
+        self.assertIn("completed", out)
 
 
 if __name__ == "__main__":

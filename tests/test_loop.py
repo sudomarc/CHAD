@@ -48,8 +48,8 @@ class FakeProvider:
         self.responses = list(responses)
         self.calls: list = []
 
-    def request(self, messages, tool_schemas) -> ModelResponse:
-        self.calls.append((tuple(messages), tuple(tool_schemas)))
+    def request(self, model: str, messages, tool_schemas) -> ModelResponse:
+        self.calls.append((model, tuple(messages), tuple(tool_schemas)))
         if self.responses:
             return self.responses.pop(0)
         return ModelResponse(content="done")
@@ -70,6 +70,7 @@ def make_loop(
         task=task,
         provider=provider,
         registry=registry,
+        model="test-model",
         policy=policy or AutoApprovePolicy(),
         limits=limits or LoopLimits(),
     )

@@ -24,17 +24,18 @@
       --card: #ffffff;
       --border: #e0e0e0;
     }
-    body {
-      margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: var(--fg);
-      font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
-    }
+    body { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; }
     .gutter { padding: 0 16px; max-width: 860px; margin: 0 auto; }
     header { padding: 48px 0 24px; text-align: center; border-bottom: 1px solid var(--border); }
     h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
     .tagline { color: var(--muted); margin: 8px 0 24px; font-size: 1.1rem; }
     .version { color: var(--accent); font-family: monospace; font-size: 1.2rem; margin: 24px 0; display: inline-block; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; }
-    .install { margin: 32px 0; text-align: center; }
-    .install-btn { display: inline-block; padding: 12px 24px; background: var(--accent); color: #000; font-weight: 600; text-decoration: none; border-radius: 4px; font-size: 1rem; margin-top: 8px; }
+    .section { margin: 48px 0; }
+    .section-heading { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; font-size: 1.5rem; }
+    .install { margin: 32px 0; }
+    .command-row { margin: 8px 0; }
+    .command { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; font-family: monospace; word-break: break-all; margin: 4px 0; }
+    .command-label { color: var(--muted); display: block; margin-bottom: 4px; }
     .features { margin: 48px 0; }
     .feature { margin: 16px 0; display: flex; align-items: center; gap: 8px; }
     .feature svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7; }
@@ -42,7 +43,6 @@
     @media (max-width: 600px) { h1 { font-size: 2rem; } .gutter { padding: 0 12px; } }
   </style>
   <script>
-    // Theme toggle
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
@@ -56,30 +56,141 @@
       <h1>CHAD</h1>
       <p class="tagline">Local-first general-purpose coding agent</p>
       <div class="version">v0.1.0</div>
-      <div class="install">
-        <a href="https://github.com/sudomarc/CHAD" target="_blank" rel="noopener" class="install-btn">Installer CHAD</a>
-        <span style="margin-left: 16px; color: var(--muted);">via APT</span>
-      </div>
     </header>
 
-    <section class="features">
-      <div class="feature">
-        <svg viewBox="0 0 24 24"><path d="M12 7c1.934 0 3.5 1.566 3.5 3.5S13.934 14 12 14 8.5 12.566 8.5 10 10 6.434 12 7ZM12 4c-1.103 0-2 .897-2 2v3h3l2 3h5l2-3h3v-3c0-1.103-.897-2-2-2Z"/></svg>
-        <span>Python-first orchestration</span>
+    <section class="section" id="presentation">
+      <div class="section-heading">Présentation</div>
+      <p>CHAD est un agent de codage local-first conçu pour travailler dans n'importe quel dépôt local. Il combine une interface terminal UI (TUI), un runtime agent borné, une passerelle de modèle multi-provider, des outils aware du dépôt et des contrôles de sécurité explicites.</p>
+      <p>Langage principal : Python pour lorchestration et la logique produit ; Rust pour les composants natifs justifiés.</p>
+      <p>Modèle d'implantation : local-first ; pas de service CHAD hébergé obligatoire.</p>
+    </section>
+
+    <section class="section" id="objectif">
+      <div class="section-heading">Objectif et fonctionnalités</div>
+      <ul>
+        <li><strong>Orchestration Python-first</strong> : tout le comportement, les providers et le TUI sont en Python.</li>
+        <li><strong>Passerelle de modèle multi-provider</strong> : providers interchangeables (Anthropic, OpenAI, Google, LapisLLM).</li>
+        <li><strong>Interface terminal (TUI)</strong> : interface Textual pour une expérience CLI riche.</li>
+        <li><strong>Runtime borné</strong> : boucle observe/décider/act bornée avec contrôle des permissions.</li>
+        <li><strong>Conscience du dépôt</strong> : outils filesystem, git, shell conscients du dépôt.</li>
+        <li><strong>Sécurité explicite</strong> : politique ReadOnly par défaut, pas de copie silencieuse d'exceptions.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="plateformes">
+      <div class="section-heading">Plateformes et environnements compatibles</div>
+      <ul>
+        <li>Debian/Ubuntu (via dépôt APT)</li>
+        <li>Distribution Linux générique (installation manuelle possible)</li>
+        <li>Environnement Python 3.11+</li>
+        <li>Interface terminal (TUI) nécessitant Textual</li>
+      </ul>
+    </section>
+
+    <section class="section" id="pre-requis">
+      <div class="section-heading">Prérequis</div>
+      <ul>
+        <li>Système d'exploitation : Debian 12+, Ubuntu 22.04+, ou distribution Linux compatible</li>
+        <li>Python 3.11 ou version supérieure</li>
+        <li>Accès en ligne de commande (terminal)</li>
+        <li>Connexion internet (pour l'installation initiale depuis le dépôt)</li>
+      </ul>
+    </section>
+
+    <section class="section" id="installation">
+      <div class="section-heading">Installation</div>
+      <p>Choisissez la méthode qui vous convient :</p>
+
+      <div class="section-heading">Installation via APT (recommandé)</div>
+      <p>Ces commandes sont copiables individuellement :</p>
+
+      <div class="command-row">
+        <span class="command-label">Configuration du dépôt</span>
+        <span class="command">curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/chad-archive-keyring.gpg</span>
       </div>
-      <div class="feature">
-        <svg viewBox="0 0 24 24"><path d="M12 17c-1.657 0-3.032.895-3.359 2.121l.596 1.505c.038.157.072.325.072.512 0 .217-.035.444-.072.682l-.595 1.506C8.967 21.105 8 21.323 8 23c0 1.103.897 2 2 2h8c.707 0 1.293-.165 1.707-.395l.596-1.506c.038-.157.072-.324.072-.512 0-.217.035-.444.072-.683l.596-1.505C15.032 17.895 13.657 17 12 17ZM12 7a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
-        <span>Provider-neutral gateway</span>
+
+      <div class="command-row">
+        <span class="command-label">Ajouter la source APT</span>
+        <span class="command">echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list</span>
       </div>
-      <div class="feature">
-        <svg viewBox="0 0 24 24"><path d="M2 4h5v19H2V4zm4 6h11v7H6V10zm4 4h.02c.552-.77 1.268-1.532 2.273-2.013 1.018-.53 2.011-1.144 2.842-1.834 1.02-.843 1.997-1.794 2.898-2.933.377-.5 1.024-.808 1.595-.658.572.15 1.253.238 1.853.238.664 0 1.321-.096 1.867-.288.546-.192.924-.356 1.177-.466.253-.11.435-.17.588-.133.153.037.288.037.442 0l2-3c.186-.506.33-.708.33-1.0l0-6h-4v2h2c.553 0 1 .425 1 1v1c0 .528-.22 1.017-.637 1.394l-.768 2.135-.768-2.135c-.41-.377-.86-.57-1.342-.57-1.055 0-2.093.383-3.006 1.126l-.246.675-.805-.515c-.777-.495-1.557-.962-2.245-1.371-.2-.097-.384-.12-.577-.087-.194.035-.339.055-.466.055-.128 0-.258 0-.382 0l-2 3c-.186.506-.33.708-.33 1.0l0 6h4v-2H6c-.553 0-1-.425-1-1v-1c0-.528.22-1.017.637-1.394l.768-2.135.768 2.135c.41.377.86.57 1.342.57 1.055 0 2.093-.383 3.006-1.126l.246-.675.805.515c.777.495 1.557.962 2.245 1.371.2.097.384.12.577.087.194-.035.339-.055.466-.055.128 0 .258 0 .382 0l2-3c.186-.506.33-.708.33-1.0l0-6h-4v2H6z"/></svg>
-        <span>Interface TUI terminal</span>
+
+      <div class="command-row">
+        <span class="command-label">Mise à jour et installation</span>
+        <span class="command">sudo apt update && sudo apt install chad</span>
+      </div>
+
+      <div class="command-row">
+        <span class="command-label">Vérification de l'installation</span>
+        <span class="command">chad --version</span>
+      </div>
+
+      <div class="command-row">
+        <span class="command-label">Première utilisation</span>
+        <span class="command">chad run "ta tâche d'inspection ou de modification"</span>
+      </div>
+
+      <div class="section-heading">Installation manuelle</div>
+      <p>Si l'installation APT n'est pas disponible ou adaptée :</p>
+      <div class="command-row">
+        <span class="command-label">Via pip</span>
+        <span class="command">pip install git+https://github.com/sudomarc/CHAD.git</span>
+      </div>
+      <div class="command-row">
+        <span class="command-label">Depuis les sources</span>
+        <span class="command">git clone https://github.com/sudomarc/CHAD.git && cd CHAD && pip install -e .</span>
       </div>
     </section>
 
-    <footer class="footer">
-      <p>Projet open source — Voir le code sur <a href="https://github.com/sudomarc/CHAD" target="_blank" rel="noopener">GitHub</a></p>
-    </footer>
+    <section class="section" id="mise-a-jour">
+      <div class="section-heading">Commandes de mise à jour</div>
+      <div class="command-row">
+        <span class="command">sudo apt update && sudo apt upgrade chad</span>
+      </div>
+      <div class="command-row">
+        <span class="command">Pour mettre à jour vers une version spécifique :</span>
+        <span class="command">sudo apt install chad=0.1.1</span>
+      </div>
+    </section>
+
+    <section class="section" id="desinstallation">
+      <div class="section-heading">Commandes de désinstallation</div>
+      <div class="command-row">
+        <span class="command">sudo apt remove chad</span>
+      </div>
+      <div class="command-row">
+        <span class="command">Suppression complète incluant les dépendances non utilisées :</span>
+        <span class="command">sudo apt autoremove chad</span>
+      </div>
+    </section>
+
+    <section class="section" id="depanage">
+      <div class="section-heading">Dépannage</div>
+      <ul>
+        <li><strong>Commande introuvable :</strong> Vérifiez que `/usr/share/keyrings/chad-archive-keyring.gpg` existe et que la source APT est correcte.</li>
+        <li><strong>Erreur de signature :</strong> Réimportez la clé GPG : <code>curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/chad-archive-keyring.gpg</code></li>
+        <li><strong>Package non trouvé :</strong> Exécutez <code>sudo apt update</code> puis vérifiez que la source APT est correctement ajoutée.</li>
+        <li><strong>chad --version ne répond pas :</strong> Vérifiez que le wrapper chad est bien dans <code>/usr/bin</code>.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="exemples">
+      <div class="section-heading">Exemples d'utilisation</div>
+      <ul>
+        <li><code>chad run "inspecter ce dépôt"</code> — Exécute une tâche d'inspection.</li>
+        <li><code>chad tui</code> — Lance l'interface terminal interactives.</li>
+        <li><code>chad --help</code>Affiche l'aide en ligne de commande.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="liens">
+      <div class="section-heading">Liens utiles</div>
+      <ul>
+        <li><a href="https://github.com/sudomarc/CHAD" target="_blank" rel="noopener">Dépôt GitHub</a></li>
+        <li><a href="https://github.com/sudomarc/CHAD/releases" target="_blank" rel="noopener">Releases</a></li>
+        <li><a href="https://sudomarc.github.io/CHAD/apt/" target="_blank" rel="noopener">Documentation APT</a></li>
+        <li><a href="https://sudomarc.github.io/CHAD/" target="_blank" rel="noopener">Site du projet</a></li>
+      </ul>
+    </section>
   </div>
 </body>
 </html>

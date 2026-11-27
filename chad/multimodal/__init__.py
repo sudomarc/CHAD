@@ -1,1 +1,0 @@
-"""Multimodal package for CHAD."""

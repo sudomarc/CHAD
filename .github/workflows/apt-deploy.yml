@@ -52,14 +52,13 @@ jobs:
         run: |
           git config user.name "sudomarc"
           git config user.email "sudomarc@users.noreply.github.com"
-          git remote set-url origin https://github.com/sudomarc/CHAD.git
 
       - name: Deploy to GitHub Pages (site + repo APT)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
-          target_branch: gh-pages
+          publish_branch: gh-pages
           keep_files: .
           user_name: "sudomarc"
           user_email: "sudomarc@users.noreply.github.com"

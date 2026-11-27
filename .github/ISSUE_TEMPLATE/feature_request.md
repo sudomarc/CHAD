@@ -2,7 +2,6 @@
 name: Feature request
 about: Propose a scoped product or engineering improvement
 title: "[Feature] "
-labels: ["enhancement"]
 assignees: []
 ---
 

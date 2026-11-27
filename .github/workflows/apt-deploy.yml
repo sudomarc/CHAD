@@ -73,15 +73,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Pages
-        uses: actions/setup-pages@v3
-
-      - name: Upload artifact pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./site
-
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          keep_files: .
+          user_name: "sudomarc"
+          user_email: "sudomarc@users.noreply.github.com"

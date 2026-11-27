@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,7 +33,7 @@ jobs:
           python3 -m venv /opt/chad-venv
           /opt/chad-venv/bin/pip install --quiet -e .
 
-      - name: Build .deb package (manual steps documented)
+      - name: Build .deb package (documented steps)
         run: |
           echo "Build .deb manuellement :"
           echo "  mkdir -p /tmp/chad-deb/DEBIAN /tmp/chad-deb/usr/bin"
@@ -47,7 +48,13 @@ jobs:
           echo "Utiliser dpkg-scanpackages, gzip, et les fichiers Release/InRelease"
           echo "Placer le dépôt sur la branche gh-pages de GitHub Pages"
 
-      - name: Deploy to GitHub Pages (site + repo)
+      - name: Configure git for Pages deployment
+        run: |
+          git config user.name "sudomarc"
+          git config user.email "sudomarc@users.noreply.github.com"
+          git remote set-url origin https://github.com/sudomarc/CHAD.git
+
+      - name: Deploy to GitHub Pages (site + repo APT)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

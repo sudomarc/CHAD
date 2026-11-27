@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 from . import __version__
 from .config import load_config
@@ -48,7 +48,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Start an agent task (not implemented in this slice).",
     )
     run.add_argument("task", help="Task description for the agent.")
+    tui = subparsers.add_parser(
+        "tui",
+        help="Launch the terminal user interface shell.",
+    )
+    tui.add_argument(
+        "--standalone",
+        action="store_true",
+        help="Run the shell without a runtime (echoes input).",
+    )
     return parser
+
+
+def run_tui(args) -> int:
+    """Launch the Textual TUI shell.
+
+    Textual is imported lazily so the core package stays installable without
+    the TUI dependency (see the ``tui`` extra in pyproject.toml).
+    """
+    from .tui.app import ChadApp
+
+    app = ChadApp()
+    return int(app.run() or 0)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -81,6 +102,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+
+    if args.command == "tui":
+        return run_tui(args)
 
     return 0
 

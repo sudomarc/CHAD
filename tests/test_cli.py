@@ -6,8 +6,8 @@ import io
 import unittest
 from unittest.mock import patch
 
-from chad.cli import main
 from chad import __version__
+from chad.cli import main
 
 
 class CliTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(err, "")
 
     def test_help_flag(self):
-        code, out, err = self.run_main(["--help"])
+        code, out, _err = self.run_main(["--help"])
         self.assertEqual(code, 0)
         self.assertIn("chad", out)
         self.assertIn("--version", out)

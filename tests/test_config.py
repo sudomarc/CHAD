@@ -7,7 +7,6 @@ import unittest
 from pathlib import Path
 
 from chad.config import (
-    Config,
     DEFAULT_MAX_ITERATIONS,
     DEFAULT_MAX_OUTPUT_BYTES,
     DEFAULT_MAX_REQUESTS,

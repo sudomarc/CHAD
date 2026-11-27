@@ -15,5 +15,14 @@ dependencies = []
 [project.scripts]
 chad = "chad.cli:main"
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.9",
+    "mypy>=1.11",
+]
+tui = [
+    "textual>=8.0",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]

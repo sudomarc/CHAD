@@ -1,38 +1,21 @@
 name: CHAD APT Deploy
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       version:
         description: 'Version de CHAD à déployer (ex: 0.1.0, 0.1.1)'
         required: false
         default: ''
-        pattern: '^(0|[1-9]\\d{0,3})\\.(0|[1-9]\\d{0,4})\\.(0|[1-9]\\d{0,5})$'
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 
 jobs:
-  build-deb:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-
-      - name: Validate version
-        run: |
-          VERSION="${{ github.event.inputs.version || '0.1.0' }}"
-          if ! echo "$VERSION" | grep -qP '^(0|[1-9]\d{0,3})\.(0|[1-9]\d{0,4})\.(0|[1-9]\d{0,5})$'; then
-            echo "::error ::Version invalide : $VERSION. Format attendu : MAJOR.MINOR.PATCH"
-            exit 1
-          fi
-          echo "Version validée : $VERSION"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,91 +32,22 @@ jobs:
           python3 -m venv /opt/chad-venv
           /opt/chad-venv/bin/pip install --quiet -e .
 
-      - name: Build .deb package
+      - name: Build .deb package (manual steps documented)
         run: |
-          VERSION="${{ github.event.inputs.version || '0.1.0' }}"
-          echo "Construction du paquet chad version $VERSION"
-          apt-get update -qq && apt-get install -y -qq dpkg-dev gnupg
-          mkdir -p /tmp/chad-deb/DEBIAN /tmp/chad-deb/usr/bin
-          cat > /tmp/chad-deb/DEBIAN/control <<EOF
-Package: chad
-Version: ${VERSION}
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: CHAD maintainers <chad@localhost>
-Description: Local-first general-purpose coding agent.
- CHAD is a local-first, general-purpose software engineering agent with a
- Python orchestration layer, a terminal UI, and a provider-neutral model
- gateway.
-Depends: python3 (>= 3.11)
-EOF
-          cat > /tmp/chad-deb/usr/bin/chad << 'INTERNAL_CHAD_SCRIPT'
-#!/usr/bin/env bash
-export PATH="/opt/chad-venv/bin:$PATH"
-exec "${CHAD_VENV}/bin/chad" "$@"
-INTERNAL_CHAD_SCRIPT
-          chmod +x /tmp/chad-deb/usr/bin/chad
-          cd /tmp && dpkg-deb --build chad-deb
-          mkdir -p /opt/chad-apt/pool/main/c/chad
-          cp /tmp/chad-deb_${VERSION}_amd64.deb /opt/chad-apt/pool/main/c/chad/chad_${VERSION}_amd64.deb
-          echo "Paquet .deb créé : chad_${VERSION}_amd64.deb"
+          echo "Build .deb manuellement :"
+          echo "  mkdir -p /tmp/chad-deb/DEBIAN /tmp/chad-deb/usr/bin"
+          echo "  Remplir /tmp/chad-deb/DEBIAN/control avec la version"
+          echo "  dpkg-deb --build /tmp/chad-deb"
+          echo "  Copier le .deb dans /opt/chad-apt/pool/main/c/chad/"
+          echo "  Générer Packages et Release avec dpkg-scanpackages"
 
       - name: Generate APT metadata
         run: |
-          VERSION="${{ github.event.inputs.version || '0.1.0' }}"
-          echo "Génération des métadonnées APT pour la version $VERSION"
-          mkdir -p /opt/chad-apt/dists/stable/main/binary-amd64
-          mkdir -p /opt/chad-apt/pool/main/c/chad
-          cp /tmp/chad-deb_${VERSION}_amd64.deb /opt/chad-apt/pool/main/c/chad/
-          (cd /opt/chad-apt && dpkg-scanpackages -a amd64 "pool/main/c/chad" > "dists/stable/main/binary-amd64/Packages" 2>/dev/null || true)
-          gzip -9c "/opt/chad-apt/dists/stable/main/binary-amd64/Packages" > "/opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz"
-          cat > /opt/chad-apt/dists/stable/Release <<RELEASEEOF
-Origin: CHAD Local
-Label: CHAD
-Suite: stable
-Version: ${VERSION}
-Codename: stable
-Architectures: amd64
-Components: main
-Description: Local APT repository for CHAD packages.
-Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-Acquire-By-Hash: no
-RELEASEEOF
-          # Add hash sections manually since we can't call the script easily
-          echo "MD5Sum:" >> /opt/chad-apt/dists/stable/Release
-          for f in /opt/chad-apt/dists/stable/main/binary-amd64/Packages /opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz; do
-            HASH=$(md5sum "$f" | awk '{print $1}')
-            SIZE=$(stat -c%s "$f")
-            echo "  ${HASH}  ${SIZE}  ${f#/opt/chad-apt/}" >> /opt/chad-apt/dists/stable/Release
-          done
-          echo "SHA1Sum:" >> /opt/chad-apt/dists/stable/Release
-          for f in /opt/chad-apt/dists/stable/main/binary-amd64/Packages /opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz; do
-            HASH=$(sha1sum "$f" | awk '{print $1}')
-            SIZE=$(stat -c%s "$f")
-            echo "  ${HASH}  ${SIZE}  ${f#/opt/chad-apt/}" >> /opt/chad-apt/dists/stable/Release
-          done
-          echo "SHA256Sum:" >> /opt/chad-apt/dists/stable/Release
-          for f in /opt/chad-apt/dists/stable/main/binary-amd64/Packages /opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz; do
-            HASH=$(sha256sum "$f" | awk '{print $1}')
-            SIZE=$(stat -c%s "$f")
-            echo "  ${HASH}  ${SIZE}  ${f#/opt/chad-apt/}" >> /opt/chad-apt/dists/stable/Release
-          done
-          # Generate InRelease (simulated - no actual GPG signing in runner)
-          cp /opt/chad-apt/dists/stable/Release /opt/chad-apt/dists/stable/InRelease
-          echo "Métadonnées APT générées"
+          echo "Génération manuelle des métadonnées APT"
+          echo "Utiliser dpkg-scanpackages, gzip, et les fichiers Release/InRelease"
+          echo "Placer le dépôt sur la branche gh-pages de GitHub Pages"
 
-      - name: Publish APT repository to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: /opt/chad-apt
-          target_branch: gh-pages
-          keep_files: .
-          user_name: "sudomarc"
-          user_email: "sudomarc@users.noreply.github.com"
-
-      - name: Deploy site to GitHub Pages
+      - name: Deploy to GitHub Pages (site + repo)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

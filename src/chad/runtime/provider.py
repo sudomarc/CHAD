@@ -1,36 +1,17 @@
-"""Provider-neutral model request contract.
+"""Lazy re-exports of the provider-neutral model contract owned by the gateway.
 
-Providers translate between this contract and vendor APIs. The runtime does
-not assume streaming, tool calling, vision, or structured output; capability
-support is declared per-model by the adapter (docs/model-providers.md).
+The contract itself lives in ``chad.gateway.provider_contract``; the runtime
+consumes it (docs/architecture.md: dependency direction). Re-export is lazy
+so importing ``chad.runtime`` never pulls in the gateway (and vice versa),
+which avoids an import cycle.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
 
-from .contracts import Message, ToolCall
-from .tools import ToolSchema
+def __getattr__(name: str):
+    if name in ("ModelResponse", "Provider"):
+        from chad.gateway.provider_contract import ModelResponse, Provider
 
-
-@dataclass(frozen=True)
-class ModelResponse:
-    content: str
-    tool_calls: tuple[ToolCall, ...] = ()
-
-
-@runtime_checkable
-class Provider(Protocol):
-    """A model provider implementing the normalized contract."""
-
-    def request(
-        self,
-        messages: tuple[Message, ...],
-        tool_schemas: tuple[ToolSchema, ...],
-    ) -> ModelResponse:
-        """Synchronously produce a model response.
-
-        Returns a completed response; never simulate streaming token events.
-        """
-        ...
+        return {"ModelResponse": ModelResponse, "Provider": Provider}[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

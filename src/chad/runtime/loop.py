@@ -13,13 +13,15 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from .contracts import Message, Role, ToolResult
 from .events import Event, EventType
-from .provider import Provider
 from .task import Task, TaskStatus, TransitionError
 from .tools import Tool, ToolError, ToolRegistry
+
+if TYPE_CHECKING:
+    from .provider import Provider
 
 
 class LoopOutcome(str, Enum):

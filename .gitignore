@@ -23,12 +23,14 @@ dist/
 *.pem
 *.key
 
-# CHAD runtime data
-.chad/
-*.sqlite
-*.sqlite3
-*.db
-*.log
+# CHAD generated runtime data (keep project rules/configuration/memory trackable)
+.chad/sessions/
+.chad/index/
+.chad/logs/
+.chad/*.sqlite
+.chad/*.sqlite3
+.chad/*.db
+.chad/*.log
 
 # Editors and operating systems
 .vscode/

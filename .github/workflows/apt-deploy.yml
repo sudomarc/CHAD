@@ -39,9 +39,7 @@ jobs:
           VERSION="${{ env.VERSION }}"
           echo "Construction de CHAD version $VERSION"
           # Mise à jour de la version dans le paquet
-          # On remplace la version par défaut dans les fichiers de contrôle
           sed -i "s/Version: ${CHAD_VERSION}/Version: ${VERSION}/" /opt/chad-apt/DEBIAN/control 2>/dev/null || true
-          # Reconstruire si nécessaire
           apt-get update -qq && apt-get install -y -qq dpkg-dev gnupg
           python3 -m venv /tmp/chad-venv
           /tmp/chad-venv/bin/pip install --quiet -e .
@@ -51,10 +49,8 @@ jobs:
         run: |
           VERSION="${{ env.VERSION }}"
           echo "Mise à jour du dépôt APT pour la version $VERSION"
-          # Reconstruire les index avec la bonne version
           (cd /opt/chad-apt && dpkg-scanpackages -a amd64 "pool/main/c/chad" > "dists/stable/main/binary-amd64/Packages" 2>/dev/null || true)
           gzip -9c "/opt/chad-apt/dists/stable/main/binary-amd64/Packages" > "/opt/chad-apt/dists/stable/main/binary-amd64/Packages.gz"
-          # Signer le Release (nécessite la clé GPG)
           gpg --batch --homedir /tmp/chad-gnupg --default-key "$(gpg --batch --homedir /tmp/chad-gnupg --with-colons --list-keys CHAD APT Archive 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')" --detach-sign --armor --output "dists/stable/Release.gpg" "dists/stable/Release" 2>/dev/null || true
           gpg --batch --homedir /tmp/chad-gnupg --default-key "$(gpg --batch --homedir /tmp/chad-gnupg --with-colons --list-keys CHAD APT Archive 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')" --clearsign --output "dists/stable/InRelease" "dists/stable/Release" 2>/dev/null || true
 
@@ -64,24 +60,23 @@ jobs:
           echo "Installed at: $(which chad)"
           echo "Deployed version from workflow: $VERSION"
 
-  # Job optionnel pour le site statique
   build-site:
-    needs: build-apt-repo
     runs-on: ubuntu-latest
-    if: false  # Désactivé par défaut - à activer si site GitHub Pages
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Generate static site
-        run: |
-          # Script générant le site de présentation
-          # À partir des métadonnées du dépôt APT
-          echo "Site generation placeholder - see plan for details"
+      - name: Setup Pages
+        uses: actions/setup-pages@v3
+
+      - name: Upload artifact pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
 
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/deploy-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
+          token: ${{ secrets.GITHUB_TOKEN }}

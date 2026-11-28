@@ -42,7 +42,7 @@ class DebianPackageTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             ).stdout.splitlines()
-            self.assertEqual(metadata, ["chad", "0.9.7", "all", "python3 (>= 3.11)"])
+            self.assertEqual(metadata, ["Package: chad", "Version: 0.9.7", "Architecture: all", "Depends: python3 (>= 3.11)"])
 
             extracted = Path(temp) / "extracted"
             subprocess.run(["dpkg-deb", "--extract", str(package), str(extracted)], check=True)

@@ -48,6 +48,10 @@ class SiteRenderTests(unittest.TestCase):
             self.assertIn("Candidate", html)
             self.assertIn("Architecture: all", html)
             self.assertIn("Unable to locate package chad", html)
+            self.assertIn("sudo apt install chad", html)
+            self.assertIn("sudo apt update && sudo apt upgrade chad", html)
+            self.assertIn("aptEnabled = true;", html)
+            self.assertNotIn("TUI optionnel", html)
 
     def test_renders_without_apt_or_download_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

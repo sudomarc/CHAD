@@ -2,23 +2,67 @@
 
 ## Compatibilité
 
-CHAD nécessite Python 3.11 ou supérieur.
+CHAD nécessite Python 3.11 ou supérieur. Le paquet Debian est architecture indépendante (`Architecture: all`) et utilise l'interpréteur système `/usr/bin/python3`.
 
-Le paquet Debian est **architecture indépendante** (`Architecture: all`) : il contient du code Python et utilise l'interpréteur système `/usr/bin/python3`.
-
-Le dépôt APT actuellement publié ne fournit toutefois qu'un index **amd64**. Vérifie l'architecture native avant de choisir cette méthode :
+Le dépôt APT actuellement publié ne fournit qu'un index **amd64**. Vérifie ton architecture et ta version de Python :
 
 ```bash
 dpkg --print-architecture
 python3 --version
 ```
 
-- `amd64` : le dépôt APT peut être utilisé.
-- `i386` ou une autre architecture : utilise l'installation directe du paquet Debian, sous réserve d'avoir Python 3.11+.
+- `amd64` : tu peux utiliser le dépôt APT signé si APT voit une version candidate de `chad`.
+- `i386` ou une autre architecture : utilise le paquet Debian direct, sous réserve d'avoir Python 3.11+.
 
-## Méthode recommandée — paquet Debian direct
+## Debian / Ubuntu — dépôt APT signé (amd64)
 
-Cette méthode installe le paquet de la version publiée sans dépendre de l'index du dépôt APT CHAD. Elle convient aussi aux systèmes non-amd64 compatibles avec Python 3.11+.
+C'est la méthode à privilégier sur les systèmes `amd64` lorsque le paquet apparaît bien dans l'index APT. Elle permet de recevoir les mises à jour avec le gestionnaire de paquets.
+
+### 1. Importer la clé et ajouter le dépôt
+
+```bash
+sudo install -d -m 0755 /usr/share/keyrings
+curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc \
+  | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" \
+  | sudo tee /etc/apt/sources.list.d/chad.list
+```
+
+### 2. Actualiser et vérifier que le paquet est indexé
+
+```bash
+sudo apt update
+apt-cache policy chad
+```
+
+**Avant d'installer, vérifie que `apt-cache policy chad` affiche une version dans `Candidate`.** Le message `Hit: ... CHAD ... InRelease` confirme seulement que les métadonnées signées du dépôt ont été récupérées ; il ne prouve pas que l'index des paquets a été chargé.
+
+Si `Candidate: (none)` apparaît, ne répète pas simplement `sudo apt install chad`. Suis la section [Dépannage](#depannage) ou utilise le paquet Debian direct.
+
+### 3. Installer et mettre à jour
+
+```bash
+sudo apt install chad
+chad --version
+```
+
+Pour mettre à jour :
+
+```bash
+sudo apt update
+sudo apt upgrade chad
+```
+
+Pour désinstaller :
+
+```bash
+sudo apt remove chad
+```
+
+## Paquet Debian direct — solution de secours
+
+Utilise cette méthode si ton architecture n'est pas `amd64`, ou si APT ne présente aucune version candidate pour CHAD.
 
 1. Ouvre le [site officiel d'installation](https://sudomarc.github.io/CHAD/) et relève la version affichée.
 2. Remplace `0.1.0` ci-dessous par cette version, puis télécharge et installe le paquet :
@@ -37,60 +81,6 @@ chad --help
 ```
 
 APT résout les dépendances du fichier local à partir des dépôts Debian configurés. Cette méthode **n'ajoute pas** le dépôt APT de CHAD : pour mettre à jour CHAD, télécharge et installe le nouveau fichier `.deb` publié sur le site.
-
-## Debian / Ubuntu — dépôt APT signé (amd64)
-
-Le dépôt APT permet de recevoir les mises à jour de CHAD avec le gestionnaire de paquets. Il est actuellement publié pour `amd64` uniquement.
-
-### 1. Vérifier l'architecture
-
-```bash
-dpkg --print-architecture
-```
-
-Continue avec cette méthode uniquement si la commande affiche `amd64`. Sur `i386` ou une autre architecture, utilise la méthode du paquet Debian direct ci-dessus.
-
-### 2. Importer la clé et ajouter le dépôt
-
-```bash
-sudo install -d -m 0755 /usr/share/keyrings
-curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc \
-  | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg
-
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" \
-  | sudo tee /etc/apt/sources.list.d/chad.list
-```
-
-### 3. Actualiser et vérifier que le paquet est réellement indexé
-
-```bash
-sudo apt update
-apt-cache policy chad
-```
-
-**Avant d'installer, vérifie que `apt-cache policy chad` affiche une version dans `Candidate`.** Le message `Hit: ... CHAD ... InRelease` confirme seulement que les métadonnées signées du dépôt ont été récupérées ; il ne prouve pas que l'index des paquets a été chargé.
-
-Si `Candidate: (none)` apparaît, ne répète pas simplement `sudo apt install chad`. Suis la section [Dépannage](#depannage) ou installe le paquet Debian direct.
-
-### 4. Installer et mettre à jour
-
-```bash
-sudo apt install chad
-chad --version
-```
-
-Pour mettre à jour une installation APT :
-
-```bash
-sudo apt update
-sudo apt upgrade chad
-```
-
-Pour désinstaller :
-
-```bash
-sudo apt remove chad
-```
 
 ## Installation depuis les sources avec pipx
 
@@ -146,7 +136,7 @@ grep -Rns 'sudomarc.github.io/CHAD' \
   /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null
 ```
 
-- Si l'architecture native n'est pas `amd64`, utilise le [paquet Debian direct](#methode-recommandee--paquet-debian-direct).
+- Si l'architecture native n'est pas `amd64`, utilise le [paquet Debian direct](#paquet-debian-direct--solution-de-secours).
 - Si l'architecture est `amd64` mais que `Candidate` vaut `(none)`, force le renouvellement des seuls index CHAD puis vérifie à nouveau :
 
 ```bash

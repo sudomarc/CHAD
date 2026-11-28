@@ -18,7 +18,7 @@ class DebianPackageTests(unittest.TestCase):
     def test_builds_installable_architecture_independent_package(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "dist"
-            subprocess.run(
+            result = subprocess.run(
                 [
                     sys.executable,
                     str(BUILDER),
@@ -29,10 +29,10 @@ class DebianPackageTests(unittest.TestCase):
                     "--root",
                     str(ROOT),
                 ],
-                check=True,
                 capture_output=True,
                 text=True,
             )
+            self.assertEqual(result.returncode, 0, f"Package build failed:\n{result.stdout}\n{result.stderr}")
             package = output / "chad_0.9.7_all.deb"
             self.assertTrue(package.is_file())
 

@@ -62,6 +62,7 @@ class AptRepositoryTests(unittest.TestCase):
                     "--output", str(downloads),
                     "--root", str(ROOT),
                 ],
+                check=False,
                 capture_output=True,
                 text=True,
             )

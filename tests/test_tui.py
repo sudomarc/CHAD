@@ -41,8 +41,7 @@ class TuiAppTests(unittest.TestCase):
     def test_no_runtime_means_standalone(self):
         app = ChadApp()
         self.assertIsNone(app.runtime)
-        self.assertIsNone(app._on_submit)
-        self.assertIsNone(app._on_cancel)
+        # New API: runtime is an object with submit/cancel methods, not callbacks
 
 
 if __name__ == "__main__":

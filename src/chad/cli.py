@@ -1,9 +1,8 @@
 """Command-line interface entry point for CHAD.
 
-The first usable slice (M1) installs a ``chad`` command, prints version and
-help, loads optional configuration, and initializes structured logging.
-Starting an agent task (``chad run <task>``) is intentionally rejected with
-a clear error until the bounded agent runtime exists.
+The terminal UI is the primary interface. Running ``chad`` without arguments
+launches the interactive TUI. A non-interactive ``run`` mode remains
+available for automation and scripting.
 """
 
 from __future__ import annotations
@@ -50,17 +49,12 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
     run = subparsers.add_parser(
         "run",
-        help="Execute an agent task using the bounded agent runtime.",
+        help="Execute an agent task using the bounded agent runtime (non-interactive).",
     )
     run.add_argument("task", help="Task description for the agent.")
-    tui = subparsers.add_parser(
+    subparsers.add_parser(
         "tui",
-        help="Launch the terminal user interface shell.",
-    )
-    tui.add_argument(
-        "--standalone",
-        action="store_true",
-        help="Run the shell without a runtime (echoes input).",
+        help="Launch the terminal user interface shell (default when no command given).",
     )
     return parser
 
@@ -249,15 +243,86 @@ def run_task(args, config) -> int:
     return 2
 
 
-def run_tui(args) -> int:
-    """Launch the Textual TUI shell.
+def run_tui(args, config) -> int:
+    """Launch the Textual TUI shell connected to the agent runtime."""
+    from chad.runtime.loop import AgentLoop, LoopLimits
+    from chad.runtime.task import Task
+    from chad.runtime.tools import ToolRegistry
+    from chad.tools import GlobTool, GrepTool, ListTool, ReadTool
 
-    Textual is imported lazily so the core package stays installable without
-    the TUI dependency (see the ``tui`` extra in pyproject.toml).
-    """
     from .tui.app import ChadApp
 
-    app = ChadApp()
+    # Build tool registry with read-only tools
+    registry = ToolRegistry()
+    for tool_cls in (ReadTool, ListTool, GrepTool, GlobTool):
+        registry.register(tool_cls(config.workspace_root))  # type: ignore[arg-type]
+
+    # Build provider
+    provider = _build_provider(config)
+
+    # Build limits from config
+    limits = LoopLimits(
+        max_iterations=config.max_iterations,
+        max_requests=config.max_requests,
+        max_tool_calls=config.max_tool_calls,
+        max_wall_clock_seconds=config.max_wall_clock_seconds,
+        max_output_bytes=config.max_output_bytes,
+    )
+
+    # Create TUI app with runtime integration
+    class TUIRuntime:
+        def __init__(self):
+            self._loop: AgentLoop | None = None
+            self._task: Task | None = None
+            self._on_submit_callback = None
+            self._on_cancel_callback = None
+
+        def submit(self, task_description: str) -> None:
+            """Submit a new task to the agent loop."""
+
+            self._task = Task(id="tui-1", description=task_description)
+            self._loop = AgentLoop(
+                task=self._task,
+                provider=provider,
+                registry=registry,
+                model=config.model,
+                policy=ReadOnlyPolicy(),
+                limits=limits,
+                on_event=self._on_event,
+            )
+
+            if self._on_submit_callback:
+                self._on_submit_callback()
+
+            # Run the loop in a background thread
+            import threading
+
+            def run_loop():
+                report = self._loop.run()
+                # Emit completion event
+                self._emit_completion(report)
+
+            thread = threading.Thread(target=run_loop, daemon=True)
+            thread.start()
+
+        def cancel(self) -> None:
+            """Cancel the current task."""
+            if self._loop:
+                self._loop.cancel()
+
+        def _on_event(self, event):
+            """Handle runtime events and forward to TUI."""
+            if self._on_event_callback:
+                self._on_event_callback(event)
+
+        def _emit_completion(self, report):
+            """Emit task completion."""
+            if self._on_completion_callback:
+                self._on_completion_callback(report)
+
+    runtime = TUIRuntime()
+
+    app = ChadApp(runtime=runtime)
     return int(app.run() or 0)
 
 
@@ -281,15 +346,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         config.model,
     )
 
-    if args.command is None:
-        parser.print_help(sys.stdout)
-        return 0
+    # Default to TUI when no command is given; preserve explicit tui command
+    # But allow non-interactive mode for automation/testing
+    if args.command is None or args.command == "tui":
+        import sys
+        if not sys.stdin.isatty():
+            # Non-interactive environment: print help instead of launching TUI
+            parser.print_help(sys.stdout)
+            return 0
+        return run_tui(args, config)
 
     if args.command == "run":
         return run_task(args, config)
-
-    if args.command == "tui":
-        return run_tui(args)
 
     return 0
 

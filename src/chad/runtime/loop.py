@@ -138,7 +138,7 @@ class AgentLoop:
         elapsed = (
             time.monotonic() - self._start if self._start is not None else 0.0
         )
-        return TaskReport(
+        report = TaskReport(
             task_id=self.task.id,
             status=self.task.status,
             outcome=outcome,
@@ -155,6 +155,16 @@ class AgentLoop:
             results=list(self.task.results),
             error=error,
         )
+
+        # Emit completion events
+        if outcome == LoopOutcome.COMPLETED:
+            self._emit(EventType.TASK_FINISHED, {"task_id": self.task.id})
+        elif outcome == LoopOutcome.FAILED:
+            self._emit(EventType.TASK_FAILED, {"task_id": self.task.id, "error": error})
+        elif outcome == LoopOutcome.CANCELLED:
+            self._emit(EventType.TASK_CANCELLED, {"task_id": self.task.id})
+
+        return report
 
     # ------------------------------------------------------------------ cycle
 
@@ -263,6 +273,10 @@ class AgentLoop:
                         pass
                     return self._report(LoopOutcome.WAITING_FOR_PERMISSION)
                 else:
+                    self._emit(
+                        EventType.TOOL_REQUESTED,
+                        {"tool": tool_call.name, "arguments": tool_call.arguments},
+                    )
                     try:
                         result = tool.call(tool_call.arguments)
                     except ToolError as exc:

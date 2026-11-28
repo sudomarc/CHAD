@@ -90,7 +90,7 @@ class AptRepositoryTests(unittest.TestCase):
             self.assertTrue((repo / "dists/stable/main/binary-amd64/Packages.gz").is_file())
             self.assertTrue((repo / "dists/stable/Release").is_file())
             release_content = (repo / "dists/stable/Release").read_text(encoding="utf-8")
-            release_hashes = release_content.split("SHA256:\\n", 1)[1].splitlines()
+            release_hashes = release_content.split("SHA256:\n", 1)[1].splitlines()
             indexed_paths = {
                 line.split()[-1] for line in release_hashes if line.strip()
             }

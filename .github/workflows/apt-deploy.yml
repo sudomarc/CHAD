@@ -1,68 +1,126 @@
-name: CHAD APT Deploy
+name: CHAD Build and Deploy
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version de CHAD à déployer (ex: 0.1.0, 0.1.1)'
+        description: "Optional release version (MAJOR.MINOR.PATCH; defaults to pyproject.toml)"
         required: false
-        default: ''
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chad-pages
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
+    name: Build package and installation site
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+      apt_enabled: ${{ steps.apt.outputs.enabled }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install CHAD in editable mode
+      - name: Install packaging tools
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
+          sudo apt-get update
+          sudo apt-get install --yes dpkg-dev gnupg
 
-      - name: Create deployment venv
+      - name: Resolve and validate version
+        id: version
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
         run: |
-          python3 -m venv /opt/chad-venv
-          /opt/chad-venv/bin/pip install --quiet -e .
+          VERSION="$REQUESTED_VERSION"
+          if [ -z "$VERSION" ]; then
+            VERSION="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          fi
+          python -c 'import re,sys; v=sys.argv[1]; sys.exit(0 if re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", v) else 1)' "$VERSION" || {
+            echo "Invalid version: use MAJOR.MINOR.PATCH." >&2
+            exit 1
+          }
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Build .deb package (documented steps)
+      - name: Build Debian package
         run: |
-          echo "Build .deb manuellement :"
-          echo "  mkdir -p /tmp/chad-deb/DEBIAN /tmp/chad-deb/usr/bin"
-          echo "  Remplir /tmp/chad-deb/DEBIAN/control avec la version"
-          echo "  dpkg-deb --build /tmp/chad-deb"
-          echo "  Copier le .deb dans /opt/chad-apt/pool/main/c/chad/"
-          echo "  Générer Packages et Release avec dpkg-scanpackages"
+          python scripts/build_deb.py --version "${{ steps.version.outputs.value }}" --output public/downloads
+          dpkg-deb --info "public/downloads/chad_${{ steps.version.outputs.value }}_all.deb"
+          dpkg-deb --contents "public/downloads/chad_${{ steps.version.outputs.value }}_all.deb"
 
-      - name: Generate APT metadata
+      - name: Verify installed package payload
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
         run: |
-          echo "Génération manuelle des métadonnées APT"
-          echo "Utiliser dpkg-scanpackages, gzip, et les fichiers Release/InRelease"
-          echo "Placer le dépôt sur la branche gh-pages de GitHub Pages"
+          mkdir -p "$RUNNER_TEMP/chad-extracted"
+          dpkg-deb --extract "public/downloads/chad_${VERSION}_all.deb" "$RUNNER_TEMP/chad-extracted"
+          PYTHONPATH="$RUNNER_TEMP/chad-extracted/usr/lib/chad" python -c             'from chad import __version__; from chad.cli import main; assert __version__ == __import__("os").environ["VERSION"]; raise SystemExit(main(["--version"]))'
 
-      - name: Deploy site to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Build signed APT repository when signing key is configured
+        id: apt
+        env:
+          CHAD_APT_GPG_PRIVATE_KEY: ${{ secrets.CHAD_APT_GPG_PRIVATE_KEY }}
+          CHAD_APT_GPG_PASSPHRASE: ${{ secrets.CHAD_APT_GPG_PASSPHRASE }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          if [ -z "${CHAD_APT_GPG_PRIVATE_KEY:-}" ]; then
+            echo "APT signing key is not configured; publishing the direct .deb installer only."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python scripts/build_apt_repo.py \
+            --package "public/downloads/chad_${VERSION}_all.deb" \
+            --version "$VERSION" \
+            --output public
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - name: Render installation site
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+          APT_ENABLED: ${{ steps.apt.outputs.enabled }}
+        run: |
+          python scripts/render_site.py --version "$VERSION" --apt-enabled "$APT_ENABLED" --output public
+          test -s public/index.html
+          test -s "public/downloads/chad_${VERSION}_all.deb"
+          if [ "$APT_ENABLED" = "true" ]; then
+            test -s public/apt/KEY.asc
+            test -s public/apt/dists/stable/InRelease
+            test -s public/apt/dists/stable/Release.gpg
+          fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          publish_branch: gh-pages
-          keep_files: .
-          user_name: "sudomarc"
-          user_email: "sudomarc@users.noreply.github.com"
+          path: public
 
-      - name: Display CHAD info
-        run: |
-          echo "CHAD version: $(chad --version)"
-          echo "Installed at: $(which chad)"
+  deploy:
+    name: Deploy GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

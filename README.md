@@ -2,9 +2,20 @@
 
 CHAD is a local-first, general-purpose software engineering agent designed to work inside arbitrary local repositories. It combines an interactive terminal interface, a bounded agent runtime, a provider-neutral model gateway, repository-aware tools, and explicit security controls.
 
-**Current status:** project foundation and specifications. Features described in the roadmap are planned until implemented and verified.
+**Project status:** active development. Commands and integrations are documented only to the extent implemented and verified. The TUI currently provides a standalone shell; runtime integration is still in progress.
+
+## Installation
+
+The installation guide is maintained at **[sudomarc.github.io/CHAD](https://sudomarc.github.io/CHAD/)**.
+
+- Debian/Ubuntu: use the signed APT repository when the site marks it available.
+- Direct Debian package: download the versioned `.deb` linked from the installation site.
+- Python source install: use pipx with the optional Textual extra for the TUI.
+
+Do not add an unsigned APT source or disable APT signature verification.
 
 ## Product decisions
+
 - **Languages:** Python for orchestration and product logic; Rust for justified native components.
 - **Interface:** terminal UI (TUI).
 - **Models:** multi-provider, capability-aware gateway.
@@ -12,6 +23,7 @@ CHAD is a local-first, general-purpose software engineering agent designed to wo
 - **Deployment model:** local-first; no mandatory hosted CHAD service.
 
 ## Product principles
+
 1. The agent must inspect before it changes.
 2. Tool execution must be observable, bounded, and permission-aware.
 3. Provider capabilities must be explicit rather than assumed.
@@ -20,6 +32,8 @@ CHAD is a local-first, general-purpose software engineering agent designed to wo
 6. Security and truthful reporting are product requirements.
 
 ## Documentation
+
+- [Installation](docs/installation.md)
 - [Agent instructions](AGENTS.md)
 - [Claude Code instructions](CLAUDE.md)
 - [Contributing](CONTRIBUTING.md)
@@ -33,13 +47,27 @@ CHAD is a local-first, general-purpose software engineering agent designed to wo
 - [Testing strategy](docs/testing.md)
 - [Development plan](docs/development-plan.md)
 
-## Planned user experience
-From a repository directory, the user will eventually be able to start CHAD, ask it to inspect or modify the project, review proposed changes, authorize tools, run tests, and resume previous sessions.
+## Quick start
 
-The exact command and installation experience will be finalized with the first working CLI milestone.
+After installation:
 
-## Development status
-The repository is being rebuilt from an empty Git tree. Do not assume that the architecture, modules, commands, or capabilities in these documents already exist. Track implementation through GitHub issues and update this README as verified functionality lands.
+```bash
+chad --version
+chad --help
+chad run "Inspecte ce dépôt et résume sa structure"
+```
 
-## Contributing
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before submitting changes.
+Without an explicit provider configuration, CHAD uses its deterministic fake provider. Configure a provider and its API key before expecting responses from a real model. See [Installation](docs/installation.md#configuration-dun-fournisseur).
+
+## Development
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -e ".[dev]"
+python -m unittest discover -s tests
+```
+
+The `dev` extra includes Textual so the TUI tests run in CI. The `tui` extra remains available for runtime installations that need the terminal UI.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before contributing.

@@ -2,195 +2,269 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>CHAD — Local-first Coding Agent</title>
-  <meta name="description" content="CHAD — Local-first general-purpose coding agent">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10151b">
+  <meta name="description" content="CHAD — agent de développement local-first. Guide d'installation Debian, Ubuntu et Python.">
+  <title>CHAD — Installer l'agent de développement</title>
   <style>
     :root {
-      --bg: #0d0d0d;
-      --bg-subtle: #1a1a1a;
-      --fg: #e0e0e0;
-      --muted: #6b6b6b;
-      --accent: #c5f015;
-      --card: #121212;
-      --border: #2a2a2a;
+      color-scheme: dark;
+      --bg: #10151b;
+      --panel: #171e26;
+      --panel-2: #1d2731;
+      --text: #edf2f7;
+      --muted: #a4b0bc;
+      --line: #2b3743;
+      --accent: #a6e3a1;
+      --accent-ink: #122018;
+      --warning: #f4cc83;
+      --blue: #a9c7f5;
+      --radius: 18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    [data-theme="light"] {
-      --bg: #f5f5f5;
-      --bg-subtle: #ffffff;
-      --fg: #1a1a1a;
-      --muted: #6b6b6b;
-      --accent: #2e7d32;
-      --card: #ffffff;
-      --border: #e0e0e0;
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at 78% 0%, #1d2b35 0, var(--bg) 42rem); color: var(--text); line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; gap: 12px; align-items: center; color: var(--text); font-weight: 800; letter-spacing: .04em; }
+    .mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); font-weight: 900; }
+    nav { display: flex; gap: 22px; color: var(--muted); font-size: .94rem; }
+    .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 46px; align-items: center; padding: 76px 0 58px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .82rem; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+    h1 { margin: 20px 0 16px; font-size: clamp(2.8rem, 6vw, 5rem); line-height: 1.04; letter-spacing: -.06em; }
+    .lead { max-width: 610px; color: var(--muted); font-size: 1.12rem; }
+    .hero-links { display: flex; align-items: center; gap: 22px; margin-top: 28px; font-size: .94rem; }
+    .button { display: inline-flex; align-items: center; justify-content: center; padding: 11px 17px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 750; }
+    .version-card { background: linear-gradient(145deg, #202c36, #151c24); border: 1px solid #34424e; border-radius: 24px; padding: 25px; box-shadow: 0 24px 80px #0005; }
+    .version-label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .12em; }
+    .version { font-size: 2.4rem; font-weight: 800; letter-spacing: -.05em; margin: 5px 0 2px; }
+    .version-note { color: var(--muted); font-size: .9rem; }
+    .terminal { margin-top: 23px; padding: 16px; background: #0b1015; border: 1px solid #29343f; border-radius: 13px; font: .91rem/1.9 ui-monospace, SFMono-Regular, Menlo, monospace; color: #d9e5ed; }
+    .terminal span { color: var(--accent); }
+    section { padding: 48px 0; border-top: 1px solid var(--line); }
+    .section-head { display: flex; justify-content: space-between; gap: 28px; align-items: end; margin-bottom: 25px; }
+    h2 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: -.04em; }
+    .section-copy { max-width: 520px; color: var(--muted); margin: 0; }
+    .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 23px; }
+    .card.primary { border-color: #58705c; background: linear-gradient(150deg, #1d2a26, var(--panel)); }
+    .card h3 { margin: 0 0 6px; font-size: 1.16rem; }
+    .card p { color: var(--muted); margin: 0 0 17px; font-size: .94rem; }
+    .step { margin-top: 16px; }
+    .step-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: .83rem; }
+    .command { position: relative; padding: 14px 90px 14px 14px; background: #0c1116; border: 1px solid #2a3540; border-radius: 11px; overflow-wrap: anywhere; font: .84rem/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e1e9ef; }
+    .copy { position: absolute; top: 8px; right: 8px; border: 1px solid #3a4854; border-radius: 7px; padding: 5px 9px; background: #202a33; color: var(--text); cursor: pointer; font: .75rem system-ui, sans-serif; }
+    .copy:hover { border-color: var(--accent); }
+    .status { display: inline-flex; padding: 4px 9px; border: 1px solid #4a5c4d; border-radius: 999px; color: var(--accent); font-size: .77rem; font-weight: 700; margin-bottom: 13px; }
+    .status.pending { border-color: #6b5433; color: var(--warning); }
+    .notice { margin-top: 17px; border-left: 3px solid var(--warning); padding: 12px 14px; background: #292319; color: #e9d6b6; border-radius: 0 10px 10px 0; font-size: .88rem; }
+    .requirements { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .requirement { padding: 18px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
+    .requirement strong { display: block; margin-bottom: 4px; }
+    .requirement span { color: var(--muted); font-size: .9rem; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .feature { padding: 19px; background: var(--panel); border: 1px solid var(--line); border-radius: 13px; }
+    .feature h3 { margin: 0 0 7px; font-size: 1rem; }
+    .feature p { color: var(--muted); margin: 0; font-size: .9rem; }
+    .links { display: flex; flex-wrap: wrap; gap: 20px; }
+    footer { border-top: 1px solid var(--line); padding: 25px 0 42px; color: var(--muted); font-size: .88rem; }
+    .hidden { display: none; }
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; padding-top: 52px; gap: 28px; }
+      nav { gap: 12px; font-size: .84rem; }
+      .section-head { display: block; }
+      .section-copy { margin-top: 10px; }
+      .install-grid { grid-template-columns: 1fr; }
+      .requirements, .features { grid-template-columns: 1fr; }
     }
-    body { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; }
-    .gutter { padding: 0 16px; max-width: 860px; margin: 0 auto; }
-    header { padding: 48px 0 24px; text-align: center; border-bottom: 1px solid var(--border); }
-    h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
-    .tagline { color: var(--muted); margin: 8px 0 24px; font-size: 1.1rem; }
-    .version { color: var(--accent); font-family: monospace; font-size: 1.2rem; margin: 24px 0; display: inline-block; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; }
-    .section { margin: 48px 0; }
-    .section-heading { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; font-size: 1.5rem; }
-    .install { margin: 32px 0; }
-    .command-row { margin: 8px 0; }
-    .command { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; font-family: monospace; word-break: break-all; margin: 4px 0; }
-    .command-label { color: var(--muted); display: block; margin-bottom: 4px; }
-    .features { margin: 48px 0; }
-    .feature { margin: 16px 0; display: flex; align-items: center; gap: 8px; }
-    .feature svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7; }
-    .footer { padding: 32px 0; text-align: center; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
-    @media (max-width: 600px) { h1 { font-size: 2rem; } .gutter { padding: 0 12px; } }
+    @media (max-width: 460px) { .wrap { width: min(100% - 26px, 1080px); } nav a:nth-child(2) { display: none; } }
   </style>
-  <script>
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-    });
-  </script>
 </head>
 <body>
-  <div class="gutter">
-    <header>
-      <h1>CHAD</h1>
-      <p class="tagline">Local-first general-purpose coding agent</p>
-      <div class="version">v0.1.1</div>
+  <div class="wrap">
+    <header class="topbar">
+      <a class="brand" href="./"><span class="mark">C</span><span>CHAD</span></a>
+      <nav aria-label="Navigation principale">
+        <a href="#installation">Installation</a>
+        <a href="#fonctionnalites">Fonctionnalités</a>
+        <a href="https://github.com/sudomarc/CHAD">GitHub</a>
+      </nav>
     </header>
 
-    <section class="section" id="presentation">
-      <div class="section-heading">Présentation</div>
-      <p>CHAD est un agent de codage local-first conçu pour travailler dans n'importe quel dépôt local. Il combine une interface terminal UI (TUI), un runtime agent borné, une passerelle de modèle multi-provider, des outils aware du dépôt et des contrôles de sécurité explicites.</p>
-      <p>Langage principal : Python pour lorchestration et la logique produit ; Rust pour les composants natifs justifiés.</p>
-      <p>Modèle d'implantation : local-first ; pas de service CHAD hébergé obligatoire.</p>
-    </section>
-
-    <section class="section" id="objectif">
-      <div class="section-heading">Objectif et fonctionnalités</div>
-      <ul>
-        <li><strong>Orchestration Python-first</strong> : tout le comportement, les providers et le TUI sont en Python.</li>
-        <li><strong>Passerelle de modèle multi-provider</strong> : providers interchangeables (Anthropic, OpenAI, Google, LapisLLM).</li>
-        <li><strong>Interface terminal (TUI)</strong> : interface Textual pour une expérience CLI riche.</li>
-        <li><strong>Runtime borné</strong> : boucle observe/décider/act bornée avec contrôle des permissions.</li>
-        <li><strong>Conscience du dépôt</strong> : outils filesystem, git, shell conscients du dépôt.</li>
-        <li><strong>Sécurité explicite</strong> : politique ReadOnly par défaut, pas de copie silencieuse d'exceptions.</li>
-      </ul>
-    </section>
-
-    <section class="section" id="plateformes">
-      <div class="section-heading">Plateformes et environnements compatibles</div>
-      <ul>
-        <li>Debian/Ubuntu (via dépôt APT)</li>
-        <li>Distribution Linux générique (installation manuelle possible)</li>
-        <li>Environnement Python 3.11+</li>
-        <li>Interface terminal (TUI) nécessitant Textual</li>
-      </ul>
-    </section>
-
-    <section class="section" id="pre-requis">
-      <div class="section-heading">Prérequis</div>
-      <ul>
-        <li>Système d'exploitation : Debian 12+, Ubuntu 22.04+, ou distribution Linux compatible</li>
-        <li>Python 3.11 ou version supérieure</li>
-        <li>Accès en ligne de commande (terminal)</li>
-        <li>Connexion internet (pour l'installation initiale depuis le dépôt)</li>
-      </ul>
-    </section>
-
-    <section class="section" id="installation">
-      <div class="section-heading">Installation</div>
-      <p>Choisissez la méthode qui vous convient :</p>
-
-      <div class="section-heading">Installation via APT (recommandé)</div>
-      <p>Ces commandes sont copiables individuellement :</p>
-
-      <div class="command-row">
-        <span class="command-label">Configuration du dépôt</span>
-        <span class="command">curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/chad-archive-keyring.gpg</span>
+    <main>
+      <div class="hero">
+        <div>
+          <span class="eyebrow"><span class="dot"></span> Agent de développement local-first</span>
+          <h1>Ton dépôt.<br>Ton environnement.<br>Ton agent.</h1>
+          <p class="lead">CHAD est un agent de développement conçu pour travailler directement dans tes dépôts locaux, avec un runtime borné, une passerelle de modèles interchangeable et des permissions explicites.</p>
+          <div class="hero-links">
+            <a class="button" href="#installation">Installer CHAD</a>
+            <a href="https://github.com/sudomarc/CHAD">Voir le code source ↗</a>
+          </div>
+        </div>
+        <aside class="version-card">
+          <div class="version-label">Version publiée</div>
+          <div class="version">v__CHAD_VERSION__</div>
+          <div class="version-note">Paquet Debian architecture indépendante</div>
+          <div class="terminal">
+            <div><span>$</span> chad --version</div>
+            <div>chad __CHAD_VERSION__</div>
+            <div><span>$</span> chad --help</div>
+            <div>Usage: chad [options] {run,tui}</div>
+          </div>
+        </aside>
       </div>
 
-      <div class="command-row">
-        <span class="command-label">Ajouter la source APT</span>
-        <span class="command">echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list</span>
-      </div>
+      <section id="installation">
+        <div class="section-head">
+          <h2>Installer CHAD</h2>
+          <p class="section-copy">Choisis la méthode adaptée à ton système. Les commandes ci-dessous correspondent aux artefacts construits par le workflow du dépôt.</p>
+        </div>
 
-      <div class="command-row">
-        <span class="command-label">Mise à jour et installation</span>
-        <span class="command">sudo apt update && sudo apt install chad</span>
-      </div>
+        <div class="install-grid">
+          <article class="card primary" id="apt-card">
+            <div id="apt-active" class="hidden">
+              <span class="status">Dépôt signé disponible</span>
+              <h3>Debian / Ubuntu — APT</h3>
+              <p>Ajoute le dépôt signé, puis installe et mets à jour CHAD avec le gestionnaire de paquets.</p>
+              <div class="step">
+                <span class="step-label">1. Importer la clé publique</span>
+                <div class="command">curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg<button class="copy" data-copy="curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg">Copier</button></div>
+              </div>
+              <div class="step">
+                <span class="step-label">2. Ajouter la source APT</span>
+                <div class="command">echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list<button class="copy" data-copy='echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list'>Copier</button></div>
+              </div>
+              <div class="step">
+                <span class="step-label">3. Installer</span>
+                <div class="command">sudo apt update && sudo apt install chad<button class="copy" data-copy="sudo apt update && sudo apt install chad">Copier</button></div>
+              </div>
+            </div>
+            <div id="apt-pending">
+              <span class="status pending">Configuration du dépôt en attente</span>
+              <h3>Dépôt APT signé</h3>
+              <p>Le dépôt APT ne sera activé qu'après configuration de la clé de signature persistante. L'installation directe du paquet ci-contre reste disponible.</p>
+              <div class="notice">La vérification cryptographique APT n'est jamais désactivée. N'ajoute pas de source non signée ou marquée <code>trusted=yes</code>.</div>
+            </div>
+          </article>
 
-      <div class="command-row">
-        <span class="command-label">Vérification de l'installation</span>
-        <span class="command">chad --version</span>
-      </div>
+          <article class="card">
+            <span class="status">Disponible</span>
+            <h3>Paquet Debian direct</h3>
+            <p>Installe le fichier <code>.deb</code> de cette version. Cette méthode ne configure pas de dépôt pour les mises à jour automatiques.</p>
+            <div class="step">
+              <span class="step-label">1. Télécharger le paquet</span>
+              <div class="command">curl -fLO https://sudomarc.github.io/CHAD/downloads/chad___CHAD_VERSION___all.deb<button class="copy" data-copy="curl -fLO https://sudomarc.github.io/CHAD/downloads/chad___CHAD_VERSION___all.deb">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">2. Installer le paquet local</span>
+              <div class="command">sudo apt install ./chad___CHAD_VERSION___all.deb<button class="copy" data-copy="sudo apt install ./chad___CHAD_VERSION___all.deb">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">3. Vérifier</span>
+              <div class="command">chad --version<button class="copy" data-copy="chad --version">Copier</button></div>
+            </div>
+          </article>
 
-      <div class="command-row">
-        <span class="command-label">Première utilisation</span>
-        <span class="command">chad run "ta tâche d'inspection ou de modification"</span>
-      </div>
+          <article class="card">
+            <span class="status">Depuis Git</span>
+            <h3>Installation Python avec pipx</h3>
+            <p>Installe la version source dans un environnement Python isolé. Utile pour suivre le développement et activer le TUI optionnel.</p>
+            <div class="step">
+              <span class="step-label">1. Installer pipx</span>
+              <div class="command">sudo apt update && sudo apt install pipx python3-venv git<button class="copy" data-copy="sudo apt update && sudo apt install pipx python3-venv git">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">2. Installer CHAD</span>
+              <div class="command">pipx install git+https://github.com/sudomarc/CHAD.git<button class="copy" data-copy="pipx install git+https://github.com/sudomarc/CHAD.git">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">3. Ajouter le TUI optionnel</span>
+              <div class="command">pipx inject chad "textual>=8.0"<button class="copy" data-copy='pipx inject chad "textual>=8.0"'>Copier</button></div>
+            </div>
+          </article>
 
-      <div class="section-heading">Installation manuelle</div>
-      <p>Si l'installation APT n'est pas disponible ou adaptée :</p>
-      <div class="command-row">
-        <span class="command-label">Via pip</span>
-        <span class="command">pip install git+https://github.com/sudomarc/CHAD.git</span>
-      </div>
-      <div class="command-row">
-        <span class="command-label">Depuis les sources</span>
-        <span class="command">git clone https://github.com/sudomarc/CHAD.git && cd CHAD && pip install -e .</span>
-      </div>
-    </section>
+          <article class="card">
+            <h3>Après l'installation</h3>
+            <p>Vérifie le binaire, consulte l'aide et lance une première tâche. Sans fournisseur configuré, CHAD utilise son fournisseur fictif de test.</p>
+            <div class="step">
+              <span class="step-label">Vérifier la version</span>
+              <div class="command">chad --version<button class="copy" data-copy="chad --version">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">Afficher l'aide</span>
+              <div class="command">chad --help<button class="copy" data-copy="chad --help">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">Exécuter une tâche</span>
+              <div class="command">chad run "Inspecte ce dépôt"<button class="copy" data-copy='chad run "Inspecte ce dépôt"'>Copier</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
 
-    <section class="section" id="mise-a-jour">
-      <div class="section-heading">Commandes de mise à jour</div>
-      <div class="command-row">
-        <span class="command">sudo apt update && sudo apt upgrade chad</span>
-      </div>
-      <div class="command-row">
-        <span class="command">Pour mettre à jour vers une version spécifique :</span>
-        <span class="command">sudo apt install chad=0.1.1</span>
-      </div>
-    </section>
+      <section id="prerequis">
+        <div class="section-head">
+          <h2>Prérequis</h2>
+          <p class="section-copy">Le paquet Debian ne contient pas d'environnement virtuel propre à une machine et n'exécute pas pip avec les privilèges système.</p>
+        </div>
+        <div class="requirements">
+          <div class="requirement"><strong>Python 3.11+</strong><span>Fourni par le système ou installé séparément.</span></div>
+          <div class="requirement"><strong>Debian / Ubuntu</strong><span>Linux x86-64 pour les commandes APT présentées.</span></div>
+          <div class="requirement"><strong>Fournisseur de modèle</strong><span>Une clé API est nécessaire pour appeler un vrai modèle distant.</span></div>
+        </div>
+      </section>
 
-    <section class="section" id="desinstallation">
-      <div class="section-heading">Commandes de désinstallation</div>
-      <div class="command-row">
-        <span class="command">sudo apt remove chad</span>
-      </div>
-      <div class="command-row">
-        <span class="command">Suppression complète incluant les dépendances non utilisées :</span>
-        <span class="command">sudo apt autoremove chad</span>
-      </div>
-    </section>
+      <section id="fonctionnalites">
+        <div class="section-head">
+          <h2>Conçu pour les dépôts réels</h2>
+          <p class="section-copy">L'architecture vise à garder l'interface, le runtime, les fournisseurs et les outils clairement séparés.</p>
+        </div>
+        <div class="features">
+          <article class="feature"><h3>Runtime borné</h3><p>Budgets, limites d'exécution et résultats structurés pour éviter les boucles sans fin.</p></article>
+          <article class="feature"><h3>Passerelle multi-modèles</h3><p>Contrat commun pour intégrer plusieurs fournisseurs sans lier le runtime à un seul service.</p></article>
+          <article class="feature"><h3>Contrôles explicites</h3><p>Outils et permissions séparés, avec une attention particulière aux frontières du workspace.</p></article>
+        </div>
+      </section>
 
-    <section class="section" id="depanage">
-      <div class="section-heading">Dépannage</div>
-      <ul>
-        <li><strong>Commande introuvable :</strong> Vérifiez que `/usr/share/keyrings/chad-archive-keyring.gpg` existe et que la source APT est correcte.</li>
-        <li><strong>Erreur de signature :</strong> Réimportez la clé GPG : <code>curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/chad-archive-keyring.gpg</code></li>
-        <li><strong>Package non trouvé :</strong> Exécutez <code>sudo apt update</code> puis vérifiez que la source APT est correctement ajoutée.</li>
-        <li><strong>chad --version ne répond pas :</strong> Vérifiez que le wrapper chad est bien dans <code>/usr/bin</code>.</li>
-      </ul>
-    </section>
+      <section id="liens">
+        <div class="section-head">
+          <h2>Documentation et code</h2>
+          <p class="section-copy">Consulte les spécifications, l'état réel de l'implémentation, les problèmes connus et les changements.</p>
+        </div>
+        <div class="links">
+          <a href="https://github.com/sudomarc/CHAD">Dépôt GitHub ↗</a>
+          <a href="https://github.com/sudomarc/CHAD/releases">Versions ↗</a>
+          <a href="https://github.com/sudomarc/CHAD/blob/main/README.md">README ↗</a>
+          <a href="https://github.com/sudomarc/CHAD/blob/main/docs/installation.md">Guide détaillé ↗</a>
+          <a href="https://github.com/sudomarc/CHAD/blob/main/ROADMAP.md">Roadmap ↗</a>
+        </div>
+      </section>
+    </main>
 
-    <section class="section" id="exemples">
-      <div class="section-heading">Exemples d'utilisation</div>
-      <ul>
-        <li><code>chad run "inspecter ce dépôt"</code> — Exécute une tâche d'inspection.</li>
-        <li><code>chad tui</code> — Lance l'interface terminal interactives.</li>
-        <li><code>chad --help</code>Affiche l'aide en ligne de commande.</li>
-      </ul>
-    </section>
-
-    <section class="section" id="liens">
-      <div class="section-heading">Liens utiles</div>
-      <ul>
-        <li><a href="https://github.com/sudomarc/CHAD" target="_blank" rel="noopener">Dépôt GitHub</a></li>
-        <li><a href="https://github.com/sudomarc/CHAD/releases" target="_blank" rel="noopener">Releases</a></li>
-        <li><a href="https://sudomarc.github.io/CHAD/apt/" target="_blank" rel="noopener">Documentation APT</a></li>
-        <li><a href="https://sudomarc.github.io/CHAD/" target="_blank" rel="noopener">Site du projet</a></li>
-      </ul>
-    </section>
+    <footer>
+      CHAD · Local-first software engineering agent · Version __CHAD_VERSION__
+    </footer>
   </div>
+  <script>
+    const aptEnabled = "__APT_ENABLED__" === "true";
+    document.getElementById("apt-active").classList.toggle("hidden", !aptEnabled);
+    document.getElementById("apt-pending").classList.toggle("hidden", aptEnabled);
+    document.querySelectorAll("button[data-copy]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy);
+          button.textContent = "Copié";
+        } catch {
+          button.textContent = "Copie impossible";
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1400);
+      });
+    });
+  </script>
 </body>
 </html>

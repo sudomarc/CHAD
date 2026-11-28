@@ -68,7 +68,7 @@ class SiteRenderTests(unittest.TestCase):
             self.assertTrue((output / ".nojekyll").is_file())
             self.assertIn("const aptEnabled = false;", html)
             self.assertIn("const packageAvailable = false;", html)
-            self.assertNotIn('<article class="card primary hidden" id="deb-card">', html)
+            self.assertIn('id="deb-card"', html)
 
 
 if __name__ == "__main__":

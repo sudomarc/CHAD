@@ -89,6 +89,15 @@ class AptRepositoryTests(unittest.TestCase):
             self.assertIn("Architecture: all", packages_index.read_text(encoding="utf-8"))
             self.assertTrue((repo / "dists/stable/main/binary-amd64/Packages.gz").is_file())
             self.assertTrue((repo / "dists/stable/Release").is_file())
+            release_content = (repo / "dists/stable/Release").read_text(encoding="utf-8")
+            release_hashes = release_content.split("SHA256:\\n", 1)[1].splitlines()
+            indexed_paths = {
+                line.split()[-1] for line in release_hashes if line.strip()
+            }
+            self.assertEqual(
+                indexed_paths,
+                {"main/binary-amd64/Packages", "main/binary-amd64/Packages.gz"},
+            )
             self.assertTrue((repo / "dists/stable/Release.gpg").is_file())
             self.assertTrue((repo / "dists/stable/InRelease").is_file())
             self.assertIn("BEGIN PGP PUBLIC KEY BLOCK", (repo / "KEY.asc").read_text(encoding="ascii"))

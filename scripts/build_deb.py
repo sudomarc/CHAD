@@ -99,7 +99,7 @@ def build_package(version: str, output_dir: Path, root: Path) -> Path:
         capture_output=True,
         text=True,
     ).stdout.splitlines()
-    if fields != ["chad", version, "all"]:
+    if fields != [f"Package: chad", f"Version: {version}", "Architecture: all"]:
         output.unlink(missing_ok=True)
         raise RuntimeError(f"Unexpected Debian package metadata: {fields!r}")
 

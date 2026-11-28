@@ -40,9 +40,9 @@ class SiteRenderTests(unittest.TestCase):
             self.assertNotIn("__CHAD_VERSION__", html)
             self.assertNotIn("__APT_ENABLED__", html)
 
-            # The direct .deb is the primary path; APT is conditional on an
-            # actual package candidate being visible to the local APT index.
-            self.assertLess(html.index('id="deb-card"'), html.index('id="apt-card"'))
+            # Signed APT is preferred on amd64 only when a candidate exists;
+            # the direct .deb remains visible as a fallback.
+            self.assertLess(html.index('id="apt-card"'), html.index('id="deb-card"'))
             self.assertIn("dpkg --print-architecture", html)
             self.assertIn("apt-cache policy chad", html)
             self.assertIn("Candidate", html)

@@ -15,8 +15,11 @@ def render(version: str, apt_enabled: bool, output: Path, root: Path) -> None:
 
     output.mkdir(parents=True, exist_ok=True)
     html = source.read_text(encoding="utf-8")
-    html = html.replace("__CHAD_VERSION__", version)
-    html = html.replace("__APT_ENABLED__", "true" if apt_enabled else "false")
+    html = html.replace("0.1.0", version)
+    html = html.replace('const CHAD_VERSION = "0.1.0";', f'const CHAD_VERSION = "{version}";')
+    html = html.replace("const aptEnabled = false;", f"const aptEnabled = {str(apt_enabled).lower()};")
+    package_available = (output / "downloads" / f"chad_{version}_all.deb").is_file()
+    html = html.replace("const packageAvailable = false;", f"const packageAvailable = {str(package_available).lower()};")
     (output / "index.html").write_text(html, encoding="utf-8")
 
     static_dir = root / "site" / "assets"

@@ -121,30 +121,11 @@
       <section id="installation">
         <div class="section-head">
           <h2>Installer CHAD</h2>
-          <p class="section-copy">Le paquet Debian direct est la voie la plus simple. Le dépôt APT signé est une option pour les systèmes amd64 lorsque le paquet apparaît bien dans l'index.</p>
+          <p class="section-copy">Sur amd64, privilégie le dépôt APT signé lorsque <code>apt-cache policy chad</code> affiche une version candidate. Le paquet Debian direct sert de solution de secours ou d'alternative pour les autres architectures compatibles.</p>
         </div>
 
         <div class="install-grid">
-          <article class="card primary hidden" id="deb-card">
-            <span class="status">Méthode recommandée</span>
-            <h3>Paquet Debian direct</h3>
-            <p>Installe directement le paquet de cette version. Cette méthode évite les problèmes de synchronisation de l'index APT CHAD et fonctionne sur les architectures compatibles avec Python 3.11+.</p>
-            <div class="step">
-              <span class="step-label">1. Télécharger le paquet</span>
-              <div class="command">curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb<button class="copy" data-copy="curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb">Copier</button></div>
-            </div>
-            <div class="step">
-              <span class="step-label">2. Installer le paquet local</span>
-              <div class="command">sudo apt install ./chad_0.1.0_all.deb<button class="copy" data-copy="sudo apt install ./chad_0.1.0_all.deb">Copier</button></div>
-            </div>
-            <div class="step">
-              <span class="step-label">3. Vérifier</span>
-              <div class="command">chad --version<button class="copy" data-copy="chad --version">Copier</button></div>
-            </div>
-            <div class="notice">Cette installation ne configure pas le dépôt APT CHAD. Pour mettre à jour, télécharge et installe le nouveau fichier <code>.deb</code> depuis ce site.</div>
-          </article>
-
-          <article class="card" id="apt-card">
+          <article class="card primary" id="apt-card">
             <div id="apt-active" class="hidden">
               <span class="status">Dépôt signé disponible</span>
               <h3>Debian / Ubuntu — APT</h3>
@@ -177,6 +158,25 @@
               <p>Le dépôt APT signé n'est pas activé pour cette publication. Utilise le paquet Debian direct lorsqu'il est affiché, ou pipx depuis Git.</p>
               <div class="notice">La vérification cryptographique APT n'est jamais désactivée. N'ajoute pas de source non signée ou marquée <code>trusted=yes</code>.</div>
             </div>
+          </article>
+
+          <article class="card hidden" id="deb-card">
+            <span class="status pending">Solution de secours</span>
+            <h3>Paquet Debian direct</h3>
+            <p>Installe directement le paquet de cette version. Cette méthode évite les problèmes de synchronisation de l'index APT CHAD et fonctionne sur les architectures compatibles avec Python 3.11+.</p>
+            <div class="step">
+              <span class="step-label">1. Télécharger le paquet</span>
+              <div class="command">curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb<button class="copy" data-copy="curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">2. Installer le paquet local</span>
+              <div class="command">sudo apt install ./chad_0.1.0_all.deb<button class="copy" data-copy="sudo apt install ./chad_0.1.0_all.deb">Copier</button></div>
+            </div>
+            <div class="step">
+              <span class="step-label">3. Vérifier</span>
+              <div class="command">chad --version<button class="copy" data-copy="chad --version">Copier</button></div>
+            </div>
+            <div class="notice">Cette installation ne configure pas le dépôt APT CHAD. Pour mettre à jour, télécharge et installe le nouveau fichier <code>.deb</code> depuis ce site.</div>
           </article>
 
           <article class="card">

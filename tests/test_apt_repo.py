@@ -55,17 +55,17 @@ class AptRepositoryTests(unittest.TestCase):
 
             output = root / "public"
             downloads = output / "downloads"
-            subprocess.run(
+            package_build = subprocess.run(
                 [
                     sys.executable, str(DEB_BUILDER),
                     "--version", "0.4.1",
                     "--output", str(downloads),
                     "--root", str(ROOT),
                 ],
-                check=True,
                 capture_output=True,
                 text=True,
             )
+            self.assertEqual(package_build.returncode, 0, f"Package build failed:\n{package_build.stdout}\n{package_build.stderr}")
             package = downloads / "chad_0.4.1_all.deb"
             env = dict(os.environ)
             env["CHAD_APT_GPG_PRIVATE_KEY"] = private_key

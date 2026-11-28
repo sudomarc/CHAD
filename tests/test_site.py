@@ -32,6 +32,7 @@ class SiteRenderTests(unittest.TestCase):
                 text=True,
             )
             html = (output / "index.html").read_text(encoding="utf-8")
+            self.assertTrue((output / ".nojekyll").is_file())
             self.assertIn('const CHAD_VERSION = "1.2.3";', html)
             self.assertIn("const aptEnabled = true;", html)
             self.assertIn("const packageAvailable = true;", html)
@@ -55,6 +56,7 @@ class SiteRenderTests(unittest.TestCase):
                 text=True,
             )
             html = (output / "index.html").read_text(encoding="utf-8")
+            self.assertTrue((output / ".nojekyll").is_file())
             self.assertIn("const aptEnabled = false;", html)
             self.assertIn("const packageAvailable = false;", html)
 

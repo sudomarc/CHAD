@@ -66,7 +66,8 @@ def build_repository(package: Path, output: Path, version: str) -> None:
     files = [packages_path, index_dir / "Packages.gz"]
     hashes = []
     for path in files:
-        relative = path.relative_to(repo).as_posix()
+        # Release index paths are relative to the directory containing Release.
+        relative = path.relative_to(distribution).as_posix()
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         hashes.append(f" {digest} {path.stat().st_size} {relative}")
 

@@ -19,6 +19,7 @@ chad = "chad.cli:main"
 dev = [
     "ruff>=0.9",
     "mypy>=1.11",
+    "textual>=8.0",
 ]
 tui = [
     "textual>=8.0",

@@ -21,6 +21,8 @@ def render(version: str, apt_enabled: bool, output: Path, root: Path) -> None:
     package_available = (output / "downloads" / f"chad_{version}_all.deb").is_file()
     html = html.replace("const packageAvailable = false;", f"const packageAvailable = {str(package_available).lower()};")
     (output / "index.html").write_text(html, encoding="utf-8")
+    # GitHub Pages must serve this rendered artifact as-is, not run Jekyll.
+    (output / ".nojekyll").touch()
 
     static_dir = root / "site" / "assets"
     if static_dir.is_dir():

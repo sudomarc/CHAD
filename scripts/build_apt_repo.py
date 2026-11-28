@@ -14,19 +14,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-def run(command: list[str], *, input_text: str | None = None) -> str:
-    result = subprocess.run(
-        command,
-        input=input_text,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+def run(command: list[str]) -> str:
+    result = subprocess.run(command, check=True, capture_output=True, text=True)
     return result.stdout
 
 
 def build_repository(package: Path, output: Path, version: str) -> None:
     private_key = os.environ.get("CHAD_APT_GPG_PRIVATE_KEY", "").strip()
+    if not package.is_file():
+        raise FileNotFoundError(f"Debian package not found: {package}")
+    metadata = subprocess.run(
+        ["dpkg-deb", "--field", str(package), "Package", "Version", "Architecture"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    if metadata != ["chad", version, "all"]:
+        raise RuntimeError(f"Package metadata does not match requested release: {metadata!r}")
     if not private_key:
         raise RuntimeError("CHAD_APT_GPG_PRIVATE_KEY is not configured.")
 
@@ -43,9 +47,6 @@ def build_repository(package: Path, output: Path, version: str) -> None:
     index_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(package, pool / package.name)
 
-    packages = run(
-        ["dpkg-scanpackages", "--arch", "amd64", "pool/main/c/chad"],
-    ) if False else ""
     # dpkg-scanpackages must run from the repository root so filenames in
     # Packages are relative to the repository URL.
     scanned = subprocess.run(
@@ -148,8 +149,6 @@ def build_repository(package: Path, output: Path, version: str) -> None:
         run(["gpg", "--batch", "--homedir", home, "--verify",
              str(distribution / "Release.gpg"), str(release_path)])
 
-    if imported.returncode != 0:
-        raise RuntimeError("GPG key import failed.")
 
 
 def main() -> int:

@@ -121,7 +121,7 @@
       <section id="installation">
         <div class="section-head">
           <h2>Installer CHAD</h2>
-          <p class="section-copy">Sur amd64, privilégie le dépôt APT signé lorsque <code>apt-cache policy chad</code> affiche une version candidate. Le paquet Debian direct sert de solution de secours ou d'alternative pour les autres architectures compatibles.</p>
+          <p class="section-copy">Sur amd64, utilise le dépôt APT signé pour installer CHAD et recevoir ses mises à jour. Le paquet Debian direct sert de solution de secours ou d'alternative pour les autres architectures compatibles.</p>
         </div>
 
         <div class="install-grid">
@@ -129,14 +129,14 @@
             <div id="apt-active" class="hidden">
               <span class="status">Dépôt signé disponible</span>
               <h3>Debian / Ubuntu — APT</h3>
-              <p>Réservé aux systèmes <code>amd64</code>. APT doit charger l'index des paquets, pas seulement le fichier <code>InRelease</code>.</p>
+              <p>Dépôt signé recommandé sur les systèmes <code>amd64</code>. Les index de paquets sont générés et publiés avec la signature CHAD.</p>
               <div class="step">
                 <span class="step-label">1. Vérifier l'architecture (doit afficher amd64)</span>
                 <div class="command">dpkg --print-architecture<button class="copy" data-copy="dpkg --print-architecture">Copier</button></div>
               </div>
               <div class="step">
                 <span class="step-label">2. Importer la clé publique</span>
-                <div class="command">curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg<button class="copy" data-copy="curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg">Copier</button></div>
+                <div class="command">sudo install -d -m 0755 /usr/share/keyrings && curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg<button class="copy" data-copy="sudo install -d -m 0755 /usr/share/keyrings && curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg">Copier</button></div>
               </div>
               <div class="step">
                 <span class="step-label">3. Ajouter la source APT</span>
@@ -146,10 +146,14 @@
                 <span class="step-label">4. Actualiser et vérifier la présence du paquet</span>
                 <div class="command">sudo apt update && apt-cache policy chad<button class="copy" data-copy="sudo apt update && apt-cache policy chad">Copier</button></div>
               </div>
-              <p>Installe uniquement si <code>Candidate</code> affiche une version. Un message <code>Hit: ... InRelease</code> seul ne prouve pas que le paquet est indexé.</p>
+              <p>Vérifie que <code>Candidate</code> affiche une version de CHAD avant l'installation.</p>
               <div class="step">
-                <span class="step-label">5. Installer</span>
+                <span class="step-label">5. Installer CHAD</span>
                 <div class="command">sudo apt install chad<button class="copy" data-copy="sudo apt install chad">Copier</button></div>
+              </div>
+              <div class="step">
+                <span class="step-label">6. Mettre à jour CHAD</span>
+                <div class="command">sudo apt update && sudo apt upgrade chad<button class="copy" data-copy="sudo apt update && sudo apt upgrade chad">Copier</button></div>
               </div>
             </div>
             <div id="apt-pending">
@@ -182,7 +186,7 @@
           <article class="card">
             <span class="status">Depuis Git</span>
             <h3>Installation Python avec pipx</h3>
-            <p>Installe la version source dans un environnement Python isolé. Utile pour suivre le développement et activer le TUI optionnel.</p>
+            <p>Installe la version source dans un environnement Python isolé. Pour installer CHAD depuis Git et ajouter la dépendance de son interface TUI.</p>
             <div class="step">
               <span class="step-label">1. Installer pipx</span>
               <div class="command">sudo apt update && sudo apt install pipx python3-venv git<button class="copy" data-copy="sudo apt update && sudo apt install pipx python3-venv git">Copier</button></div>
@@ -192,7 +196,7 @@
               <div class="command">pipx install git+https://github.com/sudomarc/CHAD.git<button class="copy" data-copy="pipx install git+https://github.com/sudomarc/CHAD.git">Copier</button></div>
             </div>
             <div class="step">
-              <span class="step-label">3. Ajouter le TUI optionnel</span>
+              <span class="step-label">3. Installer la dépendance de l'interface TUI</span>
               <div class="command">pipx inject chad "textual>=8.0"<button class="copy" data-copy='pipx inject chad "textual>=8.0"'>Copier</button></div>
             </div>
           </article>

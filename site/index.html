@@ -107,11 +107,11 @@
         </div>
         <aside class="version-card">
           <div class="version-label">Version publiée</div>
-          <div class="version">v__CHAD_VERSION__</div>
+          <div class="version">v0.1.0</div>
           <div class="version-note">Paquet Debian architecture indépendante</div>
           <div class="terminal">
             <div><span>$</span> chad --version</div>
-            <div>chad __CHAD_VERSION__</div>
+            <div>chad 0.1.0</div>
             <div><span>$</span> chad --help</div>
             <div>Usage: chad [options] {run,tui}</div>
           </div>
@@ -151,17 +151,17 @@
             </div>
           </article>
 
-          <article class="card">
+          <article class="card hidden" id="deb-card">
             <span class="status">Disponible</span>
             <h3>Paquet Debian direct</h3>
             <p>Installe le fichier <code>.deb</code> de cette version. Cette méthode ne configure pas de dépôt pour les mises à jour automatiques.</p>
             <div class="step">
               <span class="step-label">1. Télécharger le paquet</span>
-              <div class="command">curl -fLO https://sudomarc.github.io/CHAD/downloads/chad___CHAD_VERSION___all.deb<button class="copy" data-copy="curl -fLO https://sudomarc.github.io/CHAD/downloads/chad___CHAD_VERSION___all.deb">Copier</button></div>
+              <div class="command">curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb<button class="copy" data-copy="curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb">Copier</button></div>
             </div>
             <div class="step">
               <span class="step-label">2. Installer le paquet local</span>
-              <div class="command">sudo apt install ./chad___CHAD_VERSION___all.deb<button class="copy" data-copy="sudo apt install ./chad___CHAD_VERSION___all.deb">Copier</button></div>
+              <div class="command">sudo apt install ./chad_0.1.0_all.deb<button class="copy" data-copy="sudo apt install ./chad_0.1.0_all.deb">Copier</button></div>
             </div>
             <div class="step">
               <span class="step-label">3. Vérifier</span>
@@ -246,11 +246,15 @@
     </main>
 
     <footer>
-      CHAD · Local-first software engineering agent · Version __CHAD_VERSION__
+      CHAD · Local-first software engineering agent · Version 0.1.0
     </footer>
   </div>
   <script>
-    const aptEnabled = "__APT_ENABLED__" === "true";
+    const CHAD_VERSION = "0.1.0";
+    const aptEnabled = false;
+    const packageAvailable = false;
+    document.querySelectorAll("[data-version]").forEach((node) => { node.textContent = CHAD_VERSION; });
+    document.getElementById("deb-card").classList.toggle("hidden", !packageAvailable);
     document.getElementById("apt-active").classList.toggle("hidden", !aptEnabled);
     document.getElementById("apt-pending").classList.toggle("hidden", aptEnabled);
     document.querySelectorAll("button[data-copy]").forEach((button) => {

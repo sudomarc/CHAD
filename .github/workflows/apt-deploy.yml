@@ -97,9 +97,19 @@ jobs:
           test -s public/index.html
           test -s "public/downloads/chad_${VERSION}_all.deb"
           if [ "$APT_ENABLED" = "true" ]; then
-            test -s public/apt/KEY.asc
-            test -s public/apt/dists/stable/InRelease
-            test -s public/apt/dists/stable/Release.gpg
+            APT_DIR="public/apt"
+            INDEX="$APT_DIR/dists/stable/main/binary-amd64/Packages"
+            PACKAGE="chad_${VERSION}_all.deb"
+            test -s "$APT_DIR/KEY.asc"
+            test -s "$APT_DIR/dists/stable/InRelease"
+            test -s "$APT_DIR/dists/stable/Release.gpg"
+            test -s "$INDEX"
+            test -s "$INDEX.gz"
+            test -s "$APT_DIR/pool/main/c/chad/$PACKAGE"
+            grep -Fqx "Package: chad" "$INDEX"
+            grep -Fqx "Version: $VERSION" "$INDEX"
+            grep -Fqx "Architecture: all" "$INDEX"
+            grep -Fqx "Filename: pool/main/c/chad/$PACKAGE" "$INDEX"
           fi
 
       - name: Upload Pages artifact

@@ -54,7 +54,7 @@ class DebianPackageTests(unittest.TestCase):
                     sys.executable,
                     "-c",
                     ("from chad import __version__; assert __version__ == '0.9.7'; "
-                     "from chad.cli import build_parser; assert build_parser().prog == 'chad'),
+                     "from chad.cli import build_parser; assert build_parser().prog == 'chad'"),
                 ],
                 env=env,
                 check=True,

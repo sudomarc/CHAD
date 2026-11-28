@@ -20,6 +20,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install Debian packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes dpkg-dev gnupg
+
       - name: Install CHAD and development dependencies
         run: |
           python -m pip install --upgrade pip
@@ -29,7 +34,7 @@ jobs:
         run: python -m unittest discover -s tests
 
       - name: Lint with Ruff
-        run: ruff check src tests || true
+        run: ruff check src tests
 
       - name: Type check with Mypy
-        run: mypy src tests || true
+        run: mypy src tests

@@ -29,7 +29,7 @@ def build_repository(package: Path, output: Path, version: str) -> None:
         capture_output=True,
         text=True,
     ).stdout.splitlines()
-    if metadata != ["chad", version, "all"]:
+    if metadata != ["Package: chad", f"Version: {version}", "Architecture: all"]:
         raise RuntimeError(f"Package metadata does not match requested release: {metadata!r}")
     if not private_key:
         raise RuntimeError("CHAD_APT_GPG_PRIVATE_KEY is not configured.")

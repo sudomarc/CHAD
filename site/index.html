@@ -121,40 +121,14 @@
       <section id="installation">
         <div class="section-head">
           <h2>Installer CHAD</h2>
-          <p class="section-copy">Choisis la méthode adaptée à ton système. Les commandes ci-dessous correspondent aux artefacts construits par le workflow du dépôt.</p>
+          <p class="section-copy">Le paquet Debian direct est la voie la plus simple. Le dépôt APT signé est une option pour les systèmes amd64 lorsque le paquet apparaît bien dans l'index.</p>
         </div>
 
         <div class="install-grid">
-          <article class="card primary" id="apt-card">
-            <div id="apt-active" class="hidden">
-              <span class="status">Dépôt signé disponible</span>
-              <h3>Debian / Ubuntu — APT</h3>
-              <p>Ajoute le dépôt signé, puis installe et mets à jour CHAD avec le gestionnaire de paquets.</p>
-              <div class="step">
-                <span class="step-label">1. Importer la clé publique</span>
-                <div class="command">curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg<button class="copy" data-copy="curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg">Copier</button></div>
-              </div>
-              <div class="step">
-                <span class="step-label">2. Ajouter la source APT</span>
-                <div class="command">echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list<button class="copy" data-copy='echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list'>Copier</button></div>
-              </div>
-              <div class="step">
-                <span class="step-label">3. Installer</span>
-                <div class="command">sudo apt update && sudo apt install chad<button class="copy" data-copy="sudo apt update && sudo apt install chad">Copier</button></div>
-              </div>
-            </div>
-            <div id="apt-pending">
-              <span class="status pending">Configuration du dépôt en attente</span>
-              <h3>Dépôt APT signé</h3>
-              <p>Le dépôt APT ne sera activé qu'après configuration de la clé de signature persistante. L'installation directe du paquet ci-contre reste disponible.</p>
-              <div class="notice">La vérification cryptographique APT n'est jamais désactivée. N'ajoute pas de source non signée ou marquée <code>trusted=yes</code>.</div>
-            </div>
-          </article>
-
-          <article class="card hidden" id="deb-card">
-            <span class="status">Disponible</span>
+          <article class="card primary hidden" id="deb-card">
+            <span class="status">Méthode recommandée</span>
             <h3>Paquet Debian direct</h3>
-            <p>Installe le fichier <code>.deb</code> de cette version. Cette méthode ne configure pas de dépôt pour les mises à jour automatiques.</p>
+            <p>Installe directement le paquet de cette version. Cette méthode évite les problèmes de synchronisation de l'index APT CHAD et fonctionne sur les architectures compatibles avec Python 3.11+.</p>
             <div class="step">
               <span class="step-label">1. Télécharger le paquet</span>
               <div class="command">curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb<button class="copy" data-copy="curl -fLO https://sudomarc.github.io/CHAD/downloads/chad_0.1.0_all.deb">Copier</button></div>
@@ -166,6 +140,42 @@
             <div class="step">
               <span class="step-label">3. Vérifier</span>
               <div class="command">chad --version<button class="copy" data-copy="chad --version">Copier</button></div>
+            </div>
+            <div class="notice">Cette installation ne configure pas le dépôt APT CHAD. Pour mettre à jour, télécharge et installe le nouveau fichier <code>.deb</code> depuis ce site.</div>
+          </article>
+
+          <article class="card" id="apt-card">
+            <div id="apt-active" class="hidden">
+              <span class="status">Dépôt signé disponible</span>
+              <h3>Debian / Ubuntu — APT</h3>
+              <p>Réservé aux systèmes <code>amd64</code>. APT doit charger l'index des paquets, pas seulement le fichier <code>InRelease</code>.</p>
+              <div class="step">
+                <span class="step-label">1. Vérifier l'architecture (doit afficher amd64)</span>
+                <div class="command">dpkg --print-architecture<button class="copy" data-copy="dpkg --print-architecture">Copier</button></div>
+              </div>
+              <div class="step">
+                <span class="step-label">2. Importer la clé publique</span>
+                <div class="command">curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg<button class="copy" data-copy="curl -fsSL https://sudomarc.github.io/CHAD/apt/KEY.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/chad-archive-keyring.gpg">Copier</button></div>
+              </div>
+              <div class="step">
+                <span class="step-label">3. Ajouter la source APT</span>
+                <div class="command">echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list<button class="copy" data-copy='echo "deb [arch=amd64 signed-by=/usr/share/keyrings/chad-archive-keyring.gpg] https://sudomarc.github.io/CHAD/apt stable main" | sudo tee /etc/apt/sources.list.d/chad.list'>Copier</button></div>
+              </div>
+              <div class="step">
+                <span class="step-label">4. Actualiser et vérifier la présence du paquet</span>
+                <div class="command">sudo apt update && apt-cache policy chad<button class="copy" data-copy="sudo apt update && apt-cache policy chad">Copier</button></div>
+              </div>
+              <p>Installe uniquement si <code>Candidate</code> affiche une version. Un message <code>Hit: ... InRelease</code> seul ne prouve pas que le paquet est indexé.</p>
+              <div class="step">
+                <span class="step-label">5. Installer</span>
+                <div class="command">sudo apt install chad<button class="copy" data-copy="sudo apt install chad">Copier</button></div>
+              </div>
+            </div>
+            <div id="apt-pending">
+              <span class="status pending">Configuration du dépôt en attente</span>
+              <h3>Dépôt APT signé</h3>
+              <p>Le dépôt APT signé n'est pas activé pour cette publication. Utilise le paquet Debian direct lorsqu'il est affiché, ou pipx depuis Git.</p>
+              <div class="notice">La vérification cryptographique APT n'est jamais désactivée. N'ajoute pas de source non signée ou marquée <code>trusted=yes</code>.</div>
             </div>
           </article>
 
@@ -206,6 +216,31 @@
         </div>
       </section>
 
+      <section id="depannage">
+        <div class="section-head">
+          <h2>Un problème avec APT ?</h2>
+          <p class="section-copy">Un dépôt peut répondre avec ses métadonnées signées sans que le paquet soit disponible dans l'index local.</p>
+        </div>
+        <div class="card">
+          <h3>Erreur « Unable to locate package chad »</h3>
+          <p>Vérifie l'architecture et la version candidate avant de relancer l'installation.</p>
+          <div class="step">
+            <span class="step-label">1. Architecture native (le dépôt APT CHAD prend actuellement en charge amd64)</span>
+            <div class="command">dpkg --print-architecture<button class="copy" data-copy="dpkg --print-architecture">Copier</button></div>
+          </div>
+          <div class="step">
+            <span class="step-label">2. Vérifier si APT connaît le paquet</span>
+            <div class="command">apt-cache policy chad<button class="copy" data-copy="apt-cache policy chad">Copier</button></div>
+          </div>
+          <p>Si <code>Candidate: (none)</code> apparaît, même après <code>sudo apt update</code>, ne désactive pas la vérification des signatures. Sur amd64, renouvelle les index CHAD :</p>
+          <div class="step">
+            <div class="command">sudo rm -f /var/lib/apt/lists/*sudomarc.github.io*CHAD* && sudo apt update<button class="copy" data-copy="sudo rm -f /var/lib/apt/lists/*sudomarc.github.io*CHAD* && sudo apt update">Copier</button></div>
+          </div>
+          <p>Vérifie ensuite <code>apt-cache policy chad</code>. Si aucune version candidate n'apparaît, utilise le paquet Debian direct ci-dessus. Si l'architecture n'est pas amd64, utilise également le paquet direct, compatible grâce à <code>Architecture: all</code>, sous réserve de Python 3.11+.</p>
+          <div class="notice">Le message <code>Hit: ... CHAD ... InRelease</code> ne suffit pas à confirmer que le paquet est installable. Ne configure jamais <code>trusted=yes</code> et ne désactive jamais <code>apt-secure</code>.</div>
+        </div>
+      </section>
+
       <section id="prerequis">
         <div class="section-head">
           <h2>Prérequis</h2>
@@ -213,7 +248,7 @@
         </div>
         <div class="requirements">
           <div class="requirement"><strong>Python 3.11+</strong><span>Fourni par le système ou installé séparément.</span></div>
-          <div class="requirement"><strong>Debian / Ubuntu</strong><span>Linux x86-64 pour les commandes APT présentées.</span></div>
+          <div class="requirement"><strong>Debian / Ubuntu</strong><span>APT CHAD : amd64 uniquement. Le paquet direct est Architecture: all.</span></div>
           <div class="requirement"><strong>Fournisseur de modèle</strong><span>Une clé API est nécessaire pour appeler un vrai modèle distant.</span></div>
         </div>
       </section>

@@ -40,6 +40,15 @@ class SiteRenderTests(unittest.TestCase):
             self.assertNotIn("__CHAD_VERSION__", html)
             self.assertNotIn("__APT_ENABLED__", html)
 
+            # The direct .deb is the primary path; APT is conditional on an
+            # actual package candidate being visible to the local APT index.
+            self.assertLess(html.index('id="deb-card"'), html.index('id="apt-card"'))
+            self.assertIn("dpkg --print-architecture", html)
+            self.assertIn("apt-cache policy chad", html)
+            self.assertIn("Candidate", html)
+            self.assertIn("Architecture: all", html)
+            self.assertIn("Unable to locate package chad", html)
+
     def test_renders_without_apt_or_download_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "public"
@@ -59,6 +68,7 @@ class SiteRenderTests(unittest.TestCase):
             self.assertTrue((output / ".nojekyll").is_file())
             self.assertIn("const aptEnabled = false;", html)
             self.assertIn("const packageAvailable = false;", html)
+            self.assertNotIn('<article class="card primary hidden" id="deb-card">', html)
 
 
 if __name__ == "__main__":
